@@ -5,6 +5,7 @@
 Because of the high count of dependencies of required modules, Anaconda must be used for Python environment management. For DB, PostgreSQL is required. PGAdmin III can be used for DB management. It's assumed that these components are already installed on your Linux system.
 
 -- Download Anaconda from https://repo.continuum.io/archive/Anaconda3-4.3.1-Linux-x86_64.sh
+
 -- Install Anaconda with default options:
 ```sh
 bash Anaconda3-4.3.1-Linux-x86_64.sh
@@ -47,6 +48,7 @@ pip install -U googlemaps
 ```
 
 -- Go to directory:`/home/<UserName>/anaconda3/lib/python3.6/site-packages/django/contrib/admin/static`
+
 -- Copy js, img & css contents from `gisModule/Templates` project folder to this directory.
 
 -- Restore PostgreSQL Server backup named `DjangoServer` from project with PGAdmin III. Enable the server.
