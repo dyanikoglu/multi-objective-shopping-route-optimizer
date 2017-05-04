@@ -48,6 +48,7 @@ pip install -U googlemaps
 ```
 
 -- Go to directory:`/home/<UserName>/anaconda3/lib/python3.6/site-packages/django/contrib/admin/static`
+
 -- Copy js, img & css contents from `gisModule/Templates` project folder to this directory.
 
 -- Restore PostgreSQL Server backup named `DjangoServer` from project with PGAdmin III. Enable the server.
