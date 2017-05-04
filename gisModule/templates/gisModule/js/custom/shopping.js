@@ -22,7 +22,7 @@ function traverseProductTreeObject(obj, level) {
         if (obj.hasOwnProperty(key)) {
             if (level === 0) {
                 i++;
-                document.getElementById("id_productTree").innerHTML += '<div class="panel panel-primary" style="margin-left: 1%;margin-right: 1%"> <div class="panel-heading"> <h4 class="panel-title"> <a data-toggle="collapse" data-parent="#accordion" href="#collapse' + i + '">' + key + '</a> </h4> </div> <div id="collapse' + i + '" class="panel-collapse collapse"> <div class="panel-body">' + '<table id="id_mainCategoryTable' + i + '" class="table table-condensed"></table>' + '</div> </div> </div>';
+                document.getElementById("id_productTree").innerHTML += '<div class="panel panel-primary" style="margin-left: 1%;margin-right: 1%"> <div class="panel-heading"> <h4 class="panel-title"> <a data-toggle="collapse" data-parent="#accordion" href="#collapse_product_category_' + i + '">' + key + '</a> </h4> </div> <div id="collapse_product_category_' + i + '" class="panel-collapse collapse"> <div class="panel-body">' + '<table id="id_mainCategoryTable' + i + '" class="table table-condensed"></table>' + '</div> </div> </div>';
             }
             else if (level === 1) {
                 j++;
