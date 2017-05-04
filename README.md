@@ -54,3 +54,21 @@ pip install -U googlemaps
 - Copy js, img & css contents from `gisModule/Templates/gisModule` project folder to this directory.
 
 - Restore PostgreSQL Server backup named `DjangoServer` from project with PGAdmin III. Enable the server.
+
+### Starting The Server
+
+- Switch to default Anaconda Environment:
+```sh
+source activate root
+```
+- Start server by running the command in project's root folder:
+```sh
+python manage.py runserver --noreload
+```
+
+### Guide
+
+- Server can be accessed from `localhost:8000`.
+- Login is required for using shopping page. Login from http://localhost:8000/gisModule/login/ with using username `dyanikoglu` and password `Dc2216586*`(case sensitive). Login process won't redirect you to shopping page.
+- Shopping page can be found on http://localhost:8000/gisModule/shopping/. `User Panel` from `User Menu` can be used for changing route calculation's behaviour. Route calculation can be started from `Shopping Cart`.
+- Admin panel for server can be found on http://localhost:8000/admin/. Credentials are username `dyanikoglu` and password `Dc2216586*`(case sensitive).
