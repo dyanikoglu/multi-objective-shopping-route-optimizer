@@ -4,7 +4,7 @@
 
 ### Server Installation
 
-Because of the high count of dependencies of required modules, Anaconda must be used for Python environment management. For DB, PostgreSQL is required. PGAdmin III can be used for DB management. It's assumed that these components are already installed on your Linux system.
+Because of the high count of dependencies of required modules, Anaconda must be used for Python environment management.
 
 - Download Anaconda from https://repo.continuum.io/archive/Anaconda3-4.3.1-Linux-x86_64.sh
 
@@ -53,10 +53,16 @@ pip install -U googlemaps
 
 - Copy js, img & css contents from `gisModule/Templates/gisModule` project folder to this directory.
 
-- Restore PostgreSQL Server backup named `DjangoServer`. For doing this, create an empty database with PGAdmin III or with console. Restoring process can be done with the commands below. Admin username of this DB is `dyanikoglu`, and password is `Dc2216586*`(case sensitive).
+- Setup database:
 ```sh
+sudo apt-get update
+sudo apt-get install -y postgresql postgresql-contrib
+sudo apt-get install -y postgis postgresql-9.5-postgis-2.2
+sudo apt-get install -y postgis postgresql-9.5-pgrouting
+sudo -u postgres createuser -P USER_NAME_HERE
+sudo -u postgres createdb -O USER_NAME_HERE TEMP_DATABASE_NAME_HERE
 sudo su - postgres
-psql Name_of_Created_DB < path_to_project_folder/DjangoServer
+psql TEMP_DATABASE_NAME_HERE < PATH_TO_PROJECT_FOLDER_HERE/DjangoServer.backup
 ```
 
 ### Starting The Server
