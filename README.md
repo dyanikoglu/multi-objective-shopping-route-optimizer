@@ -53,7 +53,11 @@ pip install -U googlemaps
 
 - Copy js, img & css contents from `gisModule/Templates/gisModule` project folder to this directory.
 
-- Restore PostgreSQL Server backup named `DjangoServer` from project with PGAdmin III. Enable the server.
+- Restore PostgreSQL Server backup named `DjangoServer`. For doing this, create an empty database with PGAdmin III or with console. Restoring process can be done with the commands below. Admin username of this DB is `dyanikoglu`, and password is `Dc2216586*`(case sensitive).
+```sh
+sudo su - postgres
+psql Name_of_Created_DB < path_to_project_folder/DjangoServer
+```
 
 ### Starting The Server
 
