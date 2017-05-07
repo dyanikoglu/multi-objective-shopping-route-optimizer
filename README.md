@@ -57,13 +57,15 @@ pip install -U googlemaps
 ```sh
 sudo apt-get update
 sudo apt-get install -y postgresql postgresql-contrib
-sudo apt-get install -y postgis postgresql-9.5-postgis-2.2
-sudo apt-get install -y postgis postgresql-9.5-pgrouting
+# Note your installed postgresql version
+sudo apt-get install -y postgis postgresql-9.x-postgis # Change x with your postgresql version
+sudo apt-get install -y postgis postgresql-9.x-pgrouting # Change x with your postgresql version
 sudo -u postgres createuser -P USER_NAME_HERE
 sudo -u postgres createdb -O USER_NAME_HERE TEMP_DATABASE_NAME_HERE
 sudo su - postgres
 psql TEMP_DATABASE_NAME_HERE < PATH_TO_PROJECT_FOLDER_HERE/DjangoServer.backup
 ```
+- Install PGAdmin III from Ubuntu Store.
 
 ### Starting The Server
 
