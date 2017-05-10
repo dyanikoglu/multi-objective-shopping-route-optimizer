@@ -1,7 +1,6 @@
 from django.contrib.gis.db import models as gis_models
 from django.contrib.gis import geos
 from django.db import models
-from gisModule import tools
 import json
 import urllib3
 import re
@@ -100,21 +99,12 @@ class Retailer(models.Model):
 
 
 class ProductGroup(models.Model):
-    productGroupID = models.AutoField(primary_key=True)
-    productGroupName = models.CharField("Product Group Name", max_length=128)
-    isRoot = models.BooleanField("Is this a root node?", default=False)
-    isLeaf = models.BooleanField("Is this a leaf node?", default=False)
-    parentConnectionID = models.IntegerField("Parent Connection ID", null=True, blank=True, editable=False)
-    childConnectionIDs = models.CharField("Child Connection ID List", null=True, blank=True, editable=False,
-                                          max_length=1024)
-
-    def save(self, **kwargs):
-        if self.isRoot:  # This group is root, null parent connection
-            self.parentConnectionID = None
-        super(ProductGroup, self).save()
+    id = models.AutoField(primary_key=True)
+    name = models.CharField("Product Group Name", max_length=128)
+    parent = models.ForeignKey('ProductGroup', null=True, blank=True)
 
     def __str__(self):
-        return self.productGroupName
+        return self.name
 
 
 class BaseProduct(models.Model):
@@ -127,7 +117,7 @@ class BaseProduct(models.Model):
         (' Cans', 'Cans'),
     )
 
-    parentConnectionID = models.IntegerField("Parent Connection ID", null=True, blank=True, editable=False)
+    group = models.ForeignKey('ProductGroup', null=True)
     productID = models.AutoField(primary_key=True)
     brand = models.CharField("Brand", max_length=64)
     type = models.CharField("Type", max_length=64, blank=True)
@@ -136,35 +126,6 @@ class BaseProduct(models.Model):
 
     def __str__(self):
         return "%s %s %s%s" % (self.brand, self.type, self.amount, self.unit)
-
-
-class TreeEdge(models.Model):
-    edgeID = models.AutoField(primary_key=True)
-    parent = models.ForeignKey(ProductGroup, null=True, related_name="GroupParent")
-    isGroupEdge = models.BooleanField("Is this edge connecting 2 groups?", default=True)
-    groupChild = models.ForeignKey(ProductGroup, null=True, blank=True, related_name="GroupChild",
-                                   limit_choices_to={'isLeaf': True})
-    productChild = models.ForeignKey(BaseProduct, null=True, blank=True, related_name="ProductChild")
-
-    def save(self, **kwargs):
-        super(TreeEdge, self).save()
-        if self.isGroupEdge:
-            self.parent.childConnectionIDs = tools.add_uniquely(str(self.parent.childConnectionIDs), self.edgeID)
-            self.parent.save()
-            self.groupChild.parentConnectionID = self.edgeID
-            self.groupChild.save()
-        else:
-            self.parent.childConnectionIDs = tools.add_uniquely(str(self.parent.childConnectionIDs), self.edgeID)
-            self.parent.save()
-            self.productChild.parentConnectionID = self.edgeID
-            self.productChild.save()
-
-    def __str__(self):
-        if self.isGroupEdge:
-            return "%s -> %s" % (self.parent.productGroupName, self.groupChild.productGroupName)
-        else:
-            return "%s -> %s" % (self.parent.productGroupName, "%s %s %s%s" % (
-                self.productChild.brand, self.productChild.type, self.productChild.amount, self.productChild.unit))
 
 
 class RetailerProduct(models.Model):
@@ -196,7 +157,8 @@ class User(models.Model):
     password = models.CharField("Password", max_length=512)
     firstName = models.CharField("First Name", max_length=64)
     lastName = models.CharField("Last Name", max_length=64)
-    activeList = models.ForeignKey(ShoppingList, null="True")
+    email = models.EmailField("Email", max_length=64, null=True)
+    activeList = models.ForeignKey(ShoppingList, null="True", blank=True)
     preferences = models.ForeignKey('UserPreferences', null="True")
 
     def __str__(self):
@@ -204,6 +166,7 @@ class User(models.Model):
 
 
 class UserPreferences(models.Model):
+    owner = models.ForeignKey('User', null=True)
     money_factor = models.BooleanField("Money Factor")
     dist_factor = models.BooleanField("Distance Factor")
     time_factor = models.BooleanField("Time Factor")
@@ -212,7 +175,8 @@ class UserPreferences(models.Model):
     route_end_point = models.ForeignKey('UserSavedAddress', related_name='EndAddress', null=True, blank=True)
 
     def __str__(self):
-        return str(User.objects.get(preferences=self)) + "\'s Preferences"
+        return str(self.owner.userName + "\'s Preferences")
+
 
 class UserSavedAddress(models.Model):
     name = models.CharField("Address Name", max_length=256, null=False)
@@ -292,7 +256,8 @@ class ShoppingListItem(models.Model):
     id = models.AutoField(primary_key=True)
     list = models.ForeignKey(ShoppingList, null=True)
     product = models.ForeignKey(BaseProduct, null=True)
-    addedBy = models.ForeignKey(User, null=True)
+    addedBy = models.ForeignKey(User, null=True, related_name='added_by')
+    edited_by = models.ForeignKey(User, null=True, related_name='edited_by')
     quantity = models.PositiveIntegerField("Quantity")
 
     def __str__(self):

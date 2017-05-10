@@ -1,16 +1,146 @@
 import json
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render
+from django.urls import reverse
 from ObjectiveCostOptimizer.differentialEvolution import init_optimization
 from gisModule import models, tools
 from django.contrib.gis import geos
 
 
+def cart(request):
+    if request.method == "GET":
+        return render(request, 'gisModule/cart.html')
+
+    if request.method == "POST":
+        if request.POST.get('get_shopping_list_data'):
+            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            active_list = active_user.activeList
+            product_name = []
+            product_id = []
+            product_quantity = []
+            product_added_by = []
+            product_edited_by = []
+            for product in models.ShoppingListItem.objects.filter(list=active_list):
+                product_name.append(product.product.__str__())
+                product_id.append(product.product.productID)
+                product_quantity.append(product.quantity)
+                product_added_by.append(product.addedBy.userName)
+                product_edited_by.append(product.edited_by.userName)
+            return JsonResponse({'product_name': product_name, 'product_id': product_id, 'product_quantity': product_quantity, 'product_added_by': product_added_by, 'product_changed_by': product_edited_by})
+
+        elif request.POST.get('post_inc_dec_quantity'):
+            product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
+            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            active_list = active_user.activeList
+            list_product = models.ShoppingListItem.objects.get(list=active_list, product=product)
+            new_quantity = list_product.quantity + int(request.POST.get('change_amount'))
+            list_product.quantity = new_quantity
+            list_product.edited_by = active_user
+            list_product.save()
+            return JsonResponse({'new_quantity': new_quantity, 'new_changed_by': active_user.userName})
+
+        elif request.POST.get('post_change_quantity'):
+            product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
+            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            active_list = active_user.activeList
+            list_product = models.ShoppingListItem.objects.get(list=active_list, product=product)
+            new_quantity = int(request.POST.get('new_amount'))
+            list_product.quantity = new_quantity
+            list_product.edited_by = active_user
+            list_product.save()
+            return JsonResponse({'new_changed_by': active_user.userName})
+
+        elif request.POST.get('post_remove_from_cart'):
+            product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
+            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            active_list = active_user.activeList
+            models.ShoppingListItem.objects.get(list=active_list, product=product).delete()
+            return render(request, 'gisModule/cart.html')
+
+
+def shop(request):
+    root_product_groups = models.ProductGroup.objects.filter(parent=None)
+    category_name_list = {}
+    for root in root_product_groups:
+        category_name_list.update({root.name: json.dumps(tools.iterate_product_groups(root))})
+    category_id_list = {}
+    for category in models.ProductGroup.objects.all():
+        category_id_list.update({category.name: str(category.id)})
+    session_user = request.session['user_login_session']  # Get login information from current browser session
+    user = models.User.objects.get(userID=session_user['userID'])  # Current user object
+    user_prefs = user.preferences
+    active_shopping_list = user.activeList
+    saved_addresses = models.UserSavedAddress.objects.filter(user=user)
+    address_names = []
+    address_coords = []
+    address_ids = []
+    for name in saved_addresses.values('name'):
+        address_names.append(name['name'])
+    for id in saved_addresses.values('id'):
+        address_ids.append(id)
+    for coord in saved_addresses.values('geoLocation'):
+        address_coords.append(coord['geoLocation'].coords)
+
+    # Temp solution for null objects
+    if user.activeList is None:
+        shopping_lists_info = None
+    else:
+        shopping_lists_info = tools.return_shopping_list_info(user)
+
+    if active_shopping_list is None:
+        active_list_data = None
+    else:
+        active_list_data = tools.return_shopping_list_data(active_shopping_list)
+
+    if user_prefs.route_start_point is None:
+        start_point_name = ""
+    else:
+        start_point_name = user_prefs.route_start_point.name
+    if user_prefs.route_end_point is None:
+        end_point_name = ""
+    else:
+        end_point_name = user_prefs.route_end_point.name
+
+    # Standard GET request for view
+    if request.method == "GET":
+        return render(request, 'gisModule/shop.html', {'category_name_list': tools.jsonify_dict(category_name_list),
+                                                       'category_id_list': tools.jsonify_dict(category_id_list),
+                                                       'user_info': tools.jsonify_str(
+                                                           request.session['user_login_session']),
+                                                       'shopping_lists_info': shopping_lists_info,
+                                                       'active_list_data': active_list_data,
+                                                       'search_radius': user_prefs.search_radius,
+                                                       'time_cost': user_prefs.time_factor,
+                                                       'money_cost': user_prefs.money_factor,
+                                                       'dist_cost': user_prefs.dist_factor,
+                                                       'address_names': address_names,
+                                                       'address_coords': address_coords,
+                                                       'address_ids': address_ids,
+                                                       'start_point_name': start_point_name,
+                                                       'end_point_name': end_point_name})
+    # Handle AJAX Post Requests
+    if request.method == "POST":
+        if request.POST.get("post_load_products"):
+            category_id = request.POST.get("category_id")
+            group = models.ProductGroup.objects.get(id=category_id)
+            products = {}
+            for product in models.BaseProduct.objects.filter(group=group):
+                products.update({product.__str__(): product.productID})
+            return JsonResponse({'loaded_products': products})
+        if request.POST.get('post_add_to_cart'):
+            product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
+            editing_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            shopping_list = editing_user.activeList
+            tools.add_product_to_list(editing_user, product, shopping_list)
+            return render(request, 'gisModule/shop.html')
+
+
 def shopping(request):
-    root_product_groups = models.ProductGroup.objects.filter(isRoot=True)
+    root_product_groups = models.ProductGroup.objects.filter(parent=None)
     product_list = {}
     for root in root_product_groups:
-        product_list.update({root.productGroupName: json.dumps(tools.depth_first_traversal(root))})
+        product_list.update({root.name: json.dumps(tools.iterate_product_groups(root))})
     session_user = request.session['user_login_session']  # Get login information from current browser session
     user = models.User.objects.get(userID=session_user['userID'])  # Current user object
     user_prefs = user.preferences
@@ -106,12 +236,17 @@ def shopping(request):
             json_obj = json.loads(json_dump)
             itemid_list = json_obj['item_id[]']
 
-            start_end_dist = tools.calc_dist(frm.geoLocation.coords[0], frm.geoLocation.coords[1], to.geoLocation.coords[0], to.geoLocation.coords[1])  # The distance between start end end points
-            start_end_midpoint = geos.LineString(frm.geoLocation, to.geoLocation).centroid  # Midpoint between start end end points
-            search_radius_w_tolerance = (start_end_dist + user_prefs.search_radius) / 2.0  # Retailer search circle radius with user defined tolerance
+            start_end_dist = tools.calc_dist(frm.geoLocation.coords[0], frm.geoLocation.coords[1],
+                                             to.geoLocation.coords[0],
+                                             to.geoLocation.coords[1])  # The distance between start end end points
+            start_end_midpoint = geos.LineString(frm.geoLocation,
+                                                 to.geoLocation).centroid  # Midpoint between start end end points
+            search_radius_w_tolerance = (
+                                        start_end_dist + user_prefs.search_radius) / 2.0  # Retailer search circle radius with user defined tolerance
             item_quantity_list = list(map(int, json_obj['item_quantity[]']))
 
-            converted_list, retailer_count = tools.convert_to_markets_for_items_list(itemid_list, start_end_midpoint, search_radius_w_tolerance)
+            converted_list, retailer_count = tools.convert_to_markets_for_items_list(itemid_list, start_end_midpoint,
+                                                                                     search_radius_w_tolerance)
             route_dicts, pros_cons, champ_indexes, fitness_vectors = init_optimization(
                 converted_list, item_quantity_list,
                 len(itemid_list),
@@ -199,13 +334,42 @@ def shopping(request):
 
 # View for login page
 def login(request):
-    if request.method == 'POST':
-        username = request.POST.get("username")
-        user = models.User.objects.get(userName=username)
-        if tools.verify_password(request.POST.get('password'), user.password):
-            user_login_session = {'userID': user.userID, 'username': username, 'firstname': user.firstName,
-                                  'lastName': user.lastName}
-            request.session['user_login_session'] = user_login_session
-            return redirect('/gisModule/shopping/')
+    if request.method == "GET":
         return render(request, 'gisModule/login.html')
-    return render(request, 'gisModule/login.html')
+
+    if request.method == 'POST':
+        if request.POST.get('login'):
+            username = request.POST.get("username")
+            try:
+                user = models.User.objects.get(userName=username)
+            except ObjectDoesNotExist:
+                return tools.bad_request('Wrong password or username')
+
+            if tools.verify_password(request.POST.get('password'), user.password):
+                print("signed in: " + user.userName)
+                user_login_session = {'userID': user.userID, 'username': username, 'firstname': user.firstName,
+                                      'lastName': user.lastName}
+                request.session['user_login_session'] = user_login_session
+                return JsonResponse({'url': reverse('gisModule:shop')})
+            else:
+                return tools.bad_request('Wrong password or username')
+        elif request.POST.get('register'):
+            username = request.POST.get("username")
+            if models.User.objects.filter(userName=username).count() is 0:
+                email = request.POST.get("email")
+                first_name = request.POST.get("first_name")
+                last_name = request.POST.get("last_name")
+                if models.User.objects.filter(email=email).count() is 0:
+                    new_prefs = models.UserPreferences.objects.create(money_factor=True, dist_factor=True, time_factor=True, search_radius=100, route_start_point=None, route_end_point=None)
+                    new_usr = models.User.objects.create(userName=username, password=tools.encode_password(request.POST.get("password")), email=email, firstName=first_name, lastName=last_name, preferences=new_prefs, activeList=None)
+                    new_usr.preferences.owner = new_usr
+                    new_usr.preferences.save()
+                    # Login with new account
+                    user_login_session = {'userID': new_usr.userID, 'username': username, 'firstname': new_usr.firstName,
+                                          'lastName': new_usr.lastName}
+                    request.session['user_login_session'] = user_login_session
+                    return JsonResponse({'url': reverse('gisModule:shop')})
+                else:
+                    return tools.bad_request('An account with this email already exist')
+            else:
+                return tools.bad_request('An account with this username already exist')
