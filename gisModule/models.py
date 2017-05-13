@@ -123,9 +123,14 @@ class BaseProduct(models.Model):
     type = models.CharField("Type", max_length=64, blank=True)
     amount = models.PositiveIntegerField("Amount")
     unit = models.CharField("Unit", choices=UNIT_CHOICES, max_length=8)
+    name = models.CharField("Full Name", max_length=64, editable=False, null=True)
 
     def __str__(self):
         return "%s %s %s%s" % (self.brand, self.type, self.amount, self.unit)
+
+    def save(self, **kwargs):
+        self.name = "%s %s %s%s" % (self.brand, self.type, self.amount, self.unit)
+        super(BaseProduct, self).save()
 
 
 class RetailerProduct(models.Model):
@@ -262,3 +267,41 @@ class ShoppingListItem(models.Model):
 
     def __str__(self):
         return "%s:%s" % (self.list.listName, self.product.brand)
+
+
+class Friend(models.Model):
+    id = models.AutoField(primary_key=True)
+    user_sender = models.ForeignKey('User', null=True, related_name='user_sender')
+    user_receiver = models.ForeignKey('User', null=True, related_name='user_receiver')
+    status = models.BooleanField('Status', default=False)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return "%s - %s" % (self.user_sender.userName, self.user_receiver.userName)
+
+
+class Group(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField('Group Name', max_length=64, null=True)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class GroupMember(models.Model):
+    id = models.AutoField(primary_key=True)
+    group = models.ForeignKey('Group', null=True)
+    member = models.ForeignKey('User', null=True)
+    role = models.ForeignKey('Role', null=True)
+
+    def __str__(self):
+        return "%s - %s" % (self.group.name, self.member.userName)
+
+
+class Role(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField('Role Name', max_length=64, null=True)
+
+    def __str__(self):
+        return self.name

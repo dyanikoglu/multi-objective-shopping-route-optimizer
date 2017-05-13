@@ -1,0 +1,642 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Shop | E-Shopper</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="{% static 'public/css/prettyPhoto.css' %}" rel="stylesheet">
+    <link href="{% static 'public/css/price-range.css' %}" rel="stylesheet">
+    <link href="{% static 'public/css/animate.css' %}" rel="stylesheet">
+    <link href="{% static 'public/css/main.css' %}" rel="stylesheet">
+    <link href="{% static 'public/css/responsive.css' %}" rel="stylesheet">
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="shortcut icon" href="images/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
+
+    <script src="https://js.pusher.com/4.0/pusher.min.js"></script>
+    <script>
+        // Enable pusher logging - don't include this in production
+        Pusher.logToConsole = true;
+        var pusher = new Pusher('ea171f7b30a44f1ebf65', {
+            cluster: 'eu',
+            encrypted: true
+        });
+        var user_info = {{ user_info|safe }};
+        var channel = pusher.subscribe('user_' + user_info['userID']); // Subscribe to user's own channel
+
+        channel.bind('product_quantity_change', function (data) {
+            var cart_notification = $('#cart_notification');
+            cart_notification.attr('data-original-title', data['new_changed_by'] + ' changed quantity of ' + data['product_name']).tooltip("toggle");
+            setTimeout(function () {
+                $('#cart_notification').tooltip('hide');
+            }, 2000);
+        });
+
+        channel.bind('product_add', function (data) {
+            var cart_notification = $('#cart_notification');
+            cart_notification.attr('data-original-title', data['product_changed_by'] + ' added a ' + data['product_name'] + " into shopping cart").tooltip("toggle");
+            setTimeout(function () {
+                $('#cart_notification').tooltip('hide');
+            }, 2000);
+        });
+
+        channel.bind('product_remove', function (data) {
+            var cart_notification = $('#cart_notification');
+            cart_notification.attr('data-original-title', data['product_changed_by'] + ' removed ' + data['product_name'] + " from the shopping cart").tooltip("toggle");
+            setTimeout(function () {
+                $('#cart_notification').tooltip('hide');
+            }, 2000);
+        });
+
+        channel.bind('friend_request_received', function (data) {
+            var account_notification = $('#account_notification');
+            account_notification.attr('data-original-title', data['username'] + " sent you a friend request").tooltip("toggle");
+            setTimeout(function () {
+                $('#account_notification').tooltip('hide');
+            }, 2000);
+            fetch_received_friend_requests();
+        });
+
+        channel.bind('friend_request_accepted', function (data) {
+            var account_notification = $('#account_notification');
+            account_notification.attr('data-original-title', data['username'] + " accepted your friend request").tooltip("toggle");
+            setTimeout(function () {
+                $('#account_notification').tooltip('hide');
+            }, 2000);
+            fetch_pending_friend_requests();
+            fetch_friend_list();
+        });
+
+        channel.bind('friend_request_denied', function (data) {
+            var account_notification = $('#account_notification');
+            account_notification.attr('data-original-title', data['username'] + " denied your friend request").tooltip("toggle");
+            setTimeout(function () {
+                $('#account_notification').tooltip('hide');
+            }, 2000);
+            fetch_pending_friend_requests();
+        });
+
+        channel.bind('friend_request_cancelled', function (data) {
+            fetch_received_friend_requests();
+        });
+
+        channel.bind('removed_from_friendlist', function (data) {
+            var account_notification = $('#account_notification');
+            account_notification.attr('data-original-title', data['username'] + " removed you from his/her friend list").tooltip("toggle");
+            setTimeout(function () {
+                $('#account_notification').tooltip('hide');
+            }, 2000);
+            fetch_friend_list();
+        });
+    </script>
+</head><!--/head-->
+
+<body>
+<header id="header-middle"><!--header-->
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Project Name</a>
+            </div>
+            <div style="margin-right: 1%; margin-left: 1%; margin-top: 0.5%" class="nav navbar-right shop-menu">
+                <ul class="nav navbar-nav">
+                    <li><a href="#"><i class="fa fa-adjust"></i> Shop</a></li>
+                    <li id="account_notification" data-toggle="tooltip"><a class="active" href="#"><i
+                            class="fa fa-user"></i> Account</a></li>
+                    <li id="cart_notification" data-toggle="tooltip"><a href="#"><i
+                            class="fa fa-shopping-cart"></i> Cart</a></li>
+                    <li><a href="#"><i class="fa fa-lock"></i> Logout</a></li>
+                    <div class="search_box pull-right">
+                        <input onchange="search_product(this.value);" type="text" placeholder="Search"/>
+                    </div>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+
+<section style="margin-top: 70px">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="left-sidebar">
+                    <h2>Settings</h2>
+                    <div class="panel-group category-products" id="settings"><!--category-productsr-->
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#settings" href="#account_alt">
+                                        Account
+                                        <span class="badge pull-right">
+                                            <i class="fa fa-plus"></i>
+                                        </span>
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="account_alt" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a href="javascript:load_general_settings()">General Settings</a>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a href="">Regional Settings</a>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a id="manage_friends_button" href="#">Manage Friends</a>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a href="">Manage Groups</a>
+                                        </h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#settings" href="#cart_alt">
+                                        Shopping Carts
+                                        <span class="badge pull-right">
+                                            <i class="fa fa-plus"></i>
+                                        </span>
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="cart_alt" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a href="">General Settings</a>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a href="">Manage Carts</a>
+                                        </h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#settings" href="#route_alt">
+                                        Route
+                                        <span class="badge pull-right">
+                                            <i class="fa fa-plus"></i>
+                                        </span>
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="route_alt" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a href="">General Settings</a>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a href="">Algorithm Settings</a>
+                                        </h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!--/category-productsr-->
+                </div>
+            </div>
+
+            <div class="col-sm-9 padding-right">
+                <div class="features_items"><!--user_panel-->
+                    <h2 id="settings_header" class="title text-center">User Panel</h2>
+                    <div id="user_panel">
+                        <div id="account_general_settings" class="replay-box" hidden><!--Account General Settings -->
+                            <h2>Change Name</h2>
+                            <div class="row">
+                                <form method="post">
+                                    <div class="col-sm-5">
+                                        <div class="blank-arrow">
+                                            <label>First Name</label>
+                                        </div>
+                                        <input type="text" placeholder="your first name...">
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="blank-arrow">
+                                            <label>Last Name</label>
+                                        </div>
+                                        <input type="text" placeholder="your last name...">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <a class="btn btn-primary" href="">Save</a>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <h2>Change Password</h2>
+                            <div class="row">
+                                <form method="post">
+                                    <div class="col-sm-3">
+                                        <div class="blank-arrow">
+                                            <label>Old Password</label>
+                                        </div>
+                                        <input type="password" placeholder="old password...">
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="blank-arrow">
+                                            <label>New Password</label>
+                                        </div>
+                                        <input type="password" placeholder="new password...">
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="blank-arrow">
+                                            <label>New Password Again</label>
+                                        </div>
+                                        <input type="password" placeholder="new password again...">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <a class="btn btn-primary" href="">Save</a>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <h2>Change E-mail</h2>
+                            <div class="row">
+                                <form method="post">
+                                    <div class="col-sm-9">
+                                        <div class="blank-arrow">
+                                            <label>New E-mail</label>
+                                        </div>
+                                        <input type="email" placeholder="new email...">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <a class="btn btn-primary" href="">Save</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div><!--/Account General Settings -->
+
+                        <div id="account_regional_settings" class="replay-box" hidden><!--Account Regional Settings -->
+                            <h2>Change Shopping Country & City</h2>
+                            <div class="row">
+                                <form method="post">
+                                    <div class="col-sm-5">
+                                        <div class="blank-arrow">
+                                            <label>Country</label>
+                                        </div>
+                                        <select class="selectpicker"></select>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="blank-arrow">
+                                            <label>City</label>
+                                        </div>
+                                        <select class="selectpicker"></select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <a class="btn btn-primary" href="">Save</a>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <br>
+                            <h2>Change Currency</h2>
+                            <div class="row">
+                                <form method="post">
+                                    <div class="col-sm-9">
+                                        <div class="blank-arrow">
+                                            <label>Currenct Type</label>
+                                        </div>
+                                        <select class="selectpicker"></select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <a class="btn btn-primary" href="">Save</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div><!--/Account Regional Settings -->
+
+                        <div id="account_friend_management" class="replay-box" hidden><!--Account Friend Management -->
+                            <h2>Received Friend Requests</h2>
+                            <div id="received_friend_requests"></div>
+
+                            <br>
+                            <h2>Pending Friend Requests</h2>
+                            <div id="pending_friend_requests"></div>
+
+                            <br>
+                            <h1>Friend List <a id="add_friend_button" href="#">+</a></h1>
+                            <div id="add_friend_form" class="row" hidden>
+                                <br>
+                                <form method="post">
+                                    <div class="col-sm-4">
+                                        <div class="blank-arrow">
+                                            <label>Username</label>
+                                        </div>
+                                        <input name="username" type="text" placeholder="username...">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <button type="submit" id="add_as_friend_button" class="btn btn-primary">Add As
+                                            Friend
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div id="friend_list"></div>
+                        </div><!--/Account Friend Management -->
+
+                        <div id="account_group_management" class="replay-box" hidden><!--Account Group Management -->
+                            <h1>Group List</h1>
+                            <br>
+                            <h2>GROUP_NAME_COMES_HERE</h2>
+                            <div class="row">
+                                <form method="post">
+                                    <div class="col-sm-3">
+                                        <span>USERNAME_COMES_HERE</span>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <span>NAME_COMES_HERE</span>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <span>TIME_COMES_HERE</span>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <a class="btn btn-primary" href="">Remove</a> {# ADD QUIT GROUP BUTTON #}
+                                    </div>
+                                </form>
+                            </div>
+                        </div><!--/Account Group Management -->
+
+                        <div id="cart_management" class="replay-box" hidden><!--Shopping Cart Management -->
+                            <span></span>
+                            <h1>Shared Cart List <a href="">+</a></h1>
+                            <div class="row" hidden>
+                                <form method="post">
+                                    <div class="col-sm-4">
+                                        <div class="blank-arrow">
+                                            <label>New Cart Name</label>
+                                        </div>
+                                        <input type="text" placeholder="new cart name...">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <a class="btn btn-primary" href="">Add</a>
+                                    </div>
+                                </form>
+                            </div>
+                            <br>
+                            <h2>CART_NAME_COMES_HERE <a href="">-</a></h2>
+                            <div class="row">
+                                <form method="post">
+                                    <div class="col-sm-4">
+                                        <div class="blank-arrow">
+                                            <label>User</label>
+                                        </div>
+                                        <select class="selectpicker"></select>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="blank-arrow">
+                                            <label>Role</label>
+                                        </div>
+                                        <select class="selectpicker"></select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <a class="btn btn-primary" href="">Share With User</a>
+                                    </div>
+                                </form>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <form method="post">
+                                    <div class="col-sm-8">
+                                        <div class="blank-arrow">
+                                            <label>Group</label>
+                                        </div>
+                                        <select class="selectpicker"></select>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <a class="btn btn-primary" href="">Share With Group</a>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="row">
+                                <form method="post">
+                                    <div class="col-sm-3">
+                                        <span>USERNAME_COMES_HERE</span>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <span>NAME_COMES_HERE</span>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <span>ROLE_COMES_HERE</span>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <a class="btn btn-primary" href="">Unshare</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div><!--/Shopping Cart Management -->
+                    </div>
+                </div><!--user_panel-->
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer id="footer"><!--Footer-->
+    <div class="footer-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-2">
+                    <div class="companyinfo">
+                        <h2><span>e</span>-shopper</h2>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit,sed do eiusmod tempor</p>
+                    </div>
+                </div>
+                <div class="col-sm-7">
+                    <div class="col-sm-3">
+                        <div class="video-gallery text-center">
+                            <a href="#">
+                                <div class="iframe-img">
+                                    <img src="images/home/iframe1.png" alt=""/>
+                                </div>
+                                <div class="overlay-icon">
+                                    <i class="fa fa-play-circle-o"></i>
+                                </div>
+                            </a>
+                            <p>Circle of Hands</p>
+                            <h2>24 DEC 2014</h2>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <div class="video-gallery text-center">
+                            <a href="#">
+                                <div class="iframe-img">
+                                    <img src="images/home/iframe2.png" alt=""/>
+                                </div>
+                                <div class="overlay-icon">
+                                    <i class="fa fa-play-circle-o"></i>
+                                </div>
+                            </a>
+                            <p>Circle of Hands</p>
+                            <h2>24 DEC 2014</h2>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <div class="video-gallery text-center">
+                            <a href="#">
+                                <div class="iframe-img">
+                                    <img src="images/home/iframe3.png" alt=""/>
+                                </div>
+                                <div class="overlay-icon">
+                                    <i class="fa fa-play-circle-o"></i>
+                                </div>
+                            </a>
+                            <p>Circle of Hands</p>
+                            <h2>24 DEC 2014</h2>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <div class="video-gallery text-center">
+                            <a href="#">
+                                <div class="iframe-img">
+                                    <img src="images/home/iframe4.png" alt=""/>
+                                </div>
+                                <div class="overlay-icon">
+                                    <i class="fa fa-play-circle-o"></i>
+                                </div>
+                            </a>
+                            <p>Circle of Hands</p>
+                            <h2>24 DEC 2014</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="address">
+                        <img src="images/home/map.png" alt=""/>
+                        <p>505 S Atlantic Ave Virginia Beach, VA(Virginia)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="footer-widget">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-2">
+                    <div class="single-widget">
+                        <h2>Service</h2>
+                        <ul class="nav nav-pills nav-stacked">
+                            <li><a href="">Online Help</a></li>
+                            <li><a href="">Contact Us</a></li>
+                            <li><a href="">Order Status</a></li>
+                            <li><a href="">Change Location</a></li>
+                            <li><a href="">FAQ’s</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="single-widget">
+                        <h2>Quock Shop</h2>
+                        <ul class="nav nav-pills nav-stacked">
+                            <li><a href="">T-Shirt</a></li>
+                            <li><a href="">Mens</a></li>
+                            <li><a href="">Womens</a></li>
+                            <li><a href="">Gift Cards</a></li>
+                            <li><a href="">Shoes</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="single-widget">
+                        <h2>Policies</h2>
+                        <ul class="nav nav-pills nav-stacked">
+                            <li><a href="">Terms of Use</a></li>
+                            <li><a href="">Privecy Policy</a></li>
+                            <li><a href="">Refund Policy</a></li>
+                            <li><a href="">Billing System</a></li>
+                            <li><a href="">Ticket System</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="single-widget">
+                        <h2>About Shopper</h2>
+                        <ul class="nav nav-pills nav-stacked">
+                            <li><a href="">Company Information</a></li>
+                            <li><a href="">Careers</a></li>
+                            <li><a href="">Store Location</a></li>
+                            <li><a href="">Affillate Program</a></li>
+                            <li><a href="">Copyright</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-sm-offset-1">
+                    <div class="single-widget">
+                        <h2>About Shopper</h2>
+                        <form action="#" class="searchform">
+                            <input type="text" placeholder="Your email address"/>
+                            <button type="submit" class="btn btn-default"><i class="fa fa-arrow-circle-o-right"></i>
+                            </button>
+                            <p>Get the most recent updates from <br/>our site and be updated your self...</p>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="row">
+                <p class="pull-left">Copyright © 2017. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+</footer><!--/Footer-->
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="{% static 'public/js/jquery.scrollUp.min.js' %}"></script>
+<script src="{% static 'public/js/price-range.js' %}"></script>
+<script src="{% static 'public/js/jquery.prettyPhoto.js' %}"></script>
+<script src="{% static 'public/js/main.js' %}"></script>
+<script src="{% static 'account/js/account.js' %}"></script>
+<script>
+    var STATIC_URL = "{% static '' %}";
+    $('#cart_notification').tooltip({
+        placement: "bottom",
+        trigger: "manual"
+    });
+    $('#account_notification').tooltip({
+        placement: "bottom",
+        trigger: "manual"
+    });
+</script>
+</body>
+</html>
