@@ -8,9 +8,8 @@
 
 body {
   font-family: 'Roboto', sans-serif;
-  background:;
   position: relative;
-  font-weight:400px;
+  font-weight:400;
 }
 
 ul li {
@@ -198,7 +197,6 @@ a#scrollUp i{
 
 
 .shop-menu ul li a {
-  background: #FFFFFF;
   color: #696763;
   font-family: 'Roboto', sans-serif;
   font-size: 14px;
@@ -305,7 +303,6 @@ ul.sub-menu {
   color: #FDB45E;
   padding-left: 0;
 }
-
 
 .navbar-nav li ul.sub-menu li{
   padding: 10px 20px 0 ;
@@ -899,7 +896,6 @@ h2.title {
   transition: height 500ms ease 0s;
   width: 100%;
   display: block;
-  opacity:;
 }
 
 .single-products:hover .product-overlay {
@@ -2141,7 +2137,6 @@ h2.title {
 
 .rating-area {
   border: 1px solid #F7F7F0;
-  direction: block;
   overflow: hidden;
 }
 

@@ -70,7 +70,28 @@ function add_to_cart(product_id) {
         type: "POST",
         data: {"post_add_to_cart": "post_add_to_cart", 'product_id': product_id},
         success: function (data) {
-            active_category_id = category_id;
+
+        },
+        error: function (jXHR, textStatus, errorThrown) {
+            alert(errorThrown);
+        }
+    });
+}
+
+function search_product(search_text) {
+    if(!search_text) {
+        active_category_id = -1;
+        var category_products = $('#category_products');
+        category_products.hide();
+        category_products.empty();
+        return
+    }
+
+    $.ajax({
+        type: "POST",
+        data: {"post_search_product": "post_search_product", 'search_text': search_text},
+        success: function (data) {
+            active_category_id = -1;
             var obj = data['loaded_products'];
             var category_products = $('#category_products');
             category_products.hide();
@@ -84,8 +105,8 @@ function add_to_cart(product_id) {
             }
             category_products.show('normal');
         },
-        error: function (jXHR, textStatus, errorThrown) {
-            alert(errorThrown);
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
         }
     });
 }
@@ -104,7 +125,7 @@ function load_products(category_id) {
         type: "POST",
         data: {"post_load_products": "post_load_products", "category_id": category_id},
         success: function (data) {
-            active_category_id = category_id;
+            active_category_id = parseInt(data['category_id']);
             var obj = data['loaded_products'];
             var category_products = $('#category_products');
             category_products.hide();
