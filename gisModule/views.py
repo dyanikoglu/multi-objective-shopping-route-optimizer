@@ -133,6 +133,98 @@ def account(request):
 
             return JsonResponse({'status': 'success'})
 
+        elif request.POST.get('create_new_group'):
+            new_group = models.Group.objects.create(name=request.POST.get('group_name'))
+            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            role = models.Role.objects.get(name="Admin")  # TODO Change role implementation later
+            models.GroupMember.objects.create(group=new_group, member=active_user, role=role)
+
+            return JsonResponse({'status': 'success'})
+
+        elif request.POST.get('fetch_group_list'):
+            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            groups = []
+            for group_membership in models.GroupMember.objects.filter(member=active_user):
+                group = group_membership.group
+                active_role = group_membership.role.name  # TODO Expand Role model with permissions
+                members = []
+
+                for other_member in models.GroupMember.objects.filter(group=group):
+                    other_user = other_member.member
+                    members.append({'user_id': other_user.userID, 'username': other_user.userName, 'name': "%s %s" % (
+                        other_user.firstName, other_user.lastName), 'join_date': other_member.date})
+                groups.append(
+                    {'group_id': group.id, 'active_role': active_role, 'members': members, 'group_name': group.name,
+                     'creation_date': group.date, })
+
+            friends = []
+            for friend in models.Friend.objects.filter(user_receiver=active_user, status=True):
+                friends.append({'user_id': friend.user_sender.userID, 'username': friend.user_sender.userName,
+                                'name': "%s %s" % (
+                                    friend.user_sender.firstName, friend.user_sender.lastName)})
+            for friend in models.Friend.objects.filter(user_sender=active_user, status=True):
+                friends.append({'user_id': friend.user_receiver.userID, 'username': friend.user_receiver.userName,
+                                'name': "%s %s" % (
+                                    friend.user_receiver.firstName, friend.user_receiver.lastName)})
+
+            return JsonResponse({'groups': groups, 'friends': friends})
+
+        elif request.POST.get('quit_from_group'):
+            user_to_quit = models.User.objects.get(userID=request.POST.get('user_id'))
+            group_to_quit = models.Group.objects.get(id=request.POST.get('group_id'))
+            models.GroupMember.objects.get(member=user_to_quit, group=group_to_quit).delete()
+
+            # Notify whole group
+            for member in models.GroupMember.objects.filter(group=group_to_quit):
+                if member.member.userID != user_to_quit.userID:
+                    pusher_client.trigger('user_%s' % member.member.userID, 'member_quit_from_group',
+                                          {'username': user_to_quit.userName, 'group_name': group_to_quit.name})
+
+            return JsonResponse({'status': 'success'})
+
+        elif request.POST.get('remove_from_group'):
+            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            user_to_remove = models.User.objects.get(userID=request.POST.get('user_id'))
+            group = models.Group.objects.get(id=request.POST.get('group_id'))
+
+            # Notify whole group
+            for member in models.GroupMember.objects.filter(group=group):
+                if member.member.userID == user_to_remove.userID:
+                    username = "You"
+                else:
+                    username = user_to_remove.userName
+                if member.member.userID != active_user.userID:
+                    pusher_client.trigger('user_%s' % member.member.userID, 'member_removed_from_group',
+                                          {'username': username, 'removed_by': active_user.userName,
+                                           'group_name': group.name})
+
+            models.GroupMember.objects.get(member=user_to_remove, group=group).delete()
+            return JsonResponse({'status': 'success'})
+
+        elif request.POST.get('add_to_group'):
+            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            user_to_add = models.User.objects.get(userID=request.POST.get('user_id'))  # TODO Username hashing
+            group_to_add = models.Group.objects.get(id=request.POST.get('group_id'))
+            role = models.Role.objects.get(name="Member")  # TODO Change role implementation later
+            try:
+                models.GroupMember.objects.get(group=group_to_add, member=user_to_add)
+                return tools.bad_request('This user is already in this group')
+            except ObjectDoesNotExist:  # Safe to add user to group, no duplicates
+                models.GroupMember.objects.create(group=group_to_add, member=user_to_add, role=role)
+
+                # Notify whole group
+                for member in models.GroupMember.objects.filter(group=group_to_add):
+                    if member.member.userID == user_to_add.userID:
+                        username = "You"
+                    else:
+                        username = user_to_add.userName
+                    if member.member.userID != active_user.userID:
+                        pusher_client.trigger('user_%s' % member.member.userID, 'member_added_to_group',
+                                              {'username': username, 'added_by': active_user.userName,
+                                               'group_name': group_to_add.name})
+
+                return JsonResponse({'status': 'success'})
+
 
 def cart(request):
     if request.method == "GET":

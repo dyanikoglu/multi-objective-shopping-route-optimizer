@@ -99,6 +99,33 @@
             }, 2000);
             fetch_friend_list();
         });
+
+        channel.bind('member_quit_from_group', function (data) {
+            var account_notification = $('#account_notification');
+            account_notification.attr('data-original-title', data['username'] + " has quit from the group: " + data['group_name']).tooltip("toggle");
+            setTimeout(function () {
+                $('#account_notification').tooltip('hide');
+            }, 3000);
+            fetch_group_list();
+        });
+
+        channel.bind('member_removed_from_group', function (data) {
+            var account_notification = $('#account_notification');
+            account_notification.attr('data-original-title', data['username'] + " have been removed from the group " + data['group_name'] + " by " + data['removed_by']).tooltip("toggle");
+            setTimeout(function () {
+                $('#account_notification').tooltip('hide');
+            }, 3000);
+            fetch_group_list();
+        });
+
+        channel.bind('member_added_to_group', function (data) {
+            var account_notification = $('#account_notification');
+            account_notification.attr('data-original-title', data['username'] + " have been added to the group " + data['group_name'] + " by " + data['added_by']).tooltip("toggle");
+            setTimeout(function () {
+                $('#account_notification').tooltip('hide');
+            }, 3000);
+            fetch_group_list();
+        });
     </script>
 </head><!--/head-->
 
@@ -149,7 +176,7 @@
                                 <div class="panel-body">
                                     <div class="panel-heading">
                                         <h4 class="panel-title">
-                                            <a href="javascript:load_general_settings()">General Settings</a>
+                                            <a href="">General Settings</a>
                                         </h4>
                                     </div>
                                     <div class="panel-heading">
@@ -164,7 +191,7 @@
                                     </div>
                                     <div class="panel-heading">
                                         <h4 class="panel-title">
-                                            <a href="">Manage Groups</a>
+                                            <a id="manage_groups_button" href="#">Manage Groups</a>
                                         </h4>
                                     </div>
                                 </div>
@@ -364,25 +391,24 @@
                         </div><!--/Account Friend Management -->
 
                         <div id="account_group_management" class="replay-box" hidden><!--Account Group Management -->
-                            <h1>Group List</h1>
-                            <br>
-                            <h2>GROUP_NAME_COMES_HERE</h2>
-                            <div class="row">
+                            <h1>Group List <a id="add_group_button" href="#">+</a></h1>
+                            <div id="add_group_form" class="row" hidden>
+                                <br>
                                 <form method="post">
-                                    <div class="col-sm-3">
-                                        <span>USERNAME_COMES_HERE</span>
-                                    </div>
                                     <div class="col-sm-4">
-                                        <span>NAME_COMES_HERE</span>
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <span>TIME_COMES_HERE</span>
+                                        <div class="blank-arrow">
+                                            <label>Group Name</label>
+                                        </div>
+                                        <input name="group_name" type="text" placeholder="group name...">
                                     </div>
                                     <div class="col-sm-2">
-                                        <a class="btn btn-primary" href="">Remove</a> {# ADD QUIT GROUP BUTTON #}
+                                        <button type="submit" id="create_group_button" class="btn btn-primary">Create New Group
+                                        </button>
                                     </div>
                                 </form>
                             </div>
+                            <br>
+                            <div id="group_list"></div>
                         </div><!--/Account Group Management -->
 
                         <div id="cart_management" class="replay-box" hidden><!--Shopping Cart Management -->

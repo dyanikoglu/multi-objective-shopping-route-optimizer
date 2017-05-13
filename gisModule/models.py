@@ -294,6 +294,7 @@ class GroupMember(models.Model):
     group = models.ForeignKey('Group', null=True)
     member = models.ForeignKey('User', null=True)
     role = models.ForeignKey('Role', null=True)
+    date = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return "%s - %s" % (self.group.name, self.member.userName)
