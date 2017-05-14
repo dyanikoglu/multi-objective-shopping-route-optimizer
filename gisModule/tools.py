@@ -71,7 +71,7 @@ def convert_to_markets_for_items_list(itemid_list, midpoint, dist):
 def return_shopping_list_info(user):
     shoppinglist_info = {}
     for list in models.UserShoppingList.objects.filter(user=user):
-        shoppinglist_info[str(list.shoppingList.listName)] = int(list.shoppingList.listID)
+        shoppinglist_info[str(list.list.name)] = int(list.list.id)
     return jsonify_str(shoppinglist_info)
 
 
@@ -87,12 +87,12 @@ def add_product_to_list(editing_user, product, shopping_list ):
 
 
 # Return includes of given shopping list object as parameter as json data
-def return_shopping_list_data(shoppingList):
+def return_shopping_list_data(list):
     shoppinglist_data = {}
-    shoppinglist_data['ListID'] = shoppingList.listID
-    shoppinglist_data['ListName'] = shoppingList.listName
+    shoppinglist_data['ListID'] = list.id
+    shoppinglist_data['ListName'] = list.name
     shoppinglist_data['ListProducts'] = []
-    for product in models.ShoppingListItem.objects.filter(list=shoppingList):
+    for product in models.ShoppingListItem.objects.filter(list=list):
         shoppinglist_data['ListProducts'].append(
             {'name': "%s %s %s%s" % (
                 product.product.brand, product.product.type, product.product.amount, product.product.unit),

@@ -3,13 +3,16 @@
  */
 
 $(document).ready(function () {
-    $('#manage_friends_button').click(function () {
-        load_account_friend_management();
+    $('#account_general_settings_button').click(function () {
+        hide_all();
+        $('#settings_header').html('Account | General Settings');
+        $('#account_general_settings').toggle('normal');
         return false;
     });
 
-    $('#manage_groups_button').click(function () {
-        load_account_group_management();
+
+    $('#manage_friends_button').click(function () {
+        load_account_friend_management();
         return false;
     });
 
@@ -18,13 +21,19 @@ $(document).ready(function () {
         return false;
     });
 
+    $('#add_as_friend_button').click(function () {
+        send_friend_request($(this).closest('form').serialize());
+        return false;
+    });
+
+
     $('#add_group_button').click(function () {
         $('#add_group_form').toggle('normal');
         return false;
     });
 
-    $('#add_as_friend_button').click(function () {
-        send_friend_request($(this).closest('form').serialize());
+    $('#manage_groups_button').click(function () {
+        load_account_group_management();
         return false;
     });
 
@@ -32,12 +41,135 @@ $(document).ready(function () {
         create_new_group($(this).closest('form').serialize());
         return false;
     });
+
+
+    $('#manage_lists_button').click(function () {
+        load_shopping_list_management();
+        return false;
+    });
+
+    $('#add_list_button').click(function () {
+        $('#add_list_form').toggle('normal');
+        return false;
+    });
+
+    $('#create_list_button').click(function () {
+        create_new_list($(this).closest('form').serialize());
+        return false;
+    });
 });
 
 function hide_all() {
+    $('#account_general_settings').hide('normal');
     $('#account_friend_management').hide('normal');
     $('#account_group_management').hide('normal');
+    $('#list_management').hide('normal');
 }
+
+///////////////////// SHOPPING LIST MANAGEMENT START
+
+function load_shopping_list_management() {
+    hide_all();
+    fetch_shopping_lists();
+    $('#list_management').show('normal');
+    $('#settings_header').html('Shopping List Management');
+}
+
+function create_new_list(serialized_form) {
+    serialized_form += "&create_new_list=create_new_list";
+    $.ajax({
+        type: "POST",
+        data: serialized_form,
+        success: function (data) {
+            fetch_shopping_lists();
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status + ' Error: ' + xhr['responseJSON']['message']);
+        }
+    });
+}
+
+function quit_from_list(list_id, user_id) {
+    $.ajax({
+        type: "POST",
+        data: {'quit_from_list': 'quit_from_list', 'list_id': list_id, 'user_id': user_id},
+        success: function (data) {
+            fetch_shopping_lists();
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+        }
+    });
+}
+
+function remove_from_list(list_id, user_id) {
+    $.ajax({
+        type: "POST",
+        data: {'remove_from_list': 'remove_from_list', 'list_id': list_id, 'user_id': user_id},
+        success: function (data) {
+            fetch_shopping_lists();
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+        }
+    });
+}
+
+function add_to_list(list_id) {
+    var serialized_form = $('#add_to_list_form_' + list_id).serialize();
+    serialized_form += "&list_id=" + list_id + "&add_to_list=add_to_list";
+    $.ajax({
+        type: "POST",
+        data: serialized_form,
+        success: function (data) {
+            fetch_shopping_lists();
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status + ' Error: ' + xhr['responseJSON']['message']);
+        }
+    });
+}
+
+function fetch_shopping_lists() {
+    $.ajax({
+        type: "POST",
+        data: {'fetch_shopping_lists': 'fetch_shopping_lists'},
+        success: function (data) {
+            var list_list = $('#list_list');
+            list_list.empty();
+            for (var i = 0; i < data['lists'].length; i++) {
+                if (data['lists'][i]['active_role'] === 'Admin') {
+                    var onclick_val = "$('#add_to_list_" + data['lists'][i]['list_id'] + "').toggle('normal'); return false;";
+                    list_list.append('<br><h2>' + data['lists'][i]['list_name'] + '<a onclick="' + onclick_val + '" href="#">+</a></h2>');
+                    list_list.append('<div id="add_to_list_' + data['lists'][i]['list_id'] + '" class="row" hidden> <br> <form id="add_to_list_form_' + data['lists'][i]['list_id'] + '" method="post"> <div class="col-sm-3"> <div class="blank-arrow"> <label>User Name</label> </div> <select id="add_to_list_select_' + data['lists'][i]['list_id'] + '" name="user_id" type="text"></select> </div> <div class="col-sm-2"> <button type="button" onclick="add_to_list(' + data['lists'][i]['list_id'] + ');" class="btn btn-primary">Add to List</button> </div> </form> </div>');
+                    var select_user = $('#add_to_list_select_' + data['lists'][i]['list_id']);
+                    for (var k = 0; k < data['friends'].length; k++) {
+                        select_user.append('<option value="' + data['friends'][k]['user_id'] + '">' + data['friends'][k]['username'] + '</option>');
+                    }
+                } else {
+                    list_list.append('<br><h2>' + data['lists'][i]['list_name'] + '</h2>');
+                }
+
+
+                for (var j = 0; j < data['lists'][i]['members'].length; j++) {
+                    if (data['lists'][i]['members'][j]['user_id'] === user_info['userID']) { // Our membership
+                        list_list.append('<div class="row"> <div class="col-sm-3"> <span>' + data['lists'][i]['members'][j]['username'] + '</span> </div> <div class="col-sm-3"> <span>' + data['lists'][i]['members'][j]['name'] + '</span> </div> <div class="col-sm-3"> <span>'  + '</span> </div> <div class="col-sm-2"> <button type="submit" onclick="quit_from_list(' + data['lists'][i]['list_id'] + ',' + data['lists'][i]['members'][j]['user_id'] + '); return false;" class="btn btn-primary">Quit From List</button> </div> </div> </div>');
+                    }
+                    else if (data['lists'][i]['active_role'] === 'Admin') {
+                        list_list.append('<div class="row"> <div class="col-sm-3"> <span>' + data['lists'][i]['members'][j]['username'] + '</span> </div> <div class="col-sm-3"> <span>' + data['lists'][i]['members'][j]['name'] + '</span> </div> <div class="col-sm-3"> <span>' + '</span> </div> <div class="col-sm-2"> <button type="submit" onclick="remove_from_list(' + data['lists'][i]['list_id'] + ',' + data['lists'][i]['members'][j]['user_id'] + '); return false;" class="btn btn-primary">Remove From List</button> </div> </div> </div>');
+                    }
+                    else { // Other members
+                        list_list.append('<div class="row"> <div class="col-sm-3"> <span>' + data['lists'][i]['members'][j]['username'] + '</span> </div> <div class="col-sm-3"> <span>' + data['lists'][i]['members'][j]['name'] + '</span> </div> <div class="col-sm-3"> <span>' + '</span> </div> <div class="col-sm-4"> </div> </div> </div>');
+                    }
+                }
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+        }
+    });
+}
+///////////////////// SHOPPING LIST MANAGEMENT END
 
 ///////////////////// GROUP MANAGEMENT START
 function load_account_group_management() {

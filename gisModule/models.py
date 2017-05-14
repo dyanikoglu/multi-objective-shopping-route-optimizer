@@ -146,14 +146,14 @@ class RetailerProduct(models.Model):
 
 
 class ShoppingList(models.Model):
-    listID = models.AutoField(primary_key=True)
-    listName = models.CharField("List Name", max_length=64, default="Shopping List")
+    id = models.AutoField(primary_key=True)
+    name = models.CharField("List Name", max_length=64, default="Shopping List")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    isCompleted = models.BooleanField("Completed?", default=False)
+    completed = models.BooleanField("Completed?", default=False)
 
     def __str__(self):
-        return "%s" % self.listName
+        return "%s" % self.name
 
 
 class User(models.Model):
@@ -248,12 +248,13 @@ class UserSavedAddress(models.Model):
 
 
 class UserShoppingList(models.Model):
-    shoppingList = models.ForeignKey(ShoppingList, null=True)
+    list = models.ForeignKey(ShoppingList, null=True)
     user = models.ForeignKey(User, null=True)
+    role = models.ForeignKey('Role', null=True)
 
     def __str__(self):
         username = self.user.userName
-        list_name = self.shoppingList.listName
+        list_name = self.list.name
         return "%s:%s" % (username, list_name)
 
 
@@ -266,7 +267,7 @@ class ShoppingListItem(models.Model):
     quantity = models.PositiveIntegerField("Quantity")
 
     def __str__(self):
-        return "%s:%s" % (self.list.listName, self.product.brand)
+        return "%s:%s" % (self.list.name, self.product.brand)
 
 
 class Friend(models.Model):
