@@ -9,6 +9,7 @@
     <title>{% block title %}{% endblock %}</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="{% static 'public/css/bootstrap-fullscreen-select.css' %}" rel="stylesheet">
     <link href="{% static 'public/css/prettyPhoto.css' %}" rel="stylesheet">
     <link href="{% static 'public/css/price-range.css' %}" rel="stylesheet">
     <link href="{% static 'public/css/animate.css' %}" rel="stylesheet">
@@ -358,10 +359,12 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="{% static 'public/js/bootstrap-fullscreen-select.min.js' %}"></script>
 <script src="{% static 'public/js/jquery.scrollUp.min.js' %}"></script>
 <script src="{% static 'public/js/price-range.js' %}"></script>
 <script src="{% static 'public/js/jquery.prettyPhoto.js' %}"></script>
 <script src="{% static 'public/js/main.js' %}"></script>
+
 {% block specific_js %}{% endblock %}
 <script>
     var STATIC_URL = "{% static '' %}";

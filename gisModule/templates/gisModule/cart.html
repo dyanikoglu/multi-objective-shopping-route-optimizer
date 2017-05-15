@@ -11,7 +11,7 @@
             <div class="breadcrumbs">
                 <ol class="breadcrumb">
                     <li><a href="#">Home</a></li>
-                    <li class="active">Shopping Cart</li>
+                    <li id="active_list_name" style="color: orange;" class="active"><span data-list_id="-1" id="active_list_text"></span><span style="color: orange" class="fa fa-arrow-circle-down"></span></li>
                 </ol>
             </div>
             <div class="table-responsive cart_info">
@@ -33,6 +33,10 @@
             </div>
         </div>
     </section> <!--/#cart_items-->
+
+    <select class="form-control mobileSelect hidden" data-theme="white" data-triggerOn="#active_list_name"
+            data-title="Choose active shopping list" data-btntext-save="Choose" data-btntext-cancel="Cancel" id="active_list_selection">
+    </select>
 
     <section id="do_action">
         <div class="container">
@@ -117,5 +121,3 @@
 {% block specific_js %}
     <script src="{% static 'cart/js/cart.js' %}"></script>
 {% endblock %}
-
-{% block postscript %}fetch_cart_data();{% endblock %}

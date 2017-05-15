@@ -178,6 +178,7 @@ class UserPreferences(models.Model):
     search_radius = models.PositiveIntegerField("Search Radius(km)", null="True")
     route_start_point = models.ForeignKey('UserSavedAddress', related_name='StartAddress', null=True, blank=True)
     route_end_point = models.ForeignKey('UserSavedAddress', related_name='EndAddress', null=True, blank=True)
+    get_notif_only_for_active_list = models.BooleanField("Get notifications only for active shopping list?", default=True)
 
     def __str__(self):
         return str(self.owner.username + "\'s Preferences")

@@ -393,12 +393,14 @@ def cart(request):
                 product_added_by.append(product.addedBy.username)
                 product_edited_by.append(product.edited_by.username)
             return JsonResponse(
-                {'product_name': product_name, 'product_id': product_id, 'product_quantity': product_quantity,
+                {'active_list_name': active_list.name, 'active_list_id': active_list.id, 'product_name': product_name,
+                 'product_id': product_id, 'product_quantity': product_quantity,
                  'product_added_by': product_added_by, 'product_changed_by': product_edited_by})
 
         elif request.POST.get('post_inc_dec_quantity'):
             product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
             active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            active_user_prefs = active_user.preferences
             active_list = active_user.active_list
             try:
                 list_product = models.ShoppingListItem.objects.get(list=active_list, product=product)
@@ -413,11 +415,13 @@ def cart(request):
             for user_shopping_list in models.ShoppingListMember.objects.filter(list=active_list):
                 notify_id = user_shopping_list.user.id
                 if notify_id != active_user.id:  # Except current user
-                    notification = "<b>%s</b> has changed the quantity of <b>%s</b> as <b>%s</b>" % (
-                        active_user.username, product.name, new_quantity)
-                    pusher_client.trigger('user_%s' % notify_id, 'product_quantity_change',
-                                          {'message': notification, 'product_id': request.POST.get('product_id'),
-                                           'new_quantity': new_quantity, 'new_changed_by': active_user.username})
+                    # Notify if cart is active on others users or their settings allow notifications from other carts
+                    if not user_shopping_list.user.preferences.get_notif_only_for_active_list or user_shopping_list.list.id == user_shopping_list.user.active_list.id:
+                        notification = "<b>%s</b> has changed the quantity of <b>%s</b> as <b>%s</b> in <b>%s</b>" % (
+                            active_user.username, product.name, new_quantity, active_list.name)
+                        pusher_client.trigger('user_%s' % notify_id, 'product_quantity_change',
+                                              {'message': notification, 'product_id': request.POST.get('product_id'),
+                                               'new_quantity': new_quantity, 'new_changed_by': active_user.username})
 
             message = "Successfully changed the quantity of <b>%s</b>" % product.name
             return JsonResponse(
@@ -442,11 +446,13 @@ def cart(request):
             for user_shopping_list in models.ShoppingListMember.objects.filter(list=active_list):
                 notify_id = user_shopping_list.user.id
                 if notify_id != active_user.id:  # Except current user
-                    notification = "<b>%s</b> has changed the quantity of <b>%s</b> as <b>%s</b>" % (
-                        active_user.username, product.name, new_quantity)
-                    pusher_client.trigger('user_%s' % notify_id, 'product_quantity_change',
-                                          {'message': notification, 'product_id': request.POST.get('product_id'),
-                                           'new_quantity': new_quantity, 'new_changed_by': active_user.username})
+                    # Notify if cart is active on others users or their settings allow notifications from other carts
+                    if not user_shopping_list.user.preferences.get_notif_only_for_active_list or user_shopping_list.list.id == user_shopping_list.user.active_list.id:
+                        notification = "<b>%s</b> has changed the quantity of <b>%s</b> as <b>%s</b> in <b>%s</b>" % (
+                            active_user.username, product.name, new_quantity, active_list.name)
+                        pusher_client.trigger('user_%s' % notify_id, 'product_quantity_change',
+                                              {'message': notification, 'product_id': request.POST.get('product_id'),
+                                               'new_quantity': new_quantity, 'new_changed_by': active_user.username})
 
             message = "Successfully changed the quantity of <b>%s</b>" % product.name
             return JsonResponse({'message': message, 'new_changed_by': active_user.username})
@@ -455,7 +461,6 @@ def cart(request):
             product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
             active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             active_list = active_user.active_list
-
             try:
                 models.ShoppingListItem.objects.get(list=active_list, product=product).delete()
             except ObjectDoesNotExist:
@@ -465,15 +470,32 @@ def cart(request):
             for user_shopping_list in models.ShoppingListMember.objects.filter(list=active_list):
                 notify_id = user_shopping_list.user.id
                 if notify_id != active_user.id:  # Except current user
-                    notification = "<b>%s</b> has removed <b>%s</b> from the shopping list" % (
-                        active_user.username, product.name)
-                    pusher_client.trigger('user_%s' % notify_id, 'product_remove',
-                                          {'message': notification,
-                                           'product_changed_by': active_user.username,
-                                           'product_id': request.POST.get('product_id')})
+                    # Notify if cart is active on others users or their settings allow notifications from other carts
+                    if not user_shopping_list.user.preferences.get_notif_only_for_active_list or user_shopping_list.list.id == user_shopping_list.user.active_list.id:
+                        notification = "<b>%s</b> has removed <b>%s</b> from <b>%s</b>" % (
+                            active_user.username, product.name, active_list.name)
+                        pusher_client.trigger('user_%s' % notify_id, 'product_remove',
+                                              {'message': notification,
+                                               'product_changed_by': active_user.username,
+                                               'product_id': request.POST.get('product_id')})
 
-                message = "Successfully removed the <b>%s</b> from shopping list" % product.name
-                return JsonResponse({'status': 'success', 'message': message})
+            message = "Successfully removed the <b>%s</b> from shopping list" % product.name
+            return JsonResponse({'status': 'success', 'message': message})
+
+        elif request.POST.get('fetch_shopping_lists'):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            lists = []
+            for shopping_list_membership in models.ShoppingListMember.objects.filter(user=active_user):
+                lists.append(
+                    {'list_name': shopping_list_membership.list.name, 'list_id': shopping_list_membership.list.id})
+            return JsonResponse({'lists': lists, 'active_list_id': active_user.active_list.id})
+
+        elif request.POST.get('change_active_list'):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            new_active_list = models.ShoppingList.objects.get(id=request.POST.get('list_id'))
+            active_user.active_list = new_active_list
+            active_user.save()
+            return JsonResponse({'status': 'success'});
 
 
 def shop(request):
@@ -553,20 +575,29 @@ def shop(request):
             product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
             editing_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             shopping_list = editing_user.active_list
-            list_product = tools.add_product_to_list(editing_user, product, shopping_list)
+            list_product, exists, new_quantity = tools.add_product_to_list(editing_user, product, shopping_list)
 
             # Notify other users sharing the cart
+            if exists:
+                notification = "<b>%s</b> has changed the quantity of <b>%s</b> as <b>%s</b> in <b>%s</b>" % (
+                    editing_user.username, product.name, new_quantity, shopping_list.name)
+            else:
+                notification = "<b>%s</b> has added a <b>%s</b> into <b>%s</b>" % (
+                    editing_user.username, product.name, shopping_list.name)
             for user_shopping_list in models.ShoppingListMember.objects.filter(list=shopping_list):
                 notify_id = user_shopping_list.user.id
                 if user_shopping_list.user.id != editing_user.id:  # Except current user
-                    pusher_client.trigger('user_%s' % notify_id, 'product_add',
-                                          {'product_name': product.name,
-                                           'product_id': request.POST.get('product_id'),
-                                           'product_quantity': list_product.quantity,
-                                           'product_added_by': list_product.addedBy.username,
-                                           'product_changed_by': list_product.edited_by.username})
+                    # Notify if cart is active on others users or their settings allow notifications from other carts
+                    if not user_shopping_list.user.preferences.get_notif_only_for_active_list or user_shopping_list.list.id == user_shopping_list.user.active_list.id:
+                        pusher_client.trigger('user_%s' % notify_id, 'product_add',
+                                              {'message': notification, 'product_name': product.name,
+                                               'product_id': request.POST.get('product_id'),
+                                               'product_quantity': list_product.quantity,
+                                               'product_added_by': list_product.addedBy.username,
+                                               'product_changed_by': list_product.edited_by.username})
 
-            return render(request, 'gisModule/shop.html')
+            message = "Product successfully added into shopping list"
+            return JsonResponse({'status': 'success', 'message': message})
 
         elif request.POST.get('post_search_product'):
             search_text = request.POST.get('search_text').split()
@@ -624,8 +655,8 @@ def shopping(request):
         if request.POST.get("post_active_cart_change"):
             new_list_id = request.POST.get("cartID")
             new_user_shopping_list = models.ShoppingListMember.objects.get(user=user,
-                                                                         list=models.ShoppingList.objects.get(
-                                                                             id=new_list_id))
+                                                                           list=models.ShoppingList.objects.get(
+                                                                               id=new_list_id))
             new_shopping_list = new_user_shopping_list.list
             user.active_list = new_shopping_list
             user.save()

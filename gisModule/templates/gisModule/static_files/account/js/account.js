@@ -2,8 +2,6 @@
  * Created by dyanikoglu on 12.05.2017.
  */
 
-var notif_semaphore = false;
-
 $(document).ready(function () {
     $('#account_general_settings_button').click(function () {
         hide_all();
