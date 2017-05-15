@@ -4,20 +4,16 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description" content="Multi-Objective Shopping Route Optimizer">
+    <meta name="author" content="Doğa Can Yanıkoğlu">
     <title>{% block title %}{% endblock %}</title>
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="{% static 'public/css/prettyPhoto.css' %}" rel="stylesheet">
     <link href="{% static 'public/css/price-range.css' %}" rel="stylesheet">
     <link href="{% static 'public/css/animate.css' %}" rel="stylesheet">
     <link href="{% static 'public/css/main.css' %}" rel="stylesheet">
     <link href="{% static 'public/css/responsive.css' %}" rel="stylesheet">
-    <!--[if lt IE 9]>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
     <link rel="shortcut icon" href="images/ico/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
@@ -33,14 +29,10 @@
             encrypted: true
         });
         var user_info = {{ user_info|safe }};
-        var channel = pusher.subscribe('user_' + user_info['userID']); // Subscribe to user's own channel
+        var channel = pusher.subscribe('user_' + user_info['id']); // Subscribe to user's own channel
 
         channel.bind('product_quantity_change', function (data) {
-            var cart_notification = $('#cart_notification');
-            cart_notification.attr('data-original-title', data['new_changed_by'] + ' changed quantity of ' + data['product_name']).tooltip("toggle");
-            setTimeout(function () {
-                $('#cart_notification').tooltip('hide');
-            }, 2000);
+            show_cart_notif(data['message'], 3000);
             if ('{{ title }}' === 'Cart') {
                 var quantity_realtime = $('#quantity_' + data['product_id']);
                 quantity_realtime.val(parseInt(data['new_quantity']));
@@ -51,11 +43,7 @@
         });
 
         channel.bind('product_remove', function (data) {
-            var cart_notification = $('#cart_notification');
-            cart_notification.attr('data-original-title', data['product_changed_by'] + ' removed ' + data['product_name'] + " from the shopping cart").tooltip("toggle");
-            setTimeout(function () {
-                $('#cart_notification').tooltip('hide');
-            }, 2000);
+            show_cart_notif(data['message'], 3000);
             if ('{{ title }}' === 'Cart') {
                 var product_row = $('#product_' + data['product_id']);
                 product_row.remove();
@@ -65,17 +53,11 @@
             var cart_notification = $('#cart_notification');
             if ('{{ title }}' === 'Cart') {
                 if (!document.getElementById('product_' + data['product_id'])) { // Product does not exist in cart
-                    cart_notification.attr('data-original-title', data['product_changed_by'] + ' added a ' + data['product_name'] + " into shopping cart").tooltip("toggle");
-                    setTimeout(function () {
-                        $('#cart_notification').tooltip('hide');
-                    }, 2000);
+                    show_cart_notif(data['message'], 3000);
                     var cart_products = $('#cart_products');
                     cart_products.append('<tr id="product_' + data['product_id'] + '"> <td class="cart_product"> <a href=""><img src="images/cart/one.png" alt=""></a> </td> <td class="cart_description"> <h4><a href="">' + data['product_name'] + '</a></h4> <p>Web ID: ' + data['product_id'] + '</p> </td> <td class="cart_price"> <p>' + data['product_added_by'] + '</p> </td> <td class="cart_quantity"> <div class="cart_quantity_button"> <a class="cart_quantity_up" href="javascript:inc_dec_quantity(' + data['product_id'] + ',1);"> + </a> <input onblur="change_quantity(' + data['product_id'] + ')" id="quantity_' + data['product_id'] + '" class="cart_quantity_input" type="text" name="quantity" value="' + data['product_quantity'] + '" autocomplete="off" size="2"> <a class="cart_quantity_down" href="javascript:inc_dec_quantity(' + data['product_id'] + ',-1);"> - </a> </div> </td> <td class="cart_total"> <p id="changed_by_' + data['product_id'] + '" class="cart_total_price">' + data['product_changed_by'] + '</p> </td> <td class="cart_delete"> <a class="cart_quantity_delete" href="javascript:remove_from_cart(' + data['product_id'] + ');"><i class="fa fa-times"></i></a> </td> </tr>');
                 } else { // Product exists in cart
-                    cart_notification.attr('data-original-title', data['product_changed_by'] + ' changed quantity of ' + data['product_name']).tooltip("toggle");
-                    setTimeout(function () {
-                        $('#cart_notification').tooltip('hide');
-                    }, 2000);
+                    show_cart_notif(data['message'], 3000);
                     var quantity_realtime = $('#quantity_' + data['product_id']);
                     quantity_realtime.val(parseInt(data['product_quantity']));
                     var changed_by_realtime = $('#changed_by_' + data['product_id']);
@@ -83,31 +65,19 @@
                     changed_by_realtime.append(data['product_changed_by']);
                 }
             } else {
-                var cart_notification = $('#cart_notification');
-                cart_notification.attr('data-original-title', data['product_changed_by'] + ' added a ' + data['product_name'] + " into shopping cart").tooltip("toggle");
-                setTimeout(function () {
-                    $('#cart_notification').tooltip('hide');
-                }, 2000);
+                show_cart_notif(data['message'], 3000);
             }
         });
 
         channel.bind('friend_request_received', function (data) {
-            var account_notification = $('#account_notification');
-            account_notification.attr('data-original-title', data['username'] + " sent you a friend request").tooltip("toggle");
-            setTimeout(function () {
-                $('#account_notification').tooltip('hide');
-            }, 2000);
+            show_account_notif(data['message'], 3000);
             if ('{{ title }}' === 'Account') {
                 fetch_received_friend_requests();
             }
         });
 
         channel.bind('friend_request_accepted', function (data) {
-            var account_notification = $('#account_notification');
-            account_notification.attr('data-original-title', data['username'] + " accepted your friend request").tooltip("toggle");
-            setTimeout(function () {
-                $('#account_notification').tooltip('hide');
-            }, 2000);
+            show_account_notif(data['message'], 3000);
             if ('{{ title }}' === 'Account') {
                 fetch_pending_friend_requests();
                 fetch_friend_list();
@@ -115,11 +85,7 @@
         });
 
         channel.bind('friend_request_denied', function (data) {
-            var account_notification = $('#account_notification');
-            account_notification.attr('data-original-title', data['username'] + " denied your friend request").tooltip("toggle");
-            setTimeout(function () {
-                $('#account_notification').tooltip('hide');
-            }, 2000);
+            show_account_notif(data['message'], 3000);
             if ('{{ title }}' === 'Account') {
                 fetch_pending_friend_requests();
             }
@@ -132,59 +98,76 @@
         });
 
         channel.bind('removed_from_friendlist', function (data) {
-            var account_notification = $('#account_notification');
-            account_notification.attr('data-original-title', data['username'] + " removed you from his/her friend list").tooltip("toggle");
-            setTimeout(function () {
-                $('#account_notification').tooltip('hide');
-            }, 2000);
+            show_account_notif(data['message'], 3000);
             if ('{{ title }}' === 'Account') {
                 fetch_friend_list();
             }
         });
 
         channel.bind('removed_from_friendlist', function (data) {
-            var account_notification = $('#account_notification');
-            account_notification.attr('data-original-title', data['username'] + " removed you from his/her friend list").tooltip("toggle");
-            setTimeout(function () {
-                $('#account_notification').tooltip('hide');
-            }, 2000);
+            show_account_notif(data['message'], 3000);
             if ('{{ title }}' === 'Account') {
                 fetch_friend_list();
             }
         });
 
         channel.bind('member_quit_from_group', function (data) {
-            var account_notification = $('#account_notification');
-            account_notification.attr('data-original-title', data['username'] + " has quit from the group: " + data['group_name']).tooltip("toggle");
-            setTimeout(function () {
-                $('#account_notification').tooltip('hide');
-            }, 3000);
+            show_account_notif(data['message'], 3000);
             if ('{{ title }}' === 'Account') {
                 fetch_group_list();
             }
         });
 
         channel.bind('member_removed_from_group', function (data) {
-            var account_notification = $('#account_notification');
-            account_notification.attr('data-original-title', data['username'] + " have been removed from the group " + data['group_name'] + " by " + data['removed_by']).tooltip("toggle");
-            setTimeout(function () {
-                $('#account_notification').tooltip('hide');
-            }, 3000);
+            show_account_notif(data['message'], 3000);
             if ('{{ title }}' === 'Account') {
                 fetch_group_list();
             }
         });
 
         channel.bind('member_added_to_group', function (data) {
-            var account_notification = $('#account_notification');
-            account_notification.attr('data-original-title', data['username'] + " have been added to the group " + data['group_name'] + " by " + data['added_by']).tooltip("toggle");
-            setTimeout(function () {
-                $('#account_notification').tooltip('hide');
-            }, 3000);
+            show_account_notif(data['message'], 3000);
             if ('{{ title }}' === 'Account') {
                 fetch_group_list();
             }
         });
+
+        channel.bind('member_added_to_list', function (data) {
+            show_account_notif(data['message'], 3000);
+            if ('{{ title }}' === 'Account') {
+                fetch_shopping_lists();
+            }
+        });
+
+        channel.bind('member_removed_from_list', function (data) {
+            show_account_notif(data['message'], 3000);
+            if ('{{ title }}' === 'Account') {
+                fetch_shopping_lists();
+            }
+        });
+
+        channel.bind('member_quit_from_list', function (data) {
+            show_account_notif(data['message'], 3000);
+            if ('{{ title }}' === 'Account') {
+                fetch_shopping_lists();
+            }
+        });
+
+        function show_account_notif(msg, time) {
+            var account_notification = $('#account_notification');
+            account_notification.attr('data-original-title', msg).tooltip("show");
+            setTimeout(function () {
+                $('#account_notification').tooltip('hide');
+            }, time);
+        }
+
+        function show_cart_notif(msg, time) {
+            var cart_notification = $('#cart_notification');
+            cart_notification.attr('data-original-title', msg).tooltip("show");
+            setTimeout(function () {
+                $('#cart_notification').tooltip('hide');
+            }, time);
+        }
     </script>
 </head><!--/head-->
 
@@ -197,14 +180,15 @@
             </div>
             <div style="margin-right: 1%; margin-left: 1%; margin-top: 0.5%" class="nav navbar-right shop-menu">
                 <ul class="nav navbar-nav">
-                    <li><a class="active" href=""><i class="fa fa-adjust"></i> Shop</a></li>
-                    <li id="account_notification"><a href=""><i class="fa fa-user"></i> Account</a></li>
-                    <li id="cart_notification" data-toggle="tooltip"><a href="cart.html"><i
+                    <li id="account_notification"><a class="{% block account_active %}{% endblock %}" href=""><i
+                            class="fa fa-user"></i> Account</a></li>
+                    <li><a class="{% block shop_active %}{% endblock %}" href=""><i class="fa fa-adjust"></i> Shop</a>
+                    </li>
+                    <li id="cart_notification"><a class="{% block cart_active %}{% endblock %}"
+                                                                        href="cart.html"><i
                             class="fa fa-shopping-cart"></i> Cart</a></li>
                     <li><a href=""><i class="fa fa-lock"></i> Logout</a></li>
-                    <div class="search_box pull-right">
-                        <input onchange="search_product(this.value);" type="text" placeholder="Search"/>
-                    </div>
+                    {% block search_box %}{% endblock %}
                 </ul>
             </div>
         </div>
@@ -373,7 +357,7 @@
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="{% static 'public/js/jquery.scrollUp.min.js' %}"></script>
 <script src="{% static 'public/js/price-range.js' %}"></script>
 <script src="{% static 'public/js/jquery.prettyPhoto.js' %}"></script>
@@ -383,11 +367,13 @@
     var STATIC_URL = "{% static '' %}";
     $('#cart_notification').tooltip({
         placement: "bottom",
-        trigger: "manual"
+        trigger: "manual",
+        html: true
     });
     $('#account_notification').tooltip({
         placement: "bottom",
-        trigger: "manual"
+        trigger: "manual",
+        html: true
     });
     {% block postscript %}{% endblock %}
 </script>

@@ -157,17 +157,17 @@ class ShoppingList(models.Model):
 
 
 class User(models.Model):
-    userID = models.AutoField(primary_key=True)
-    userName = models.CharField("User Name", max_length=100)
+    id = models.AutoField(primary_key=True)
+    username = models.CharField("User Name", max_length=100)
     password = models.CharField("Password", max_length=512)
-    firstName = models.CharField("First Name", max_length=64)
-    lastName = models.CharField("Last Name", max_length=64)
+    first_name = models.CharField("First Name", max_length=64)
+    last_name = models.CharField("Last Name", max_length=64)
     email = models.EmailField("Email", max_length=64, null=True)
-    activeList = models.ForeignKey(ShoppingList, null="True", blank=True)
+    active_list = models.ForeignKey(ShoppingList, null="True", blank=True)
     preferences = models.ForeignKey('UserPreferences', null="True")
 
     def __str__(self):
-        return self.userName
+        return self.username
 
 
 class UserPreferences(models.Model):
@@ -180,7 +180,7 @@ class UserPreferences(models.Model):
     route_end_point = models.ForeignKey('UserSavedAddress', related_name='EndAddress', null=True, blank=True)
 
     def __str__(self):
-        return str(self.owner.userName + "\'s Preferences")
+        return str(self.owner.username + "\'s Preferences")
 
 
 class UserSavedAddress(models.Model):
@@ -198,7 +198,7 @@ class UserSavedAddress(models.Model):
     objects = models.Manager()
 
     def __str__(self):
-        return self.user.userName + ":" + self.name
+        return self.user.username + ":" + self.name
 
     def save(self, **kwargs):
         results = http.request('GET',
@@ -247,13 +247,13 @@ class UserSavedAddress(models.Model):
         super(UserSavedAddress, self).save()
 
 
-class UserShoppingList(models.Model):
+class ShoppingListMember(models.Model):
     list = models.ForeignKey(ShoppingList, null=True)
     user = models.ForeignKey(User, null=True)
     role = models.ForeignKey('Role', null=True)
 
     def __str__(self):
-        username = self.user.userName
+        username = self.user.username
         list_name = self.list.name
         return "%s:%s" % (username, list_name)
 
@@ -278,7 +278,7 @@ class Friend(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "%s - %s" % (self.user_sender.userName, self.user_receiver.userName)
+        return "%s - %s" % (self.user_sender.username, self.user_receiver.username)
 
 
 class Group(models.Model):
@@ -298,7 +298,7 @@ class GroupMember(models.Model):
     date = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
-        return "%s - %s" % (self.group.name, self.member.userName)
+        return "%s - %s" % (self.group.name, self.member.username)
 
 
 class Role(models.Model):

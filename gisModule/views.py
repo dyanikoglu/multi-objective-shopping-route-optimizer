@@ -24,98 +24,104 @@ def account(request):
 
     if request.method == "POST":
         if request.POST.get('send_friend_request'):
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
-            # TODO For speeding up search process, hash user names into unique numbers and run query on these numbers
             try:
-                request_user = models.User.objects.get(userName=request.POST.get('username'))
+                # TODO For speeding up search process, hash user names into unique numbers and run query on these numbers
+                request_user = models.User.objects.get(username=request.POST.get('username'))
             except ObjectDoesNotExist:
                 return tools.bad_request('User not found')
-
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             # TODO Check if these users are already friends / or there is a request pending
             models.Friend.objects.create(user_sender=active_user, user_receiver=request_user)
 
             # Notify receiver user
-            pusher_client.trigger('user_%s' % request_user.userID, 'friend_request_received',
-                                  {'username': active_user.userName})
+            notification = "<b>%s</b> has sent you a friend request" % active_user.username
+            pusher_client.trigger('user_%s' % request_user.id, 'friend_request_received', {'message': notification})
 
-            return JsonResponse({'status': 'success'})
+            message = "Friend request successfully sent to <b>%s</b>" % request_user.username
+            return JsonResponse({'status': 'success', 'message': message})
 
         elif request.POST.get('fetch_pending_friend_requests'):
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             pending_requests = []
             for request in models.Friend.objects.filter(user_sender=active_user, status=False):
-                pending_requests.append({'request_id': request.id, 'username': request.user_receiver.userName,
+                pending_requests.append({'request_id': request.id, 'username': request.user_receiver.username,
                                          'name': "%s %s" % (
-                                             request.user_receiver.firstName, request.user_receiver.lastName),
+                                             request.user_receiver.first_name, request.user_receiver.last_name),
                                          'date': request.date, })
             return JsonResponse({'pending_requests': pending_requests})
 
         elif request.POST.get('fetch_received_friend_requests'):
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             received_requests = []
             for request in models.Friend.objects.filter(user_receiver=active_user, status=False):
-                received_requests.append({'request_id': request.id, 'username': request.user_sender.userName,
+                received_requests.append({'request_id': request.id, 'username': request.user_sender.username,
                                           'name': "%s %s" % (
-                                              request.user_sender.firstName, request.user_sender.lastName),
+                                              request.user_sender.first_name, request.user_sender.last_name),
                                           'date': request.date, })
             return JsonResponse({'received_requests': received_requests})
 
         elif request.POST.get('fetch_friend_list'):
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             friends = []
             for friend in models.Friend.objects.filter(user_receiver=active_user, status=True):
-                friends.append({'request_id': friend.id, 'username': friend.user_sender.userName,
+                friends.append({'request_id': friend.id, 'username': friend.user_sender.username,
                                 'name': "%s %s" % (
-                                    friend.user_sender.firstName, friend.user_sender.lastName),
+                                    friend.user_sender.first_name, friend.user_sender.last_name),
                                 'date': friend.date, })
             for friend in models.Friend.objects.filter(user_sender=active_user, status=True):
-                friends.append({'request_id': friend.id, 'username': friend.user_receiver.userName,
+                friends.append({'request_id': friend.id, 'username': friend.user_receiver.username,
                                 'name': "%s %s" % (
-                                    friend.user_receiver.firstName, friend.user_receiver.lastName),
+                                    friend.user_receiver.first_name, friend.user_receiver.last_name),
                                 'date': friend.date, })
             return JsonResponse({'friends': friends})
 
         elif request.POST.get('deny_friend_request'):
+            notify_id = models.Friend.objects.get(id=request.POST.get('request_id')).user_sender.id
             try:
-                active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
-                notify_id = models.Friend.objects.get(id=request.POST.get('request_id')).user_sender.userID
                 models.Friend.objects.get(id=request.POST.get('request_id')).delete()
-
-                # Notify denied user
-                pusher_client.trigger('user_%s' % notify_id, 'friend_request_denied',
-                                      {'username': active_user.userName})
             except ObjectDoesNotExist:
                 return tools.bad_request('Friend request not found')
-            return JsonResponse({'status': 'success'})
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+
+            # Notify denied user
+            notification = "<b>%s</b> has declined your friend request" % active_user.username
+            pusher_client.trigger('user_%s' % notify_id, 'friend_request_denied', {'message': notification})
+
+            message = "Friend request is successfully denied"
+            return JsonResponse({'status': 'success', 'message': message})
 
         elif request.POST.get('cancel_friend_request'):
+            notify_id = models.Friend.objects.get(id=request.POST.get('request_id')).user_receiver.id
             try:
-                notify_id = models.Friend.objects.get(id=request.POST.get('request_id')).user_receiver.userID
                 models.Friend.objects.get(id=request.POST.get('request_id')).delete()
-
-                # Notify cancelled user
-                pusher_client.trigger('user_%s' % notify_id, 'friend_request_cancelled', {})
             except ObjectDoesNotExist:
                 return tools.bad_request('Friend request not found')
-            return JsonResponse({'status': 'success'})
+
+            # No notification to show user
+            pusher_client.trigger('user_%s' % notify_id, 'friend_request_cancelled', {})
+
+            message = "Pending friend request is successfully cancelled"
+            return JsonResponse({'status': 'success', 'message': message})
 
         elif request.POST.get('remove_friend'):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             try:
-                active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
                 receiver_user = models.Friend.objects.get(id=request.POST.get('request_id')).user_receiver
                 sender_user = models.Friend.objects.get(id=request.POST.get('request_id')).user_sender
-                if active_user.userID == receiver_user.userID:
-                    notify_id = sender_user.userID
+                if active_user.id == receiver_user.id:
+                    notify_id = sender_user.id
                 else:
-                    notify_id = receiver_user.userID
+                    notify_id = receiver_user.id
                 models.Friend.objects.get(id=request.POST.get('request_id')).delete()
-
-                # Notify sender user
-                pusher_client.trigger('user_%s' % notify_id, 'removed_from_friendlist',
-                                      {'username': active_user.userName})
             except ObjectDoesNotExist:
                 return tools.bad_request('Relation not found')
-            return JsonResponse({'status': 'success'})
+
+            # Notify sender user
+            notification = "<b>%s</b> has removed you from the friend list" % active_user.username
+            pusher_client.trigger('user_%s' % notify_id, 'removed_from_friendlist', {'message': notification})
+
+            message = "<b>%s</b> successfully removed from your friend list" % receiver_user.username
+            return JsonResponse({'status': 'success', 'message': message})
 
         elif request.POST.get('accept_friend_request'):
             try:
@@ -123,26 +129,29 @@ def account(request):
             except ObjectDoesNotExist:
                 return tools.bad_request('Friend request not found')
 
-            notify_id = friend_request.user_sender.userID
+            notify_id = friend_request.user_sender.id
             friend_request.status = True
             friend_request.save()
 
             # Notify sender user
+            notification = "<b>%s</b> has accepted your friend request" % friend_request.user_receiver.username
             pusher_client.trigger('user_%s' % notify_id, 'friend_request_accepted',
-                                  {'username': friend_request.user_receiver.userName})
+                                  {'message': notification})
 
-            return JsonResponse({'status': 'success'})
+            message = "Friend request successfully accepted"
+            return JsonResponse({'status': 'success', 'message': message})
 
         elif request.POST.get('create_new_group'):
             new_group = models.Group.objects.create(name=request.POST.get('group_name'))
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             role = models.Role.objects.get(name="Admin")  # TODO Change role implementation later
             models.GroupMember.objects.create(group=new_group, member=active_user, role=role)
 
-            return JsonResponse({'status': 'success'})
+            message = "Group successfully created"
+            return JsonResponse({'status': 'success', 'message': message})
 
         elif request.POST.get('fetch_group_list'):
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             groups = []
             for group_membership in models.GroupMember.objects.filter(member=active_user):
                 group = group_membership.group
@@ -151,100 +160,116 @@ def account(request):
 
                 for other_member in models.GroupMember.objects.filter(group=group):
                     other_user = other_member.member
-                    members.append({'user_id': other_user.userID, 'username': other_user.userName, 'name': "%s %s" % (
-                        other_user.firstName, other_user.lastName), 'join_date': other_member.date})
+                    members.append({'user_id': other_user.id, 'username': other_user.username, 'name': "%s %s" % (
+                        other_user.first_name, other_user.last_name), 'join_date': other_member.date})
                 groups.append(
                     {'group_id': group.id, 'active_role': active_role, 'members': members, 'group_name': group.name,
                      'creation_date': group.date, })
 
             friends = []
             for friend in models.Friend.objects.filter(user_receiver=active_user, status=True):
-                friends.append({'user_id': friend.user_sender.userID, 'username': friend.user_sender.userName,
+                friends.append({'user_id': friend.user_sender.id, 'username': friend.user_sender.username,
                                 'name': "%s %s" % (
-                                    friend.user_sender.firstName, friend.user_sender.lastName)})
+                                    friend.user_sender.first_name, friend.user_sender.last_name)})
             for friend in models.Friend.objects.filter(user_sender=active_user, status=True):
-                friends.append({'user_id': friend.user_receiver.userID, 'username': friend.user_receiver.userName,
+                friends.append({'user_id': friend.user_receiver.id, 'username': friend.user_receiver.username,
                                 'name': "%s %s" % (
-                                    friend.user_receiver.firstName, friend.user_receiver.lastName)})
+                                    friend.user_receiver.first_name, friend.user_receiver.last_name)})
 
             return JsonResponse({'groups': groups, 'friends': friends})
 
         elif request.POST.get('quit_from_group'):
-            user_to_quit = models.User.objects.get(userID=request.POST.get('user_id'))
+            user_to_quit = models.User.objects.get(id=request.POST.get('user_id'))
             group_to_quit = models.Group.objects.get(id=request.POST.get('group_id'))
             models.GroupMember.objects.get(member=user_to_quit, group=group_to_quit).delete()
 
             # Notify whole group
             for member in models.GroupMember.objects.filter(group=group_to_quit):
-                if member.member.userID != user_to_quit.userID:
-                    pusher_client.trigger('user_%s' % member.member.userID, 'member_quit_from_group',
-                                          {'username': user_to_quit.userName, 'group_name': group_to_quit.name})
+                if member.member.id != user_to_quit.id:
+                    notification = "<b>%s</b> has quit from <b>%s</b>" % (user_to_quit.username, group_to_quit.name)
+                    pusher_client.trigger('user_%s' % member.member.id, 'member_quit_from_group',
+                                          {'message': notification})
+            tools.is_group_empty(group_to_quit)  # TODO Store member count in group model, remove group if count is zero
 
-            return JsonResponse({'status': 'success'})
+            message = "Successfully quit from the group"
+            return JsonResponse({'status': 'success', 'message': message})
 
         elif request.POST.get('remove_from_group'):
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
-            user_to_remove = models.User.objects.get(userID=request.POST.get('user_id'))
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            user_to_remove = models.User.objects.get(id=request.POST.get('user_id'))
             group = models.Group.objects.get(id=request.POST.get('group_id'))
 
             # Notify whole group
             for member in models.GroupMember.objects.filter(group=group):
-                if member.member.userID == user_to_remove.userID:
-                    username = "You"
+                if member.member.id == user_to_remove.id:
+                    notification = "You are removed from <b>%s</b> by <b>%s</b>" % (group.name, active_user.username)
                 else:
-                    username = user_to_remove.userName
-                if member.member.userID != active_user.userID:
-                    pusher_client.trigger('user_%s' % member.member.userID, 'member_removed_from_group',
-                                          {'username': username, 'removed_by': active_user.userName,
-                                           'group_name': group.name})
-
+                    notification = "<b>%s</b> is removed from <b>%s</b> by <b>%s</b>" % (
+                        user_to_remove.username, group.name, active_user.username)
+                if member.member.id != active_user.id:
+                    pusher_client.trigger('user_%s' % member.member.id, 'member_removed_from_group',
+                                          {'message': notification})
             models.GroupMember.objects.get(member=user_to_remove, group=group).delete()
-            return JsonResponse({'status': 'success'})
+            tools.is_group_empty(group)
+
+            message = "User successfully removed from the group"
+            return JsonResponse({'status': 'success', 'message': message})
 
         elif request.POST.get('add_to_group'):
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
-            user_to_add = models.User.objects.get(userID=request.POST.get('user_id'))  # TODO Username hashing
-            group_to_add = models.Group.objects.get(id=request.POST.get('group_id'))
-            role = models.Role.objects.get(name="Member")  # TODO Change role implementation later
+            try:
+                user_to_add = models.User.objects.get(id=request.POST.get('user_id'))  # TODO Username hashing
+            except ObjectDoesNotExist:
+                return tools.bad_request('User not found')
+
+            try:
+                group_to_add = models.Group.objects.get(id=request.POST.get('group_id'))
+            except ObjectDoesNotExist:
+                return tools.bad_request('Group not found, maybe it\'s removed?')
+
             try:
                 models.GroupMember.objects.get(group=group_to_add, member=user_to_add)
                 return tools.bad_request('This user is already in this group')
             except ObjectDoesNotExist:  # Safe to add user to group, no duplicates
+                role = models.Role.objects.get(name="Member")  # TODO Change role implementation later
                 models.GroupMember.objects.create(group=group_to_add, member=user_to_add, role=role)
 
-                # Notify whole group
-                for member in models.GroupMember.objects.filter(group=group_to_add):
-                    if member.member.userID == user_to_add.userID:
-                        username = "You"
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            # Notify whole group
+            for member in models.GroupMember.objects.filter(group=group_to_add):
+                if member.member.id != active_user.id:
+                    if member.member.id == user_to_add.id:
+                        notification = "You are added to group <b>%s</b> by <b>%s</b>" % (
+                            group_to_add.name, active_user.username)
                     else:
-                        username = user_to_add.userName
-                    if member.member.userID != active_user.userID:
-                        pusher_client.trigger('user_%s' % member.member.userID, 'member_added_to_group',
-                                              {'username': username, 'added_by': active_user.userName,
-                                               'group_name': group_to_add.name})
+                        notification = "<b>%s</b> is added to <b>%s</b> by <b>%s</b>" % (
+                            user_to_add.username, group_to_add.name, active_user.username)
+                    pusher_client.trigger('user_%s' % member.member.id, 'member_added_to_group',
+                                          {'message': notification})
 
-                return JsonResponse({'status': 'success'})
+            message = "User successfully added to the group"
+            return JsonResponse({'status': 'success', 'message': message})
 
         elif request.POST.get('create_new_list'):
             new_list = models.ShoppingList.objects.create(name=request.POST.get('list_name'))
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             role = models.Role.objects.get(name="Admin")  # TODO Change role implementation later
-            models.UserShoppingList.objects.create(list=new_list, user=active_user, role=role)
+            models.ShoppingListMember.objects.create(list=new_list, user=active_user, role=role)
 
-            return JsonResponse({'status': 'success'})
+            message = "New shopping list successfully created"
+            return JsonResponse({'status': 'success', 'message': message})
 
         elif request.POST.get('fetch_shopping_lists'):
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             lists = []
-            for list_membership in models.UserShoppingList.objects.filter(user=active_user):
+            for list_membership in models.ShoppingListMember.objects.filter(user=active_user):
                 list = list_membership.list
                 active_role = list_membership.role.name  # TODO Expand Role model with permissions
                 members = []
 
-                for other_member in models.UserShoppingList.objects.filter(list=list):
+                for other_member in models.ShoppingListMember.objects.filter(list=list):
                     other_user = other_member.user
-                    members.append({'user_id': other_user.userID, 'username': other_user.userName, 'name': "%s %s" % (
-                        other_user.firstName, other_user.lastName)})
+                    members.append({'user_id': other_user.id, 'username': other_user.username, 'name': "%s %s" % (
+                        other_user.first_name, other_user.last_name)})
 
                 lists.append(
                     {'list_id': list.id, 'active_role': active_role, 'members': members, 'list_name': list.name,
@@ -252,71 +277,99 @@ def account(request):
 
             friends = []
             for friend in models.Friend.objects.filter(user_receiver=active_user, status=True):
-                friends.append({'user_id': friend.user_sender.userID, 'username': friend.user_sender.userName,
+                friends.append({'user_id': friend.user_sender.id, 'username': friend.user_sender.username,
                                 'name': "%s %s" % (
-                                    friend.user_sender.firstName, friend.user_sender.lastName)})
+                                    friend.user_sender.first_name, friend.user_sender.last_name)})
             for friend in models.Friend.objects.filter(user_sender=active_user, status=True):
-                friends.append({'user_id': friend.user_receiver.userID, 'username': friend.user_receiver.userName,
+                friends.append({'user_id': friend.user_receiver.id, 'username': friend.user_receiver.username,
                                 'name': "%s %s" % (
-                                    friend.user_receiver.firstName, friend.user_receiver.lastName)})
+                                    friend.user_receiver.first_name, friend.user_receiver.last_name)})
 
             return JsonResponse({'lists': lists, 'friends': friends})
 
         elif request.POST.get('quit_from_list'):
-            user_to_quit = models.User.objects.get(userID=request.POST.get('user_id'))
-            list_to_quit = models.ShoppingList.objects.get(id=request.POST.get('list_id'))
-            models.UserShoppingList.objects.get(user=user_to_quit, list=list_to_quit).delete()
+            user_to_quit = models.User.objects.get(id=request.POST.get('user_id'))
+            try:
+                list_to_quit = models.ShoppingList.objects.get(id=request.POST.get('list_id'))
+            except ObjectDoesNotExist:
+                return tools.bad_request("Shopping list does not exist anymore")
+
+            try:
+                models.ShoppingListMember.objects.get(user=user_to_quit, list=list_to_quit).delete()
+            except ObjectDoesNotExist:
+                return tools.bad_request("You're no longer in this shopping list")
 
             # Notify whole list
-            for member in models.UserShoppingList.objects.filter(list=list_to_quit):
-                if member.user.userID != user_to_quit.userID:
-                    pusher_client.trigger('user_%s' % member.user.userID, 'member_quit_from_list',
-                                          {'username': user_to_quit.userName, 'list_name': list_to_quit.name})
+            for member in models.ShoppingListMember.objects.filter(list=list_to_quit):
+                if member.user.id != user_to_quit.id:
+                    notification = "<b>%s</b> has quit from <b>%s</b>" % (user_to_quit.username, list_to_quit.name)
+                    pusher_client.trigger('user_%s' % member.user.id, 'member_quit_from_list',
+                                          {'message': notification})
+            tools.is_list_empty(list_to_quit)
 
-            return JsonResponse({'status': 'success'})
+            message = "Successfully quit from the shopping list"
+            return JsonResponse({'status': 'success', 'message': message})
 
         elif request.POST.get('remove_from_list'):
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
-            user_to_remove = models.User.objects.get(userID=request.POST.get('user_id'))
-            list = models.ShoppingList.objects.get(id=request.POST.get('list_id'))
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+
+            try:
+                list = models.ShoppingList.objects.get(id=request.POST.get('list_id'))
+            except ObjectDoesNotExist:
+                return tools.bad_request('Shopping list does not exist anymore')
+
+            user_to_remove = models.User.objects.get(id=request.POST.get('user_id'))
 
             # Notify whole list
-            for member in models.UserShoppingList.objects.filter(list=list):
-                if member.user.userID == user_to_remove.userID:
-                    username = "You"
+            for member in models.ShoppingListMember.objects.filter(list=list):
+                if member.user.id == user_to_remove.id:
+                    notification = "You are removed from <b>%s</b> by <b>%s</b>" % (list.name, active_user.username)
                 else:
-                    username = user_to_remove.userName
-                if member.user.userID != active_user.userID:
-                    pusher_client.trigger('user_%s' % member.user.userID, 'member_removed_from_list',
-                                          {'username': username, 'removed_by': active_user.userName,
-                                           'list_name': list.name})
+                    notification = "<b>%s</b> is removed from <b>%s</b> by <b>%s</b>" % (
+                        user_to_remove.username, list.name, active_user.username)
+                if member.user.id != active_user.id:
+                    pusher_client.trigger('user_%s' % member.user.id, 'member_removed_from_list',
+                                          {'message': notification})
 
-            models.UserShoppingList.objects.get(user=user_to_remove, list=list).delete()
-            return JsonResponse({'status': 'success'})
+            try:
+                models.ShoppingListMember.objects.get(user=user_to_remove, list=list).delete()
+            except ObjectDoesNotExist:
+                return tools.bad_request("This user is no longer in this group")
+            tools.is_list_empty(list)
+
+            message = "Shopping list is successfully unshared with the user"
+            return JsonResponse({'status': 'success', 'message': message})
 
         elif request.POST.get('add_to_list'):
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
-            user_to_add = models.User.objects.get(userID=request.POST.get('user_id'))  # TODO Username hashing
-            list_to_add = models.ShoppingList.objects.get(id=request.POST.get('list_id'))
-            role = models.Role.objects.get(name="Member")  # TODO Change role implementation later
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            user_to_add = models.User.objects.get(id=request.POST.get('user_id'))  # TODO Username hashing
+
             try:
-                models.UserShoppingList.objects.get(list=list_to_add, user=user_to_add)
+                list_to_add = models.ShoppingList.objects.get(id=request.POST.get('list_id'))
+            except ObjectDoesNotExist:
+                return tools.bad_request('Shopping list does not exist anymore')
+
+            role = models.Role.objects.get(name="Member")  # TODO Change role implementation later
+
+            try:
+                models.ShoppingListMember.objects.get(list=list_to_add, user=user_to_add)
                 return tools.bad_request('This user is already in this list')
             except ObjectDoesNotExist:  # Safe to add user to list, no duplicates
-                models.UserShoppingList.objects.create(list=list_to_add, user=user_to_add, role=role)
+                models.ShoppingListMember.objects.create(list=list_to_add, user=user_to_add, role=role)
 
-                # Notify whole group
-                for member in models.UserShoppingList.objects.filter(list=list_to_add):
-                    if member.user.userID == user_to_add.userID:
-                        username = "You"
+            # Notify whole group
+            for member in models.ShoppingListMember.objects.filter(list=list_to_add):
+                if member.user.id != active_user.id:
+                    if member.user.id == user_to_add.id:
+                        notification = "You are added to shopping list <b>%s</b> by <b>%s</b>" % (
+                            list_to_add.name, active_user.username)
                     else:
-                        username = user_to_add.userName
-                    if member.user.userID != active_user.userID:
-                        pusher_client.trigger('user_%s' % member.user.userID, 'member_added_to_list',
-                                              {'username': username, 'added_by': active_user.userName,
-                                               'list_name': list_to_add.name})
+                        notification = "<b>%s</b> is added to shopping list <b>%s</b> by <b>%s</b>" % (
+                            user_to_add.username, list_to_add.name, active_user.username)
+                    pusher_client.trigger('user_%s' % member.user.id, 'member_added_to_list', {'message': notification})
 
-                return JsonResponse({'status': 'success'})
+            message = "Shopping list is successfully shared with user"
+            return JsonResponse({'status': 'success', 'message': message})
 
 
 def cart(request):
@@ -326,8 +379,8 @@ def cart(request):
 
     if request.method == "POST":
         if request.POST.get('get_shopping_list_data'):
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
-            active_list = active_user.activeList
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            active_list = active_user.active_list
             product_name = []
             product_id = []
             product_quantity = []
@@ -337,70 +390,90 @@ def cart(request):
                 product_name.append(product.product.name)
                 product_id.append(product.product.productID)
                 product_quantity.append(product.quantity)
-                product_added_by.append(product.addedBy.userName)
-                product_edited_by.append(product.edited_by.userName)
+                product_added_by.append(product.addedBy.username)
+                product_edited_by.append(product.edited_by.username)
             return JsonResponse(
                 {'product_name': product_name, 'product_id': product_id, 'product_quantity': product_quantity,
                  'product_added_by': product_added_by, 'product_changed_by': product_edited_by})
 
         elif request.POST.get('post_inc_dec_quantity'):
             product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
-            active_list = active_user.activeList
-            list_product = models.ShoppingListItem.objects.get(list=active_list, product=product)
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            active_list = active_user.active_list
+            try:
+                list_product = models.ShoppingListItem.objects.get(list=active_list, product=product)
+            except ObjectDoesNotExist:
+                return tools.bad_request("This product does not exist in the shopping list anymore")
             new_quantity = list_product.quantity + int(request.POST.get('change_amount'))
             list_product.quantity = new_quantity
             list_product.edited_by = active_user
             list_product.save()
 
             # Notify other users sharing the cart
-            for user_shopping_list in models.UserShoppingList.objects.filter(list=active_list):
-                notify_id = user_shopping_list.user.userID
-                if notify_id != active_user.userID:  # Except current user
+            for user_shopping_list in models.ShoppingListMember.objects.filter(list=active_list):
+                notify_id = user_shopping_list.user.id
+                if notify_id != active_user.id:  # Except current user
+                    notification = "<b>%s</b> has changed the quantity of <b>%s</b> as <b>%s</b>" % (
+                        active_user.username, product.name, new_quantity)
                     pusher_client.trigger('user_%s' % notify_id, 'product_quantity_change',
-                                          {'product_name': product.name,
-                                           'product_id': request.POST.get('product_id'),
-                                           'new_quantity': new_quantity, 'new_changed_by': active_user.userName})
+                                          {'message': notification, 'product_id': request.POST.get('product_id'),
+                                           'new_quantity': new_quantity, 'new_changed_by': active_user.username})
 
-            return JsonResponse({'new_quantity': new_quantity, 'new_changed_by': active_user.userName})
+            message = "Successfully changed the quantity of <b>%s</b>" % product.name
+            return JsonResponse(
+                {'message': message, 'new_quantity': new_quantity, 'new_changed_by': active_user.username})
 
         elif request.POST.get('post_change_quantity'):
             product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
-            active_list = active_user.activeList
-            list_product = models.ShoppingListItem.objects.get(list=active_list, product=product)
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            active_list = active_user.active_list
+
+            try:
+                list_product = models.ShoppingListItem.objects.get(list=active_list, product=product)
+            except ObjectDoesNotExist:
+                return tools.bad_request("This product does not exist in the shopping list anymore")
+
             new_quantity = int(request.POST.get('new_amount'))
             list_product.quantity = new_quantity
             list_product.edited_by = active_user
             list_product.save()
 
             # Notify other users sharing the cart
-            for user_shopping_list in models.UserShoppingList.objects.filter(list=active_list):
-                notify_id = user_shopping_list.user.userID
-                if notify_id != active_user.userID:  # Except current user
+            for user_shopping_list in models.ShoppingListMember.objects.filter(list=active_list):
+                notify_id = user_shopping_list.user.id
+                if notify_id != active_user.id:  # Except current user
+                    notification = "<b>%s</b> has changed the quantity of <b>%s</b> as <b>%s</b>" % (
+                        active_user.username, product.name, new_quantity)
                     pusher_client.trigger('user_%s' % notify_id, 'product_quantity_change',
-                                          {'product_name': product.name,
-                                           'product_id': request.POST.get('product_id'),
-                                           'new_quantity': new_quantity, 'new_changed_by': active_user.userName})
+                                          {'message': notification, 'product_id': request.POST.get('product_id'),
+                                           'new_quantity': new_quantity, 'new_changed_by': active_user.username})
 
-            return JsonResponse({'new_changed_by': active_user.userName})
+            message = "Successfully changed the quantity of <b>%s</b>" % product.name
+            return JsonResponse({'message': message, 'new_changed_by': active_user.username})
 
         elif request.POST.get('post_remove_from_cart'):
             product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
-            active_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
-            active_list = active_user.activeList
-            models.ShoppingListItem.objects.get(list=active_list, product=product).delete()
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            active_list = active_user.active_list
+
+            try:
+                models.ShoppingListItem.objects.get(list=active_list, product=product).delete()
+            except ObjectDoesNotExist:
+                return tools.bad_request("This product does not exist in the shopping list anymore")
 
             # Notify other users sharing the cart
-            for user_shopping_list in models.UserShoppingList.objects.filter(list=active_list):
-                notify_id = user_shopping_list.user.userID
-                if notify_id != active_user.userID:  # Except current user
+            for user_shopping_list in models.ShoppingListMember.objects.filter(list=active_list):
+                notify_id = user_shopping_list.user.id
+                if notify_id != active_user.id:  # Except current user
+                    notification = "<b>%s</b> has removed <b>%s</b> from the shopping list" % (
+                        active_user.username, product.name)
                     pusher_client.trigger('user_%s' % notify_id, 'product_remove',
-                                          {'product_name': product.name,
-                                           'product_changed_by': active_user.userName,
+                                          {'message': notification,
+                                           'product_changed_by': active_user.username,
                                            'product_id': request.POST.get('product_id')})
 
-            return render(request, 'gisModule/cart.html')
+                message = "Successfully removed the <b>%s</b> from shopping list" % product.name
+                return JsonResponse({'status': 'success', 'message': message})
 
 
 def shop(request):
@@ -415,9 +488,9 @@ def shop(request):
     category_id_list = {}
     for category in models.ProductGroup.objects.all():
         category_id_list.update({category.name: str(category.id)})
-    user = models.User.objects.get(userID=session_user['userID'])  # Current user object
+    user = models.User.objects.get(id=session_user['id'])  # Current user object
     user_prefs = user.preferences
-    active_shopping_list = user.activeList
+    active_shopping_list = user.active_list
     saved_addresses = models.UserSavedAddress.objects.filter(user=user)
     address_names = []
     address_coords = []
@@ -430,7 +503,7 @@ def shop(request):
         address_coords.append(coord['geoLocation'].coords)
 
     # Temp solution for null objects
-    if user.activeList is None:
+    if user.active_list is None:
         shopping_lists_info = None
     else:
         shopping_lists_info = tools.return_shopping_list_info(user)
@@ -451,21 +524,22 @@ def shop(request):
 
     # Standard GET request for view
     if request.method == "GET":
-        return render(request, 'gisModule/shop.html', {'title': 'Shop', 'category_name_list': tools.jsonify_dict(category_name_list),
-                                                       'category_id_list': tools.jsonify_dict(category_id_list),
-                                                       'user_info': tools.jsonify_str(
-                                                           request.session['user_login_session']),
-                                                       'shopping_lists_info': shopping_lists_info,
-                                                       'active_list_data': active_list_data,
-                                                       'search_radius': user_prefs.search_radius,
-                                                       'time_cost': user_prefs.time_factor,
-                                                       'money_cost': user_prefs.money_factor,
-                                                       'dist_cost': user_prefs.dist_factor,
-                                                       'address_names': address_names,
-                                                       'address_coords': address_coords,
-                                                       'address_ids': address_ids,
-                                                       'start_point_name': start_point_name,
-                                                       'end_point_name': end_point_name})
+        return render(request, 'gisModule/shop.html',
+                      {'title': 'Shop', 'category_name_list': tools.jsonify_dict(category_name_list),
+                       'category_id_list': tools.jsonify_dict(category_id_list),
+                       'user_info': tools.jsonify_str(
+                           request.session['user_login_session']),
+                       'shopping_lists_info': shopping_lists_info,
+                       'active_list_data': active_list_data,
+                       'search_radius': user_prefs.search_radius,
+                       'time_cost': user_prefs.time_factor,
+                       'money_cost': user_prefs.money_factor,
+                       'dist_cost': user_prefs.dist_factor,
+                       'address_names': address_names,
+                       'address_coords': address_coords,
+                       'address_ids': address_ids,
+                       'start_point_name': start_point_name,
+                       'end_point_name': end_point_name})
     # Handle AJAX Post Requests
     if request.method == "POST":
         if request.POST.get("post_load_products"):
@@ -477,20 +551,20 @@ def shop(request):
             return JsonResponse({'loaded_products': products, 'category_id': category_id})
         elif request.POST.get('post_add_to_cart'):
             product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
-            editing_user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
-            shopping_list = editing_user.activeList
+            editing_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            shopping_list = editing_user.active_list
             list_product = tools.add_product_to_list(editing_user, product, shopping_list)
 
             # Notify other users sharing the cart
-            for user_shopping_list in models.UserShoppingList.objects.filter(list=shopping_list):
-                notify_id = user_shopping_list.user.userID
-                if user_shopping_list.user.userID != editing_user.userID:  # Except current user
+            for user_shopping_list in models.ShoppingListMember.objects.filter(list=shopping_list):
+                notify_id = user_shopping_list.user.id
+                if user_shopping_list.user.id != editing_user.id:  # Except current user
                     pusher_client.trigger('user_%s' % notify_id, 'product_add',
                                           {'product_name': product.name,
                                            'product_id': request.POST.get('product_id'),
                                            'product_quantity': list_product.quantity,
-                                           'product_added_by': list_product.addedBy.userName,
-                                           'product_changed_by': list_product.edited_by.userName})
+                                           'product_added_by': list_product.addedBy.username,
+                                           'product_changed_by': list_product.edited_by.username})
 
             return render(request, 'gisModule/shop.html')
 
@@ -511,9 +585,9 @@ def shopping(request):
     for root in root_product_groups:
         product_list.update({root.name: json.dumps(tools.iterate_product_groups(root))})
     session_user = request.session['user_login_session']  # Get login information from current browser session
-    user = models.User.objects.get(userID=session_user['userID'])  # Current user object
+    user = models.User.objects.get(id=session_user['id'])  # Current user object
     user_prefs = user.preferences
-    active_shopping_list = user.activeList
+    active_shopping_list = user.active_list
     saved_addresses = models.UserSavedAddress.objects.filter(user=user)
     address_names = []
     address_coords = []
@@ -549,11 +623,11 @@ def shopping(request):
         # Active cart is changed for user
         if request.POST.get("post_active_cart_change"):
             new_list_id = request.POST.get("cartID")
-            new_user_shopping_list = models.UserShoppingList.objects.get(user=user,
+            new_user_shopping_list = models.ShoppingListMember.objects.get(user=user,
                                                                          list=models.ShoppingList.objects.get(
                                                                              id=new_list_id))
             new_shopping_list = new_user_shopping_list.list
-            user.activeList = new_shopping_list
+            user.active_list = new_shopping_list
             user.save()
 
             return JsonResponse({'shopping_list_name': new_shopping_list.name,
@@ -570,7 +644,7 @@ def shopping(request):
             base_product_id = request.POST.get("id")
             new_quantity = request.POST.get("quantity")
             base_product = models.BaseProduct.objects.get(productID=base_product_id)
-            active_list = user.activeList
+            active_list = user.active_list
 
             try:
                 list_item = models.ShoppingListItem.objects.get(product=base_product, list=active_list)
@@ -593,7 +667,7 @@ def shopping(request):
             new_edited_by = request.POST.get("updated_by")
             list_item = models.ShoppingListItem.objects.get(id=int(request.POST.get("id")))
             list_item.quantity = new_quantity
-            list_item.addedBy = models.User.objects.get(userName=new_edited_by)
+            list_item.addedBy = models.User.objects.get(username=new_edited_by)
             list_item.save()
             return render(request, 'gisModule/shopping.html')
 
@@ -671,7 +745,7 @@ def shopping(request):
 
         # User Preference Save Request
         elif request.POST.get("save_preferences"):
-            user = models.User.objects.get(userID=request.session['user_login_session']['userID'])
+            user = models.User.objects.get(id=request.session['user_login_session']['id'])
             user_prefs = user.preferences
             user_prefs.money_factor = False
             user_prefs.dist_factor = False
@@ -710,21 +784,21 @@ def login(request):
         if request.POST.get('login'):
             username = request.POST.get("username")
             try:
-                user = models.User.objects.get(userName=username)
+                user = models.User.objects.get(username=username)
             except ObjectDoesNotExist:
                 return tools.bad_request('Wrong password or username')
 
             if tools.verify_password(request.POST.get('password'), user.password):
-                user_login_session = {'status': 'logged_in', 'userID': user.userID, 'username': username,
-                                      'firstname': user.firstName,
-                                      'lastName': user.lastName}
+                user_login_session = {'status': 'logged_in', 'id': user.id, 'username': username,
+                                      'first_name': user.first_name,
+                                      'last_name': user.last_name}
                 request.session['user_login_session'] = user_login_session
                 return JsonResponse({'url': reverse('gisModule:shop')})
             else:
                 return tools.bad_request('Wrong password or username')
         elif request.POST.get('register'):
             username = request.POST.get("username")
-            if models.User.objects.filter(userName=username).count() is 0:
+            if models.User.objects.filter(username=username).count() is 0:
                 email = request.POST.get("email")
                 first_name = request.POST.get("first_name")
                 last_name = request.POST.get("last_name")
@@ -732,16 +806,16 @@ def login(request):
                     new_prefs = models.UserPreferences.objects.create(money_factor=True, dist_factor=True,
                                                                       time_factor=True, search_radius=100,
                                                                       route_start_point=None, route_end_point=None)
-                    new_usr = models.User.objects.create(userName=username,
+                    new_usr = models.User.objects.create(username=username,
                                                          password=tools.encode_password(request.POST.get("password")),
-                                                         email=email, firstName=first_name, lastName=last_name,
-                                                         preferences=new_prefs, activeList=None)
+                                                         email=email, first_name=first_name, last_name=last_name,
+                                                         preferences=new_prefs, active_list=None)
                     new_usr.preferences.owner = new_usr
                     new_usr.preferences.save()
                     # Login with this new account
-                    user_login_session = {'status': 'logged_in', 'userID': new_usr.userID, 'username': username,
-                                          'firstname': new_usr.firstName,
-                                          'lastName': new_usr.lastName}
+                    user_login_session = {'status': 'logged_in', 'id': new_usr.id, 'username': username,
+                                          'first_name': new_usr.first_name,
+                                          'last_name': new_usr.last_name}
                     request.session['user_login_session'] = user_login_session
                     return JsonResponse({'url': reverse('gisModule:shop')})
                 else:

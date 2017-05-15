@@ -19,6 +19,18 @@ def bad_request(message):
     return response
 
 
+# Removes the group if it's empty
+def is_group_empty(group):
+    if models.GroupMember.objects.filter(group=group).count() == 0:
+        group.delete()
+
+
+# Removes the shopping list if it's empty
+def is_list_empty(shopping_list):
+    if models.ShoppingListMember.objects.filter(list=shopping_list).count() == 0:
+        shopping_list.delete()
+
+
 # Convert a python dictionary string to json format
 def jsonify_dict(source):
     json_str = str(source).replace('\'', '\"')
@@ -70,7 +82,7 @@ def convert_to_markets_for_items_list(itemid_list, midpoint, dist):
 # Return information of each shopping list of user as json data
 def return_shopping_list_info(user):
     shoppinglist_info = {}
-    for list in models.UserShoppingList.objects.filter(user=user):
+    for list in models.ShoppingListMember.objects.filter(user=user):
         shoppinglist_info[str(list.list.name)] = int(list.list.id)
     return jsonify_str(shoppinglist_info)
 
@@ -96,7 +108,7 @@ def return_shopping_list_data(list):
         shoppinglist_data['ListProducts'].append(
             {'name': "%s %s %s%s" % (
                 product.product.brand, product.product.type, product.product.amount, product.product.unit),
-             'added_by': product.addedBy.userName, 'quantity': product.quantity, 'item_id': product.id})
+             'added_by': product.addedBy.username, 'quantity': product.quantity, 'item_id': product.id})
     return jsonify_dict(shoppinglist_data)
 
 

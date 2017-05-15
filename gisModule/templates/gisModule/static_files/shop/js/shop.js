@@ -70,21 +70,21 @@ function add_to_cart(product_id) {
         type: "POST",
         data: {"post_add_to_cart": "post_add_to_cart", 'product_id': product_id},
         success: function (data) {
-
+            show_cart_notif(data['message'], 2000);
         },
-        error: function (jXHR, textStatus, errorThrown) {
-            alert(errorThrown);
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_cart_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
 
 function search_product(search_text) {
-    if(!search_text) {
+    if (!search_text) {
         active_category_id = -1;
         var category_products = $('#category_products');
         category_products.hide();
         category_products.empty();
-        return
+        return;
     }
 
     $.ajax({
@@ -105,8 +105,8 @@ function search_product(search_text) {
             }
             category_products.show('normal');
         },
-        error: function(xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_cart_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -119,7 +119,7 @@ function show_product(product_name, product_id, product_list_div) {
 // Loads products from selected category into shopping page
 var active_category_id = -1;
 function load_products(category_id) {
-    if(category_id === active_category_id) // Active category selected again, do not send ajax request
+    if (category_id === active_category_id) // Active category selected again, do not send ajax request
         return;
     $.ajax({
         type: "POST",
@@ -181,4 +181,12 @@ function fetchUserPreferences(dist_cost, money_cost, time_cost, search_radius, a
         if (end_point_select.options[i].text === end_point_name)
             end_point_select.options[i].selected = true;
     }
+}
+
+function show_cart_notif(msg, time) {
+    var cart_notification = $('#cart_notification');
+    cart_notification.attr('data-original-title', msg).tooltip("show");
+    setTimeout(function () {
+        $('#cart_notification').tooltip('hide');
+    }, time);
 }

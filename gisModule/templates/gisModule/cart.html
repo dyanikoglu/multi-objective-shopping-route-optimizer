@@ -3,6 +3,8 @@
 
 {% block title %}Cart{% endblock %}
 
+{% block cart_active %}active{% endblock %}
+
 {% block content %}
     <section style="margin-top: 100px" id="cart_items">
         <div class="container">
@@ -113,6 +115,7 @@
 
 
 {% block specific_js %}
-    <script src="{% static 'cart/js/cart.js' %}"></script>{% endblock %}
+    <script src="{% static 'cart/js/cart.js' %}"></script>
+{% endblock %}
 
 {% block postscript %}fetch_cart_data();{% endblock %}

@@ -2,6 +2,8 @@
  * Created by dyanikoglu on 12.05.2017.
  */
 
+var notif_semaphore = false;
+
 $(document).ready(function () {
     $('#account_general_settings_button').click(function () {
         hide_all();
@@ -81,10 +83,11 @@ function create_new_list(serialized_form) {
         type: "POST",
         data: serialized_form,
         success: function (data) {
+            show_account_notif(data['message'], 2000);
             fetch_shopping_lists();
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr['responseJSON']['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -94,10 +97,11 @@ function quit_from_list(list_id, user_id) {
         type: "POST",
         data: {'quit_from_list': 'quit_from_list', 'list_id': list_id, 'user_id': user_id},
         success: function (data) {
+            show_account_notif(data['message'], 2000);
             fetch_shopping_lists();
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -107,10 +111,11 @@ function remove_from_list(list_id, user_id) {
         type: "POST",
         data: {'remove_from_list': 'remove_from_list', 'list_id': list_id, 'user_id': user_id},
         success: function (data) {
+            show_account_notif(data['message'], 2000);
             fetch_shopping_lists();
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -122,10 +127,11 @@ function add_to_list(list_id) {
         type: "POST",
         data: serialized_form,
         success: function (data) {
+            show_account_notif(data['message'], 2000);
             fetch_shopping_lists();
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr['responseJSON']['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -152,8 +158,8 @@ function fetch_shopping_lists() {
 
 
                 for (var j = 0; j < data['lists'][i]['members'].length; j++) {
-                    if (data['lists'][i]['members'][j]['user_id'] === user_info['userID']) { // Our membership
-                        list_list.append('<div class="row"> <div class="col-sm-3"> <span>' + data['lists'][i]['members'][j]['username'] + '</span> </div> <div class="col-sm-3"> <span>' + data['lists'][i]['members'][j]['name'] + '</span> </div> <div class="col-sm-3"> <span>'  + '</span> </div> <div class="col-sm-2"> <button type="submit" onclick="quit_from_list(' + data['lists'][i]['list_id'] + ',' + data['lists'][i]['members'][j]['user_id'] + '); return false;" class="btn btn-primary">Quit From List</button> </div> </div> </div>');
+                    if (data['lists'][i]['members'][j]['user_id'] === user_info['id']) { // Our membership
+                        list_list.append('<div class="row"> <div class="col-sm-3"> <span>' + data['lists'][i]['members'][j]['username'] + '</span> </div> <div class="col-sm-3"> <span>' + data['lists'][i]['members'][j]['name'] + '</span> </div> <div class="col-sm-3"> <span>' + '</span> </div> <div class="col-sm-2"> <button type="submit" onclick="quit_from_list(' + data['lists'][i]['list_id'] + ',' + data['lists'][i]['members'][j]['user_id'] + '); return false;" class="btn btn-primary">Quit From List</button> </div> </div> </div>');
                     }
                     else if (data['lists'][i]['active_role'] === 'Admin') {
                         list_list.append('<div class="row"> <div class="col-sm-3"> <span>' + data['lists'][i]['members'][j]['username'] + '</span> </div> <div class="col-sm-3"> <span>' + data['lists'][i]['members'][j]['name'] + '</span> </div> <div class="col-sm-3"> <span>' + '</span> </div> <div class="col-sm-2"> <button type="submit" onclick="remove_from_list(' + data['lists'][i]['list_id'] + ',' + data['lists'][i]['members'][j]['user_id'] + '); return false;" class="btn btn-primary">Remove From List</button> </div> </div> </div>');
@@ -165,7 +171,7 @@ function fetch_shopping_lists() {
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -185,10 +191,11 @@ function create_new_group(serialized_form) {
         type: "POST",
         data: serialized_form,
         success: function (data) {
+            show_account_notif(data['message'], 2000);
             fetch_group_list();
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr['responseJSON']['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -198,10 +205,11 @@ function quit_from_group(group_id, user_id) {
         type: "POST",
         data: {'quit_from_group': 'quit_from_group', 'group_id': group_id, 'user_id': user_id},
         success: function (data) {
+            show_account_notif(data['message'], 2000);
             fetch_group_list();
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -211,10 +219,11 @@ function remove_from_group(group_id, user_id) {
         type: "POST",
         data: {'remove_from_group': 'remove_from_group', 'group_id': group_id, 'user_id': user_id},
         success: function (data) {
+            show_account_notif(data['message'], 2000);
             fetch_group_list();
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -226,10 +235,11 @@ function add_to_group(group_id) {
         type: "POST",
         data: serialized_form,
         success: function (data) {
+            show_account_notif(data['message'], 2000);
             fetch_group_list();
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr['responseJSON']['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -256,7 +266,7 @@ function fetch_group_list() {
 
 
                 for (var j = 0; j < data['groups'][i]['members'].length; j++) {
-                    if (data['groups'][i]['members'][j]['user_id'] === user_info['userID']) { // Our membership
+                    if (data['groups'][i]['members'][j]['user_id'] === user_info['id']) { // Our membership
                         group_list.append('<div class="row"> <div class="col-sm-3"> <span>' + data['groups'][i]['members'][j]['username'] + '</span> </div> <div class="col-sm-3"> <span>' + data['groups'][i]['members'][j]['name'] + '</span> </div> <div class="col-sm-3"> <span>' + data['groups'][i]['members'][j]['join_date'] + '</span> </div> <div class="col-sm-2"> <button type="submit" onclick="quit_from_group(' + data['groups'][i]['group_id'] + ',' + data['groups'][i]['members'][j]['user_id'] + '); return false;" class="btn btn-primary">Quit From Group</button> </div> </div> </div>');
                     }
                     else if (data['groups'][i]['active_role'] === 'Admin') {
@@ -269,7 +279,7 @@ function fetch_group_list() {
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -291,10 +301,11 @@ function send_friend_request(serialized_form) {
         type: "POST",
         data: serialized_form,
         success: function (data) {
+            show_account_notif(data['message'], 2000);
             fetch_pending_friend_requests();
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr['responseJSON']['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -311,7 +322,7 @@ function fetch_pending_friend_requests() {
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -321,10 +332,11 @@ function deny_friend_request(request_id) {
         type: "POST",
         data: {'deny_friend_request': 'deny_friend_request', 'request_id': request_id},
         success: function (data) {
+            show_account_notif(data['message'], 2000);
             fetch_received_friend_requests();
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -334,10 +346,11 @@ function cancel_friend_request(request_id) {
         type: "POST",
         data: {'cancel_friend_request': 'cancel_friend_request', 'request_id': request_id},
         success: function (data) {
+            show_account_notif(data['message'], 2000);
             fetch_pending_friend_requests();
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -347,10 +360,11 @@ function remove_friend(request_id) {
         type: "POST",
         data: {'remove_friend': 'remove_friend', 'request_id': request_id},
         success: function (data) {
+            show_account_notif(data['message'], 2000);
             fetch_friend_list();
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -360,11 +374,12 @@ function accept_friend_request(request_id) {
         type: "POST",
         data: {'accept_friend_request': 'accept_friend_request', 'request_id': request_id},
         success: function (data) {
+            show_account_notif(data['message'], 2000);
             fetch_friend_list();
             fetch_received_friend_requests();
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -381,7 +396,7 @@ function fetch_received_friend_requests() {
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
@@ -398,8 +413,16 @@ function fetch_friend_list() {
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            alert(xhr.status + ' Error: ' + xhr.responseJSON['message']);
+            show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
 }
 ///////////////////// FRIEND MANAGEMENT END
+
+function show_account_notif(msg, time) {
+    var account_notification = $('#account_notification');
+    account_notification.attr('data-original-title', msg).tooltip("show");
+    setTimeout(function () {
+        $('#account_notification').tooltip('hide');
+    }, time);
+}
