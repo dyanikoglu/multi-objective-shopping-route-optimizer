@@ -3,6 +3,32 @@
  */
 
 $(document).ready(function () {
+    $('#route_default_settings_button').click(function () {
+        hide_all();
+        $('#settings_header').html('Route | Default Settings');
+        $('#route_defaults_settings').toggle('normal');
+        fetch_route_default_settings();
+        return false;
+    });
+
+    $('#save_route_defaults_button').click(function () {
+        save_route_defaults($(this).closest('form').serialize());
+        return false;
+    });
+
+    $('#address_book_button').click(function () {
+        hide_all();
+        $('#settings_header').html('Route | Address Book');
+        $('#address_book').toggle('normal');
+        fetch_addresses();
+        return false;
+    });
+    
+    $('#create_address_button').click(function () {
+        create_address_entry($(this).closest('form').serialize());
+        return false;
+    });
+
     $('#account_general_settings_button').click(function () {
         hide_all();
         $('#settings_header').html('Account | General Settings');
@@ -64,10 +90,104 @@ function hide_all() {
     $('#account_friend_management').hide('normal');
     $('#account_group_management').hide('normal');
     $('#list_management').hide('normal');
+    $('#route_defaults_settings').hide('normal');
+    $('#address_book').hide('normal');
 }
 
-///////////////////// SHOPPING LIST MANAGEMENT START
+///////////////////// ROUTE DEFAULTS START
+function fetch_route_default_settings() {
+    $.ajax({
+        type: "POST",
+        data: {'fetch_route_default_settings': 'fetch_route_default_settings'},
+        success: function (data) {
+            $('#opt_money').prop('checked', data['opt_money']);
+            $('#opt_dist').prop('checked', data['opt_dist']);
+            $('#opt_time').prop('checked', data['opt_time']);
+            $('#default_tolerance').val(data['tolerance']);
 
+            var default_start_point = $('#default_start_point');
+            var default_end_point = $('#default_end_point');
+            default_start_point.empty();
+            default_end_point.empty();
+
+            for(var i = 0;i<data['addresses'].length;i++) {
+                default_start_point.append('<option value="' + data['addresses'][i]['address_id'] + '">' + data['addresses'][i]['address_name'] + '</option>')
+                default_end_point.append('<option value="' + data['addresses'][i]['address_id'] + '">' + data['addresses'][i]['address_name'] + '</option>')
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+}
+
+function save_route_defaults(serialized_form) {
+    serialized_form += "&save_route_defaults=save_route_defaults";
+    $.ajax({
+        type: "POST",
+        data: serialized_form,
+        success: function (data) {
+            show_account_notif(data['message'], 2000);
+            fetch_route_default_settings();
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+}
+///////////////////// ROUTE DEFAULTS END
+
+///////////////////// ADDRESS BOOK START
+function create_address_entry(serialized_form) {
+    serialized_form += "&create_address_entry=create_address_entry";
+    $.ajax({
+        type: "POST",
+        data: serialized_form,
+        success: function (data) {
+            show_account_notif(data['message'], 2000);
+            fetch_addresses();
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+}
+
+function fetch_addresses() {
+    $.ajax({
+        type: "POST",
+        data: {'fetch_addresses': 'fetch_addresses'},
+        success: function (data) {
+            var saved_addresses = $('#saved_addresses');
+            saved_addresses.empty();
+            for(var i = 0;i<data['addresses'].length;i++) {
+                saved_addresses.append('<div class="row"> <div class="col-sm-2">' + data['addresses'][i]['address_name'] + '</div> <div class="col-sm-8">' + data['addresses'][i]['address'] + '</div> <div class="col-sm-1"> <button onclick="remove_address(' + data['addresses'][i]['address_id'] + ');return false;" class="btn btn-primary">X</button> </div> </div>');
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+}
+
+function remove_address(address_id) {
+    $.ajax({
+        type: "POST",
+        data: {'remove_address': 'remove_address', 'address_id': address_id},
+        success: function (data) {
+            show_account_notif(data['message'], 2000);
+            fetch_addresses();
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            fetch_addresses();
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+}
+///////////////////// ADDRESS BOOK END
+
+
+///////////////////// SHOPPING LIST MANAGEMENT START
 function load_shopping_list_management() {
     hide_all();
     fetch_shopping_lists();
@@ -174,6 +294,7 @@ function fetch_shopping_lists() {
     });
 }
 ///////////////////// SHOPPING LIST MANAGEMENT END
+
 
 ///////////////////// GROUP MANAGEMENT START
 function load_account_group_management() {
@@ -282,6 +403,7 @@ function fetch_group_list() {
     });
 }
 ///////////////////// GROUP MANAGEMENT END
+
 
 ///////////////////// FRIEND MANAGEMENT START
 function load_account_friend_management() {
@@ -416,6 +538,7 @@ function fetch_friend_list() {
     });
 }
 ///////////////////// FRIEND MANAGEMENT END
+
 
 function show_account_notif(msg, time) {
     var account_notification = $('#account_notification');

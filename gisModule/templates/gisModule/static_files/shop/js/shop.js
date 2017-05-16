@@ -113,7 +113,7 @@ function search_product(search_text) {
 
 // Shows a product in shopping page
 function show_product(product_name, product_id, product_list_div) {
-    product_list_div.append('<div class="col-sm-4"> <div class="product-image-wrapper"> <div class="single-products"> <div class="productinfo text-center"> <img src="' + STATIC_URL + 'shop/img/product.png" alt="" /> <h2></h2> <p>' + product_name + '</p> </div> <div class="product-overlay"> <div class="overlay-content"> <h2>Lowest Price: 0TL</h2> <h2>Highest Price: 0TL</h2> <h2>Average Price: 0TL</h2> <p>' + product_name + '</p> <a href="javascript:add_to_cart(' + product_id + ')" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a> </div> </div> </div> <div class="choose"> <ul class="nav nav-pills nav-justified"> <li><a href=""><i class="fa fa-plus-square"></i>See All Prices</a></li> </ul> </div> </div> </div>');
+    product_list_div.append('<div class="col-sm-4"> <div class="product-image-wrapper"> <div class="single-products"> <div class="productinfo text-center"> <img src="' + STATIC_URL + 'shop/img/product.png" alt="" /> <h2></h2> <p>' + product_name + '</p> </div> <div class="product-overlay"> <div class="overlay-content"> <h2>Average Price: 0TL</h2> <p>' + product_name + '</p> <a href="javascript:add_to_cart(' + product_id + ')" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a> </div> </div> </div> <div class="choose"> <ul class="nav nav-pills nav-justified"> <li><a href=""><i class="fa fa-plus-square"></i>See All Prices</a></li> </ul> </div> </div> </div>');
 }
 
 // Loads products from selected category into shopping page
