@@ -27,12 +27,6 @@
                     <div class="features_items"><!--features_items-->
                         <h2 class="title text-center">Products</h2>
                         <div id="category_products"></div>
-                        {#						<ul class="pagination">#}
-                        {#							<li class="active"><a href="">1</a></li>#}
-                        {#							<li><a href="">2</a></li>#}
-                        {#							<li><a href="">3</a></li>#}
-                        {#							<li><a href="">&raquo;</a></li>#}
-                        {#						</ul>#}
                     </div><!--features_items-->
                 </div>
             </div>
@@ -46,5 +40,4 @@
 
 {% block postscript %}
     traverseProductTree(JSON.parse('{{ category_name_list|safe }}'), JSON.parse('{{ category_id_list|safe }}'), 0, 0);
-    // Fill product information on page
 {% endblock %}

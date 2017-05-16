@@ -225,8 +225,7 @@ class UserSavedAddress(models.Model):
 
                 self.address = js2['results'][0]['formatted_address']
             else:
-                print("Valid address value should be supplied to the form")
-                return
+                raise ValueError('Address is not valid')
         elif js['status'] == "OK":
             parsed_latlng = js['results'][0]['geometry']['location']
             point = "SRID=4326;POINT(%s %s)" % (parsed_latlng['lng'], parsed_latlng['lat'])
@@ -243,8 +242,7 @@ class UserSavedAddress(models.Model):
 
             self.address = js['results'][0]['formatted_address']
         else:
-            print("Valid address value should be supplied to the form")
-            return
+            raise ValueError('Address is not valid')
         super(UserSavedAddress, self).save()
 
 

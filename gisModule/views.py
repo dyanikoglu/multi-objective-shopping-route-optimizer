@@ -371,6 +371,61 @@ def account(request):
             message = "Shopping list is successfully shared with user"
             return JsonResponse({'status': 'success', 'message': message})
 
+        elif request.POST.get('create_address_entry'):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            try:
+                models.UserSavedAddress.objects.create(user=active_user, name=request.POST.get('address_name'), address=request.POST.get('address'))
+            except ValueError:
+                return tools.bad_request('Address is not valid')
+
+            message = "New address entry successfully created"
+            return JsonResponse({'status': 'success', 'message': message})
+
+        elif request.POST.get('fetch_addresses'):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            addresses = []
+            for address in models.UserSavedAddress.objects.filter(user=active_user):
+                addresses.append({'address_name': address.name, 'address': address.address, 'address_id': address.id})
+
+            return JsonResponse({'addresses': addresses})
+
+        elif request.POST.get('remove_address'):
+            try:
+                models.UserSavedAddress.objects.get(id=request.POST.get('address_id')).delete()
+            except ObjectDoesNotExist:
+                return tools.bad_request('Address is not found, maybe it\'s removed anytime soon?')
+
+            message = "Address entry successfully removed"
+            return JsonResponse({'status': 'success', 'message': message})
+
+        elif request.POST.get('fetch_route_default_settings'):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            prefs = active_user.preferences
+
+            addresses = []
+            for address in models.UserSavedAddress.objects.filter(user=active_user):
+                addresses.append({'address_name': address.name, 'address': address.address, 'address_id': address.id})
+
+            return JsonResponse({'opt_money': prefs.money_factor, 'opt_dist': prefs.dist_factor, 'opt_time': prefs.time_factor,
+                                 'tolerance': prefs.search_radius, 'addresses': addresses})
+
+        elif request.POST.get('save_route_defaults'):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            prefs = active_user.preferences
+
+            prefs.time_factor = bool(request.POST.get('opt_time'))
+            prefs.money_factor = bool(request.POST.get('opt_money'))
+            prefs.dist_factor = bool(request.POST.get('opt_dist'))
+            prefs.search_radius = int(request.POST.get('tolerance'))
+
+            prefs.route_start_point = models.UserSavedAddress.objects.get(id=request.POST.get('start_point'))
+            prefs.route_end_point = models.UserSavedAddress.objects.get(id=request.POST.get('end_point'))
+
+            prefs.save()
+
+            message = "Default settings are successfully changed"
+            return JsonResponse({'status': 'success', 'message': message})
+
 
 def cart(request):
     if request.method == "GET":
