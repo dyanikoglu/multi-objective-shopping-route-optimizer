@@ -25,6 +25,10 @@ $(document).ready(function () {
     });
     
     $('#create_address_button').click(function () {
+        if(!$('#address_name').val()) {
+            show_account_notif("<b>Address Name</b> field can\'t be empty", 2000);
+            return false;
+        }
         create_address_entry($(this).closest('form').serialize());
         return false;
     });
@@ -100,6 +104,7 @@ function fetch_route_default_settings() {
         type: "POST",
         data: {'fetch_route_default_settings': 'fetch_route_default_settings'},
         success: function (data) {
+            console.log(data['opt_money'])
             $('#opt_money').prop('checked', data['opt_money']);
             $('#opt_dist').prop('checked', data['opt_dist']);
             $('#opt_time').prop('checked', data['opt_time']);
@@ -110,10 +115,16 @@ function fetch_route_default_settings() {
             default_start_point.empty();
             default_end_point.empty();
 
+            default_start_point.append('<option value="-1">- Select -</option>');
+            default_end_point.append('<option value="-1">- Select -</option>');
+
             for(var i = 0;i<data['addresses'].length;i++) {
                 default_start_point.append('<option value="' + data['addresses'][i]['address_id'] + '">' + data['addresses'][i]['address_name'] + '</option>')
                 default_end_point.append('<option value="' + data['addresses'][i]['address_id'] + '">' + data['addresses'][i]['address_name'] + '</option>')
             }
+
+            default_start_point.val(data['start_point_id']).change();
+            default_end_point.val(data['end_point_id']).change();
         },
         error: function (xhr, ajaxOptions, thrownError) {
             show_account_notif(xhr['responseJSON']['message'], 2000);
@@ -139,6 +150,8 @@ function save_route_defaults(serialized_form) {
 
 ///////////////////// ADDRESS BOOK START
 function create_address_entry(serialized_form) {
+
+
     serialized_form += "&create_address_entry=create_address_entry";
     $.ajax({
         type: "POST",

@@ -295,9 +295,11 @@ def account(request):
                 return tools.bad_request("Shopping list does not exist anymore")
 
             try:
-                models.ShoppingListMember.objects.get(user=user_to_quit, list=list_to_quit).delete()
+                membership = models.ShoppingListMember.objects.get(user=user_to_quit, list=list_to_quit)
             except ObjectDoesNotExist:
                 return tools.bad_request("You're no longer in this shopping list")
+            tools.check_shopping_list_integrity(user_to_quit, membership.list)
+            membership.delete()
 
             # Notify whole list
             for member in models.ShoppingListMember.objects.filter(list=list_to_quit):
@@ -386,10 +388,22 @@ def account(request):
             addresses = []
             for address in models.UserSavedAddress.objects.filter(user=active_user):
                 addresses.append({'address_name': address.name, 'address': address.address, 'address_id': address.id})
-
             return JsonResponse({'addresses': addresses})
 
         elif request.POST.get('remove_address'):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            saved_start_point = active_user.preferences.route_start_point
+            saved_end_point = active_user.preferences.route_end_point
+            address_id_to_delete = int(request.POST.get('address_id'))
+
+            # Keep integrity of database
+            if saved_start_point and saved_start_point.id == address_id_to_delete:
+                active_user.preferences.route_start_point = None
+                active_user.preferences.save()
+            if saved_end_point and saved_end_point.id == address_id_to_delete:
+                active_user.preferences.route_end_point = None
+                active_user.preferences.save()
+
             try:
                 models.UserSavedAddress.objects.get(id=request.POST.get('address_id')).delete()
             except ObjectDoesNotExist:
@@ -406,8 +420,24 @@ def account(request):
             for address in models.UserSavedAddress.objects.filter(user=active_user):
                 addresses.append({'address_name': address.name, 'address': address.address, 'address_id': address.id})
 
-            return JsonResponse({'opt_money': prefs.money_factor, 'opt_dist': prefs.dist_factor, 'opt_time': prefs.time_factor,
-                                 'tolerance': prefs.search_radius, 'addresses': addresses})
+            route_start_point = prefs.route_start_point
+            route_end_point = prefs.route_end_point
+
+            # If user's start or end address points are null, send ids as -1, this will correspond to "- Select -" option
+            # in combobox
+            if route_start_point is None:
+                route_start_point_id = -1
+            else:
+                route_start_point_id = route_start_point.id
+            if route_end_point is None:
+                route_end_point_id = -1
+            else:
+                route_end_point_id = route_end_point.id
+
+            return JsonResponse(
+                {'opt_money': prefs.money_factor, 'opt_dist': prefs.dist_factor, 'opt_time': prefs.time_factor,
+                 'tolerance': prefs.search_radius, 'addresses': addresses, 'start_point_id': route_start_point_id,
+                 'end_point_id': route_end_point_id})
 
         elif request.POST.get('save_route_defaults'):
             active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
@@ -418,9 +448,11 @@ def account(request):
             prefs.dist_factor = bool(request.POST.get('opt_dist'))
             prefs.search_radius = int(request.POST.get('tolerance'))
 
-            prefs.route_start_point = models.UserSavedAddress.objects.get(id=request.POST.get('start_point'))
-            prefs.route_end_point = models.UserSavedAddress.objects.get(id=request.POST.get('end_point'))
-
+            # If index is selected as -1, this means user set his/her address to null in purpose, do not change this address
+            if int(request.POST.get('start_point')) != -1:
+                prefs.route_start_point = models.UserSavedAddress.objects.get(id=request.POST.get('start_point'))
+            if int(request.POST.get('end_point')) != -1:
+                prefs.route_end_point = models.UserSavedAddress.objects.get(id=request.POST.get('end_point'))
             prefs.save()
 
             message = "Default settings are successfully changed"
@@ -436,6 +468,24 @@ def cart(request):
         if request.POST.get('get_shopping_list_data'):
             active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             active_list = active_user.active_list
+
+            # Keep database integrity clean, if active list is null while opening cart page, assign a existing cart
+            # or create an empty cart immediately
+            another_list_exists = False
+            if active_list is None:
+                for shopping_list_membership in models.ShoppingListMember.objects.filter(user=active_user):
+                    active_user.active_list = shopping_list_membership.list
+                    active_user.save()
+                    another_list_exists = True
+                    active_list = shopping_list_membership.list
+                    break
+                if not another_list_exists:
+                    active_list = models.ShoppingList.objects.create(name="My First Shopping List")
+                    role = models.Role.objects.get(name='Admin')  # TODO Change role assignments
+                    models.ShoppingListMember.objects.create(role=role, user=active_user, list=active_list)
+                    active_user.active_list = active_list
+                    active_user.save()
+
             product_name = []
             product_id = []
             product_quantity = []
@@ -455,7 +505,6 @@ def cart(request):
         elif request.POST.get('post_inc_dec_quantity'):
             product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
             active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
-            active_user_prefs = active_user.preferences
             active_list = active_user.active_list
             try:
                 list_product = models.ShoppingListItem.objects.get(list=active_list, product=product)
@@ -550,7 +599,50 @@ def cart(request):
             new_active_list = models.ShoppingList.objects.get(id=request.POST.get('list_id'))
             active_user.active_list = new_active_list
             active_user.save()
-            return JsonResponse({'status': 'success'});
+            return JsonResponse({'status': 'success'})
+
+        elif request.POST.get('fetch_route_defaults'):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            prefs = active_user.preferences
+
+            addresses = []
+            for address in models.UserSavedAddress.objects.filter(user=active_user):
+                addresses.append({'address_name': address.name, 'address': address.address, 'address_id': address.id})
+
+            route_start_point = prefs.route_start_point
+            route_end_point = prefs.route_end_point
+
+            # If user's start or end address points are null, send ids as -1, this will correspond to "- Select -" option
+            # in combobox
+            if route_start_point is None:
+                route_start_point_id = -1
+            else:
+                route_start_point_id = route_start_point.id
+            if route_end_point is None:
+                route_end_point_id = -1
+            else:
+                route_end_point_id = route_end_point.id
+
+            return JsonResponse({'opt_money': prefs.money_factor, 'opt_dist': prefs.dist_factor, 'opt_time': prefs.time_factor,
+                                 'tolerance': prefs.search_radius, 'addresses': addresses, 'start_point_id': route_start_point_id, 'end_point_id': route_end_point_id})
+
+        elif request.POST.get('save_as_route_defaults'):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            prefs = active_user.preferences
+
+            prefs.time_factor = bool(request.POST.get('opt_time'))
+            prefs.money_factor = bool(request.POST.get('opt_money'))
+            prefs.dist_factor = bool(request.POST.get('opt_dist'))
+            prefs.search_radius = int(request.POST.get('tolerance'))
+
+            if int(request.POST.get('start_point')) != -1:
+                prefs.route_start_point = models.UserSavedAddress.objects.get(id=request.POST.get('start_point'))
+            if int(request.POST.get('end_point')) != -1:
+                prefs.route_end_point = models.UserSavedAddress.objects.get(id=request.POST.get('end_point'))
+            prefs.save()
+
+            message = "Current settings are successfully saved as defaults"
+            return JsonResponse({'status': 'success', 'message': message})
 
 
 def shop(request):

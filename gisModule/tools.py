@@ -87,7 +87,17 @@ def return_shopping_list_info(user):
     return jsonify_str(shoppinglist_info)
 
 
-def add_product_to_list(editing_user, product, shopping_list ):
+# Check if list to be deleted is active on user. If active, set it to null before deleting actual shopping list
+def check_shopping_list_integrity(user, shopping_list):
+    if user.active_list is None:
+        return
+    if user.active_list.id == shopping_list.id:
+        user.active_list = None
+        user.save()
+
+
+# Add specified product to specified list
+def add_product_to_list(editing_user, product, shopping_list):
     if models.ShoppingListItem.objects.filter(list=shopping_list, product=product).count() is 0:
         return models.ShoppingListItem.objects.create(list=shopping_list, product=product, addedBy=editing_user, edited_by=editing_user, quantity=1), False, 1
     else:

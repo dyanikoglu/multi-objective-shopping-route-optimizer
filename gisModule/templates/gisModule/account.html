@@ -296,21 +296,55 @@
                                 <div id="list_list"></div>
                             </div><!--/Shopping List Management -->
 
-                            <div id="route_defaults_settings" class="replay-box" hidden> <!--Route Default Settings -->
+                            <div id="route_defaults_settings" hidden> <!--Route Default Settings -->
                                 <form>
-                                    <input name="opt_money" id="opt_money" type="checkbox" checked>
-                                    Optimize Money Cost
-                                    <input name="opt_dist" id="opt_dist" type="checkbox" checked>
-                                    <label>Optimize Distance</label>
-                                    <input name="opt_time" id="opt_time" type="checkbox" checked>
-                                    <label>Optimize Time Spent</label>
-                                    <label>Start Point:</label>
-                                    <select name="start_point" id="default_start_point"></select>
-                                    <label>End Point:</label>
-                                    <select name="end_point" id="default_end_point"></select>
-                                    <label>Route Area Tolerance:</label>
-                                    <input name="tolerance" id="default_tolerance" placeholder="in kilometers..." type="text">
-                                    <a id="save_route_defaults_button" class="btn btn-default update" href="#">Save</a>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="mk-trc" data-color="amber" data-radius="true">
+                                                <input name="opt_money" id="opt_money" type="checkbox">
+                                                <label for="opt_money"><i data-before-check="&#xf00d;"
+                                                                         data-after-check="&#xf00c;"></i>Optimize Money Cost</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="mk-trc" data-color="amber" data-radius="true">
+                                                <input name="opt_dist" id="opt_dist" type="checkbox">
+                                                <label for="opt_dist"><i data-before-check="&#xf00d;"
+                                                                        data-after-check="&#xf00c;"></i>Optimize Distance</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="mk-trc" data-color="amber" data-radius="true">
+                                                <input name="opt_time" id="opt_time" type="checkbox">
+                                                <label for="opt_time"><i data-before-check="&#xf00d;"
+                                                                        data-after-check="&#xf00c;"></i>Optimize Time Spent</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row replay-box">
+                                        <div class="col-sm-3">
+                                            <div class="blank-arrow">
+                                                <label>Start Point:</label>
+                                            </div>
+                                            <select name="start_point" id="default_start_point"></select>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="blank-arrow">
+                                                <label>End Point:</label>
+                                            </div>
+                                            <select name="end_point" id="default_end_point"></select>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="blank-arrow">
+                                                <label>Route Area Tolerance:</label>
+                                            </div>
+                                            <input name="tolerance" id="default_tolerance"
+                                                   placeholder="in kilometers..."
+                                                   type="text">
+                                        </div>
+                                        <a id="save_route_defaults_button" class="btn btn-default update"
+                                           href="#">Save</a>
+                                    </div>
                                 </form>
                             </div><!--/Route Default Settings -->
 
@@ -322,7 +356,7 @@
                                             <div class="blank-arrow">
                                                 <label>Address Name</label>
                                             </div>
-                                            <input name="address_name" type="text" placeholder="address name...">
+                                            <input id="address_name" name="address_name" type="text" placeholder="address name...">
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="blank-arrow">

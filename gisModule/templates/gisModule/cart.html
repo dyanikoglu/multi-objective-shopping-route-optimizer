@@ -11,7 +11,9 @@
             <div class="breadcrumbs">
                 <ol class="breadcrumb">
                     <li><a href="#">Home</a></li>
-                    <li id="active_list_name" style="color: orange;" class="active"><span data-list_id="-1" id="active_list_text"></span><span style="color: orange" class="fa fa-arrow-circle-down"></span></li>
+                    <li id="active_list_name" style="color: orange;" class="active"><span data-list_id="-1"
+                                                                                          id="active_list_text"></span><span
+                            style="color: orange" class="fa fa-arrow-circle-down"></span></li>
                 </ol>
             </div>
             <div class="table-responsive cart_info">
@@ -35,64 +37,72 @@
     </section> <!--/#cart_items-->
 
     <select class="form-control mobileSelect hidden" data-theme="white" data-triggerOn="#active_list_name"
-            data-title="Choose active shopping list" data-btntext-save="Choose" data-btntext-cancel="Cancel" id="active_list_selection">
+            data-title="Choose active shopping list" data-btntext-save="Choose" data-btntext-cancel="Cancel"
+            id="active_list_selection">
     </select>
 
     <section id="do_action">
         <div class="container">
             <div class="heading">
                 <h3>What would you like to do next?</h3>
-                <p>Choose if you have a discount code or reward points you want to use or would like to estimate your
-                    delivery cost.</p>
+                <p>Change your route calculation settings or continue with route selection.</p>
             </div>
             <div class="row">
                 <div class="col-sm-6">
                     <div class="chose_area">
-                        <ul class="user_option">
-                            <li>
-                                <input type="checkbox" checked>
-                                <label>Optimize Money Cost</label>
-                            </li>
-                            <li>
-                                <input type="checkbox" checked>
-                                <label>Optimize Distance</label>
-                            </li>
-                            <li>
-                                <input type="checkbox" checked>
-                                <label>Optimize Time Spent</label>
-                            </li>
-                        </ul>
-                        <ul class="user_info">
-                            <li class="single_field">
-                                <label>Start Point:</label>
-                                <select>
-                                    <option>Turkey</option>
-                                </select>
-
-                            </li>
-                            <li class="single_field">
-                                <label>End Point:</label>
-                                <select>
-                                    <option>Ankara</option>
-                                </select>
-
-                            </li>
-                            <li class="single_field zip-field">
-                                <label>Route Area Tolerance:</label>
-                                <input placeholder="in kilometers..." type="text">
-                            </li>
-                        </ul>
-                        <a class="btn btn-default update" href="">Save As Default</a>
-                        <a class="btn btn-default check_out" href="">Apply</a>
+                        <form method="post">
+                            <ul class="user_option">
+                                <li>
+                                    <div class="mk-trc" data-color="amber" data-radius="true">
+                                        <input name="opt_money" id="opt_money" type="checkbox">
+                                        <label for="opt_money"><i data-before-check="&#xf00d;"
+                                                                  data-after-check="&#xf00c;"></i>Optimize Money
+                                            Cost</label>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="mk-trc" data-color="amber" data-radius="true">
+                                        <input name="opt_dist" id="opt_dist" type="checkbox">
+                                        <label for="opt_dist"><i data-before-check="&#xf00d;"
+                                                                 data-after-check="&#xf00c;"></i>Optimize
+                                            Distance</label>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="mk-trc" data-color="amber" data-radius="true">
+                                        <input name="opt_time" id="opt_time" type="checkbox">
+                                        <label for="opt_time"><i data-before-check="&#xf00d;"
+                                                                 data-after-check="&#xf00c;"></i>Optimize Time
+                                            Spent</label>
+                                    </div>
+                                </li>
+                            </ul>
+                            <ul class="user_info">
+                                <li class="single_field">
+                                    <label>Route Start Point:</label>
+                                    <select name="start_point" id="route_start_point"></select>
+                                </li>
+                                <li class="single_field">
+                                    <label>Route End Point:</label>
+                                    <select name="end_point" id="route_end_point"></select>
+                                </li>
+                                <li class="single_field">
+                                    <label>Route Area Tolerance:</label>
+                                    <input name="tolerance" id="tolerance" placeholder="in kilometers..." type="text">
+                                </li>
+                            </ul>
+                            <a id="save_as_default_button" class="btn btn-default update" href="#">Save As Default</a>
+                            <a class="btn btn-default check_out" href="#">Apply</a>
+                        </form>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="total_area">
                         <ul>
                             <li>Cart Average Total <span>$59</span></li>
-                            <li>Fuel Cost <span>$2</span></li>
-                            <li>Total Distance <span>0 km</span></li>
-                            <br><br>
+                            <li>Approximate Fuel Cost <span>$2</span></li>
+                            <li>Approximate Distance <span>0 km</span></li>
+                            <li>Approximate Time Spent <span>0 km</span></li>
                         </ul>
                         <a class="btn btn-default check_out" href="">Calculate Possible Routes</a>
                     </div>

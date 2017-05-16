@@ -4,6 +4,13 @@
 
 $(document).ready(function () {
     fetch_cart_data();
+    fetch_route_defaults();
+
+    $('#save_as_default_button').click(function () {
+        save_as_route_defaults($(this).closest('form').serialize());
+        return false;
+    });
+
     $('.mobileSelect').mobileSelect({
             padding: {
                 top: '15%',
@@ -15,7 +22,10 @@ $(document).ready(function () {
             onClose: function () {
                 $.ajax({
                     type: "POST",
-                    data: {'change_active_list': 'change_active_list', 'list_id': $('#active_list_selection').find(':selected').val()},
+                    data: {
+                        'change_active_list': 'change_active_list',
+                        'list_id': $('#active_list_selection').find(':selected').val()
+                    },
                     success: function (data) {
                         fetch_cart_data();
                     },
@@ -32,7 +42,7 @@ $(document).ready(function () {
                         var active_list_selection = $('#active_list_selection');
                         active_list_selection.empty();
                         for (var i = 0; i < data['lists'].length; i++) {
-                            if(data['active_list_id'] === data['lists'][i]['list_id']) {
+                            if (data['active_list_id'] === data['lists'][i]['list_id']) {
                                 active_list_selection.append('<option selected value="' + data['lists'][i]['list_id'] + '">' + data['lists'][i]['list_name'] + '</option>');
                             } else {
                                 active_list_selection.append('<option value="' + data['lists'][i]['list_id'] + '">' + data['lists'][i]['list_name'] + '</option>');
@@ -115,6 +125,54 @@ function remove_from_cart(product_id) {
             var product_row = $('#product_' + product_id);
             product_row.remove();
             show_cart_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+}
+
+function fetch_route_defaults() {
+    $.ajax({
+        type: "POST",
+        data: {'fetch_route_defaults': 'fetch_route_defaults'},
+        success: function (data) {
+            $('#opt_money').prop('checked', data['opt_money']);
+            $('#opt_dist').prop('checked', data['opt_dist']);
+            $('#opt_time').prop('checked', data['opt_time']);
+            $('#tolerance').val(data['tolerance']);
+
+            var start_point = $('#route_start_point');
+            var end_point = $('#route_end_point');
+            start_point.empty();
+            end_point.empty();
+
+            start_point.append('<option value="-1">- Select -</option>');
+            end_point.append('<option value="-1">- Select -</option>');
+
+            for (var i = 0; i < data['addresses'].length; i++) {
+                start_point.append('<option value="' + data['addresses'][i]['address_id'] + '">' + data['addresses'][i]['address_name'] + '</option>')
+                end_point.append('<option value="' + data['addresses'][i]['address_id'] + '">' + data['addresses'][i]['address_name'] + '</option>')
+            }
+
+            start_point.val(data['start_point_id']).change();
+            end_point.val(data['end_point_id']).change();
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_cart_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+}
+
+function save_as_route_defaults(serialized_form) {
+    serialized_form += "&save_as_route_defaults=save_as_route_defaults";
+    $.ajax({
+        type: "POST",
+        data: serialized_form,
+        success: function (data) {
+            show_account_notif(data['message'], 2000);
+            fetch_route_defaults();
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+            fetch_route_defaults();
         }
     });
 }
