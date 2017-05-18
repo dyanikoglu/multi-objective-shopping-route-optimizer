@@ -22,15 +22,10 @@ class Routes:
 
     def get_coordiates(self):
         for id in self.retailer_ids:
-            ret = models.Retailer.objects.get(retailerID=id)
-            self.coordinates.append(ret.geoLocation)  # Lat Long values are reversed for Google API defaults
+            ret = models.Retailer.objects.get(id=id)
+            self.coordinates.append(ret.geolocation)  # Lat Long values are reversed for Google API defaults
 
     def calculate_legs(self, current_retailers):
-        # js = self.gmaps.directions("%s,%s" % (self.frm.coords[1], self.frm.coords[0]),
-        #                                "%s,%s" % (self.to.coords[1], self.to.coords[0]),
-        #                                waypoints=["%s,%s" % (self.coordinates[int(i)].coords[1], self.coordinates[int(i)].coords[0]) for i in current_retailers],
-        #                                optimize_waypoints=True)
-
         request_str = "http://router.project-osrm.org/trip/v1/driving/"
         request_str += "%s,%s" % (self.frm.coords[0], self.frm.coords[1])
         for i in current_retailers:
@@ -39,13 +34,6 @@ class Routes:
         request_str += "?source=first&destination=last&roundtrip=false"
         results = self.http.request('GET', request_str)
         js = json.loads(results.data.decode('utf-8'))
-
-        # request_str = "https://maps.googleapis.com/maps/api/directions/json?origin=%s,%s&destination=%s,%s&waypoints=optimize:true" % (self.frm.coords[1], self.frm.coords[0], self.to.coords[1], self.to.coords[0])
-        # for i in current_retailers:
-        #     request_str += "|%s,%s" % (self.coordinates[int(i)].coords[1], self.coordinates[int(i)].coords[0])
-        # request_str += "&key=%s" % "AIzaSyBn5odGE6z77jcKm_D9wVS3W1JhWCeiJHU"
-        # results = self.http.request('GET', request_str)
-        # js = json.loads(results.data.decode('utf-8'))
 
         total_dist = 0.0
         total_time = 0.0

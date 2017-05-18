@@ -130,20 +130,23 @@ def convert_routes(decision_vectors, fitness_vectors, product_count, retailer_li
 
     routes = []
     for j in range(0, len(decision_vectors)):
-        temp_route = {}
+        retailers = []
+        products = []
         for i in range(0, product_count):
-            temp_route[models.ShoppingListItem.objects.get(
-                id=list(retailer_list.keys())[i]).product] = models.Retailer.objects.get(
-                retailerID=list(list(retailer_list.values())[0].keys())[int(decision_vectors[j][i])])
-        routes.append(temp_route)
+            retailers.append(models.Retailer.objects.get(
+                id=list(list(retailer_list.values())[0].keys())[int(decision_vectors[j][i])]))
+            products.append(models.ShoppingListItem.objects.get(id=list(retailer_list.keys())[i]).product)
+        routes.append({'retailers': retailers, 'products': products})
 
-    pros_cons = []
+    i = 0
     for fitness_vector in fitness_vectors:
-        pros_cons.append([fitness_vector[0] - fitness_vectors[money_champ_ind][0],
-                          fitness_vector[1] - fitness_vectors[dist_champ_ind][1],
-                          fitness_vector[2] - fitness_vectors[time_champ_ind][2]])
+        routes[i]['money_diff'] = fitness_vector[0] - fitness_vectors[money_champ_ind][0]
+        routes[i]['dist_diff'] = fitness_vector[1] - fitness_vectors[dist_champ_ind][1]
+        routes[i]['time_diff'] = fitness_vector[2] - fitness_vectors[time_champ_ind][2]
+        routes[i]['costs'] = fitness_vector  # [money, distance, time] costs in order
+        i += 1
 
-    return routes, pros_cons, [money_champ_ind, dist_champ_ind, time_champ_ind, reasonable_champ_ind]
+    return routes, [money_champ_ind, dist_champ_ind, time_champ_ind, reasonable_champ_ind]
 
 
 class CostOptimization(base):
@@ -171,13 +174,13 @@ class CostOptimization(base):
 
         # Caching for direction results of different retailer combinations
         hash_key = hash(frozenset(tuple(unique_list_of_retailers)))
+
         if hash_key not in self.route_cache:
             dist_cost, time_cost = self.routes.calculate_legs(unique_list_of_retailers)  # metres, seconds
             self.route_cache[hash_key] = (dist_cost, time_cost)
         else:
             dist_cost, time_cost = self.route_cache[hash_key]  # metres, seconds
         # Caching for direction results of different retailers retailer combinations
-
         time_cost += time_spent_on_shopping(len(unique_list_of_retailers), len(self.products_in_markets))  # seconds
 
         for key, value in self.products_in_markets.items():
@@ -189,7 +192,7 @@ class CostOptimization(base):
         dist_cost /= 1000  # to meters
 
         # print([models.Retailer.objects.get(
-        #     retailerID=list(list(self.products_in_markets.values())[0].keys())[int(i)]).retailerName for i in
+        #     id=list(list(self.products_in_markets.values())[0].keys())[int(i)]).name for i in
         #        unique_list_of_retailers])
         # print("Total Money Cost:" + str(money_cost) + "+" + str(int(dist_cost * FUEL_PRICE * FUEL_CONSUME)) + "=" + str(
         #     money_cost + int(dist_cost * FUEL_PRICE * FUEL_CONSUME)) + " | Distance:" + str(
@@ -229,7 +232,7 @@ def init_optimization(market_list, quantity_list, product_count, market_count, f
 
     decision_vectors, fitness_vectors = unique_population(pop)
 
-    route_dicts, pros_cons, champ_indexes = convert_routes(decision_vectors, fitness_vectors, product_count,
-                                                                   market_list, facts, prob.routes, prob.route_cache,
-                                                                   quantity_list)
-    return route_dicts, pros_cons, champ_indexes, fitness_vectors
+    route_dicts, champ_indexes = convert_routes(decision_vectors, fitness_vectors, product_count,
+                                                market_list, facts, prob.routes, prob.route_cache,
+                                                quantity_list)
+    return route_dicts, champ_indexes

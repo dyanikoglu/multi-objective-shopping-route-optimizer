@@ -4,12 +4,10 @@ from django.contrib.gis import geos, measure
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from gisModule import models
-import googlemaps
 import urllib3
 from collections import OrderedDict
 from passlib.hash import pbkdf2_sha256
 
-gmaps = googlemaps.Client(key='AIzaSyAYuOUUDGueFxWz8Esal0CqWANHV2Z7YUI')
 http = urllib3.PoolManager()
 
 
@@ -59,24 +57,26 @@ def convert_to_unique_list(ls):
 
 
 # Creates a dictionary with each market price in item arrays, used in optimization module
-def convert_to_markets_for_items_list(itemid_list, midpoint, dist):
+def convert_to_markets_for_items_list(active_list, midpoint, dist):
     product_list = OrderedDict()  # Dictionary for products
-    for itemid in itemid_list:
-        shoppinglist_item = models.ShoppingListItem.objects.get(id=itemid)
-        base_product = models.BaseProduct.objects.get(productID=shoppinglist_item.product_id)
-        product_list[
-            itemid] = OrderedDict()  # Uber Super Duper Fix For Wrong Retailer Names in Web-App, don't use plain dict
+    quantity_list = []
+    for item in models.ShoppingListItem.objects.filter(list=active_list):
+        quantity_list.append(item.quantity)
+        itemid = item.id
+        product_id = item.product.productID
+        base_product = models.BaseProduct.objects.get(productID=product_id)
+        product_list[itemid] = OrderedDict()  # Uber Super Duper Fix For Wrong Retailer Names in Web-App, don't use plain dict
         retailer_list = get_retailers_in_dist(midpoint, dist)
         for retailer in retailer_list:
             try:
                 retailer_product = models.RetailerProduct.objects.get(baseProduct=base_product, retailer=retailer)
-                product_list[itemid][retailer.retailerID] = retailer_product.unitPrice
+                product_list[itemid][retailer.id] = retailer_product.unitPrice
             except ObjectDoesNotExist:  # If item with this market does not exist, give a high price to product for this market
                 product_list[itemid][
-                    retailer.retailerID] = 99999999  # TODO Find more clever way to exclude out-of-stock retailers
+                    retailer.id] = 99999999  # TODO Find more clever way to exclude out-of-stock retailers
                 pass
-    # Returns: { <BaseProductID_i>: {<RetailerID_j>: <RetailerProductPrice_ij>, ...}, ...} |||| j is index of market, i is index of product
-    return product_list, len(retailer_list)
+    # Returns: { <BaseProductID_i>: {<id_j>: <RetailerProductPrice_ij>, ...}, ...} |||| j is index of market, i is index of product
+    return product_list, len(retailer_list), quantity_list
 
 
 # Return information of each shopping list of user as json data
@@ -143,7 +143,7 @@ def iterate_product_groups(node):
 def get_retailers_in_dist(point, dist):
     current_point = geos.fromstr("SRID=4326;POINT(%s %s)" % (point[0], point[1]))
     distance_from_point = {'km': dist}
-    shops = models.Retailer.gis.filter(geoLocation__distance_lte=(current_point, measure.D(**distance_from_point)))
+    shops = models.Retailer.gis.filter(geolocation__distance_lte=(current_point, measure.D(**distance_from_point)))
     shops = shops.distance(current_point).order_by('distance')
     return shops
 

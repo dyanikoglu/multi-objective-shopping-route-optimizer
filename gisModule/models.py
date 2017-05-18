@@ -35,25 +35,26 @@ class RetailerType(models.Model):
 
 
 class Retailer(models.Model):
-    retailerName = models.CharField("Retailer Name", max_length=256, null=False)
-    retailerType = models.ForeignKey(RetailerType, null=True)
-    retailerID = models.AutoField(primary_key=True)
+    name = models.CharField("Retailer Name", max_length=256, null=False)
+    type = models.ForeignKey(RetailerType, null=True)
+    id = models.AutoField(primary_key=True)
     address = models.CharField("Address", max_length=512)
-    geoLocation = gis_models.PointField(geography=True, blank=True, null=True, editable=False)
+    geolocation = gis_models.PointField(geography=True, blank=True, null=True, editable=False)
     cityID = models.PositiveIntegerField(null=True, editable=False)
     districtID = models.PositiveIntegerField(null=True, editable=False)
-    zipCode = models.CharField(max_length=8, editable=False, null=True)
-    lastEditTime = models.DateTimeField(auto_now_add=True, blank=True, editable=False)
+    zip_code = models.CharField(max_length=8, editable=False, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     gis = gis_models.GeoManager()
     objects = models.Manager()
 
     def __str__(self):
-        return self.retailerName
+        return self.name
 
     def save(self, **kwargs):
         results = http.request('GET', "http://maps.googleapis.com/maps/api/geocode/json?address=%s+%s" %
-                               (quote_plus(self.address), quote_plus(self.retailerName)))
+                               (quote_plus(self.address), quote_plus(self.name)))
         js = json.loads(results.data.decode('utf-8'))
         lat_lng_regex = re.match(r'([0-9]+\.[0-9]+)( |, |,)([0-9]+\.[0-9]+)', self.address, flags=0)
         if lat_lng_regex is not None:
@@ -62,7 +63,7 @@ class Retailer(models.Model):
             js2 = json.loads(results2.data.decode('utf-8'))
             if js2['status'] == "OK":
                 point = "SRID=4326;POINT(%s %s)" % (str(lat_lng_regex.group(3)), str(lat_lng_regex.group(1)))
-                self.geoLocation = geos.fromstr(point)
+                self.geolocation = geos.fromstr(point)
 
                 address_components = js2['results'][0]['address_components']
                 for component in address_components:
@@ -71,7 +72,7 @@ class Retailer(models.Model):
                     if component['types'][0] == "administrative_area_level_2":
                         self.districtID = int(District.objects.get(districtName=component['long_name']).districtID)
                     if component['types'][0] == "postal_code":
-                        self.zipCode = component['long_name']
+                        self.zip_code = component['long_name']
 
                 self.address = js2['results'][0]['formatted_address']
             else:
@@ -80,7 +81,7 @@ class Retailer(models.Model):
         elif js['status'] == "OK":
             parsed_latlng = js['results'][0]['geometry']['location']
             point = "SRID=4326;POINT(%s %s)" % (parsed_latlng['lng'], parsed_latlng['lat'])
-            self.geoLocation = geos.fromstr(point)
+            self.geolocation = geos.fromstr(point)
 
             address_components = js['results'][0]['address_components']
             for component in address_components:
@@ -89,7 +90,7 @@ class Retailer(models.Model):
                 if component['types'][0] == "administrative_area_level_2":
                     self.districtID = int(District.objects.get(districtName=component['long_name']).districtID)
                 if component['types'][0] == "postal_code":
-                    self.zipCode = component['long_name']
+                    self.zip_code = component['long_name']
 
             self.address = js['results'][0]['formatted_address']
         else:
@@ -137,19 +138,20 @@ class RetailerProduct(models.Model):
     baseProduct = models.ForeignKey(BaseProduct, null=True)
     retailer = models.ForeignKey(Retailer, null=True)
     unitPrice = models.FloatField("Unit Price(₺)")
-    lastEditTime = models.DateTimeField(auto_now_add=True, blank=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         product = BaseProduct.objects.get(productID=self.baseProduct.productID)
-        retailer = Retailer.objects.get(retailerID=self.retailer.retailerID)
-        return "%s | %s" % (retailer.retailerName, product)
+        retailer = Retailer.objects.get(id=self.retailer.id)
+        return "%s | %s" % (retailer.name, product)
 
 
 class ShoppingList(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField("List Name", max_length=64, default="Shopping List")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
     completed = models.BooleanField("Completed?", default=False)
 
     def __str__(self):
@@ -189,10 +191,10 @@ class UserSavedAddress(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, null=True)
     address = models.CharField("Address", max_length=512)
-    geoLocation = gis_models.PointField(geography=True, blank=True, null=True, editable=False)
+    geolocation = gis_models.PointField(geography=True, blank=True, null=True, editable=False)
     city = models.ForeignKey(City, null=True, editable=False)
     district = models.ForeignKey(District, null=True, editable=False)
-    zipcode = models.CharField(max_length=8, editable=False, null=True)
+    zip_code = models.CharField(max_length=8, editable=False, null=True)
     last_edit_time = models.DateTimeField(auto_now_add=True, blank=True, editable=False)
 
     gis = gis_models.GeoManager()
@@ -212,7 +214,7 @@ class UserSavedAddress(models.Model):
             js2 = json.loads(results2.data.decode('utf-8'))
             if js2['status'] == "OK":
                 point = "SRID=4326;POINT(%s %s)" % (str(lat_lng_regex.group(3)), str(lat_lng_regex.group(1)))
-                self.geoLocation = geos.fromstr(point)
+                self.geolocation = geos.fromstr(point)
 
                 address_components = js2['results'][0]['address_components']
                 for component in address_components:
@@ -221,7 +223,7 @@ class UserSavedAddress(models.Model):
                     if component['types'][0] == "administrative_area_level_2":
                         self.district = District.objects.get(districtName=component['long_name'])
                     if component['types'][0] == "postal_code":
-                        self.zipCode = component['long_name']
+                        self.zip_code = component['long_name']
 
                 self.address = js2['results'][0]['formatted_address']
             else:
@@ -229,7 +231,7 @@ class UserSavedAddress(models.Model):
         elif js['status'] == "OK":
             parsed_latlng = js['results'][0]['geometry']['location']
             point = "SRID=4326;POINT(%s %s)" % (parsed_latlng['lng'], parsed_latlng['lat'])
-            self.geoLocation = geos.fromstr(point)
+            self.geolocation = geos.fromstr(point)
 
             address_components = js['results'][0]['address_components']
             for component in address_components:
@@ -238,7 +240,7 @@ class UserSavedAddress(models.Model):
                 if component['types'][0] == "administrative_area_level_2":
                     self.district = District.objects.get(districtName=component['long_name'])
                 if component['types'][0] == "postal_code":
-                    self.zipCode = component['long_name']
+                    self.zip_code = component['long_name']
 
             self.address = js['results'][0]['formatted_address']
         else:

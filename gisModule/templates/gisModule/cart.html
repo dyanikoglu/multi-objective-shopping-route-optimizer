@@ -6,11 +6,21 @@
 {% block cart_active %}active{% endblock %}
 
 {% block content %}
+    <section class="loading" id="loading" hidden>
+        <div style="text-align: center;"><img style="max-width:100%; height: auto" src="https://dokuman.turkpatent.gov.tr/DokumanCelebi/img/8pm76v.gif"></div>
+        <div style="text-align: center;"><span id="calculating_text">CALCULATING</span></div>
+    </section>
+
+    <section style="margin-top: 20px; text-align: center" id="route_selection" hidden>
+    <div id="champ_routes"></div>
+    <div id="other_routes"></div>
+    </section>
+
     <section style="margin-top: 100px" id="cart_items">
         <div class="container">
             <div class="breadcrumbs">
                 <ol class="breadcrumb">
-                    <li><a href="#">Home</a></li>
+                    <li><a>Active</a></li>
                     <li id="active_list_name" style="color: orange;" class="active"><span data-list_id="-1"
                                                                                           id="active_list_text"></span><span
                             style="color: orange" class="fa fa-arrow-circle-down"></span></li>
@@ -37,7 +47,7 @@
     </section> <!--/#cart_items-->
 
     <select class="form-control mobileSelect hidden" data-theme="white" data-triggerOn="#active_list_name"
-            data-title="Choose active shopping list" data-btntext-save="Choose" data-btntext-cancel="Cancel"
+            data-title="Select active shopping list" data-btntext-save="Select" data-btntext-cancel="Cancel"
             id="active_list_selection">
     </select>
 
@@ -50,7 +60,7 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="chose_area">
-                        <form method="post">
+                        <form method="post">{% csrf_token %}
                             <ul class="user_option">
                                 <li>
                                     <div class="mk-trc" data-color="amber" data-radius="true">
@@ -104,7 +114,7 @@
                             <li>Approximate Distance <span>0 km</span></li>
                             <li>Approximate Time Spent <span>0 km</span></li>
                         </ul>
-                        <a class="btn btn-default check_out" href="">Calculate Possible Routes</a>
+                        <a id="calculate_routes_button" class="btn btn-default check_out" href="#">Calculate Possible Routes</a>
                     </div>
                 </div>
             </div>

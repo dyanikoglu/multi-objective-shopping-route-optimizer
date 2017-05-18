@@ -183,15 +183,15 @@
             </div>
             <div style="margin-right: 1%; margin-left: 1%; margin-top: 0.5%" class="nav navbar-right shop-menu">
                 <ul class="nav navbar-nav">
-                    <li id="account_notification"><a class="{% block account_active %}{% endblock %}" href=""><i
+                    <li id="account_notification"><a class="{% block account_active %}{% endblock %}" href="{% url 'gisModule:account' %}"><i
                             class="fa fa-user"></i> Account</a></li>
-                    <li><a class="{% block shop_active %}{% endblock %}" href=""><i class="fa fa-adjust"></i> Shop</a>
+                    <li><a class="{% block shop_active %}{% endblock %}" href="{% url 'gisModule:shop' %}"><i class="fa fa-adjust"></i> Shop</a>
                     </li>
                     <li id="cart_notification"><a class="{% block cart_active %}{% endblock %}"
-                                                                        href="cart.html"><i
+                                                                        href="{% url 'gisModule:cart' %}"><i
                             class="fa fa-shopping-cart"></i> Cart</a></li>
-                    <li><a href=""><i class="fa fa-lock"></i> Logout</a></li>
-                    {% block search_box %}{% endblock %}
+                    <li><a href="#"><i class="fa fa-lock"></i> Logout</a></li>
+{#                    {% block search_box %}{% endblock %}#}
                 </ul>
             </div>
         </div>
