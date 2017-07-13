@@ -6,15 +6,39 @@
 {% block cart_active %}active{% endblock %}
 
 {% block content %}
+    <section id="route_view" hidden>
+        <div style="width:100%; height:93%;" id="map"></div>
+    </section>
+
+    <div id="route_panel_extender" hidden>
+        <ul class="nav nav-pills nav-justified">
+            <li><a id="show_route_details_button" href="#" style="color: orange"><i id="show_route_details_icon"
+                                                                                    style="font-size: x-large"
+                                                                  k                  class="fa fa-arrow-down"></i></a>
+            </li>
+        </ul>
+    </div>
+
+    <div style="text-align: center;" id="route_panel" hidden></div>
+
     <section class="loading" id="loading" hidden>
-        <div style="text-align: center;"><img style="max-width:100%; height: auto" src="https://dokuman.turkpatent.gov.tr/DokumanCelebi/img/8pm76v.gif"></div>
+        <div style="text-align: center;"><img style="max-width:100%; height: auto"
+                                              src="https://dokuman.turkpatent.gov.tr/DokumanCelebi/img/8pm76v.gif">
+        </div>
         <div style="text-align: center;"><span id="calculating_text">CALCULATING</span></div>
     </section>
 
     <section style="margin-top: 20px; text-align: center" id="route_selection" hidden>
-    <div id="champ_routes"></div>
-        <div><ul class="nav nav-pills nav-justified"><li><a id="show_more_routes_button" href="#" style="color: orange"><i id="show_more_routes_icon" style="font-size: x-large" class="fa fa-arrow-down"></i></a></li></ul></div>
-    <div id="other_routes" hidden></div>
+        <div id="champ_routes"></div>
+        <div id="other_routes" hidden></div>
+        <div>
+            <ul class="nav nav-pills nav-justified">
+                <li><a id="show_more_routes_button" href="#" style="color: orange"><i id="show_more_routes_icon"
+                                                                                      style="font-size: x-large"
+                                                                                      class="fa fa-arrow-down"></i></a>
+                </li>
+            </ul>
+        </div>
     </section>
 
     <section style="margin-top: 100px" id="cart_items">
@@ -115,7 +139,8 @@
                             <li>Approximate Distance <span>0 km</span></li>
                             <li>Approximate Time Spent <span>0 km</span></li>
                         </ul>
-                        <a id="calculate_routes_button" class="btn btn-default check_out" href="#">Calculate Possible Routes</a>
+                        <a id="calculate_routes_button" class="btn btn-default check_out" href="#">Calculate Possible
+                            Routes</a>
                     </div>
                 </div>
             </div>
@@ -125,5 +150,8 @@
 
 
 {% block specific_js %}
+    <script src="{% static 'cart/js/route_view.js' %}"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDev30rob5VTr4k5runfKgXP9uvl0E5fTY&sensor=false&callback=initMap"
+            async defer></script>
     <script src="{% static 'cart/js/cart.js' %}"></script>
 {% endblock %}
