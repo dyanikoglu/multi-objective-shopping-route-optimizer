@@ -2,13 +2,26 @@
  * Created by dyanikoglu on 10.05.2017.
  */
 
+var route_data;
+
 $(document).ready(function () {
     fetch_cart_data();
     fetch_route_defaults();
 
     $('#show_more_routes_button').click(function () {
-        $('#other_routes').toggle('fast');
+        $('#other_routes').toggle('normal');
         var ico = $('#show_more_routes_icon');
+        if (ico.attr('class') === 'fa fa-arrow-up') {
+            ico.attr('class', 'fa fa-arrow-down');
+        } else {
+            ico.attr('class', 'fa fa-arrow-up');
+        }
+        return false;
+    });
+
+    $('#show_route_details_button').click(function () {
+        $('#route_panel').toggle('normal');
+        var ico = $('#show_route_details_icon');
         if (ico.attr('class') === 'fa fa-arrow-up') {
             ico.attr('class', 'fa fa-arrow-down');
         } else {
@@ -44,6 +57,7 @@ $(document).ready(function () {
         }, 3000);
     });
 
+    // Active list change popup
     $('.mobileSelect').mobileSelect({
             padding: {
                 top: '15%',
@@ -111,6 +125,8 @@ function initiate_route_calculation() {
 }
 
 function fill_route_data(data) {
+    route_data = data['routes'];
+
     var champ_routes = $("#champ_routes");
     champ_routes.empty();
     var other_routes = $("#other_routes");
@@ -130,7 +146,7 @@ function fill_route_data(data) {
         if (i !== m_champ_ind && i !== d_champ_ind && i !== t_champ_ind && i !== r_champ_ind) {
             other_routes.append('<div id="route_main_' + i + '"></div>');
             main = $('#route_main_' + i);
-            main.append('<br><h2 style="color: orange">Other Route - ' + route_indexing++ + '</h2>');
+            main.append('<br><a href="#" onclick="initialize_route_view(' + i + ');return false;"><h2 style="color: orange">Other Route - ' + route_indexing++ + '</h2></a>');
             other_routes.append('<div id="route_details_' + i + '"></div>');
         }
         // Put the route to champion routes section
@@ -151,15 +167,15 @@ function fill_route_data(data) {
                 title_text = title_text.replace(/,([^,]*)$/, '' + '$1'); // Remove latest comma
                 title_text += 'Optimized Route'
             }
-            main.append('<br><h2 style="color: orange">' + title_text + '</h2>');
+            main.append('<br><a href="#" onclick="initialize_route_view(' + i + ');return false;"><h2 style="color: orange">' + title_text + '</h2></a>');
             champ_routes.append('<div id="route_details_' + i + '"></div>');
         }
 
         var details = $('#route_details_' + i);
-        details.append('<div class="row" id="route_details_retailers_' + i + '"></div>')
+        details.append('<div class="row" id="route_details_retailers_' + i + '"></div>');
         var retailers = $('#route_details_retailers_' + i);
 
-        // Show retailers to visit
+        // Show retailers to visit with fancy marker icons
         for (var j = 1; j < current_route['stopover_names'].length - 1; j++) {
             retailers.append('<span><img style="width: 2em; height: 2em;" src="http://housing.utk.edu/wp-content/uploads/sites/12/2016/10/Tour2.png"></span>' + current_route['stopover_names'][j]);
             if (j !== current_route['stopover_names'].length - 2) {
@@ -170,7 +186,7 @@ function fill_route_data(data) {
         var time_value = current_route['costs'][2] * 60;
         var hours = parseInt(time_value / 60);
         var minutes = parseInt(time_value % 60);
-        retailers.append('<div style="margin-top: 25px" class="row"><span><img style="width: 2em; height: 2em;" src="https://i.hizliresim.com/LyrOqj.png"></span>&nbsp;' + current_route['costs'][0] + '&nbsp;TL&nbsp;&nbsp;&nbsp;&nbsp; <img style="width: 2em; height: 2em;" src="https://image.flaticon.com/icons/png/128/31/31126.png"></span>&nbsp;' + current_route['costs'][1].toFixed(2) + '&nbsp;KM&nbsp;&nbsp;&nbsp;&nbsp;<span><img style="width: 2em; height: 2em;" src="http://wcdn3.dataknet.com/static/resources/icons/set110/f112ae8c.png"></span>&nbsp;' + hours + 'h&nbsp;' + minutes + 'm</div>');
+        retailers.append('<div style="margin-top: 25px" class="row"><span><img style="width: 2em; height: 2em;" src="https://i.hizliresim.com/LyrOqj.png"></span>&nbsp;' + current_route['costs'][0] + '&nbsp;TL&nbsp;&nbsp;&nbsp;&nbsp; <img style="width: 2em; height: 2em;" src="https://image.flaticon.com/icons/png/128/31/31126.png"></span>&nbsp;' + current_route['costs'][1].toFixed(2) + '&nbsp;KM&nbsp;&nbsp;&nbsp;&nbsp;<span><img style="width: 2em; height: 2em;" src="http://www.iconninja.com/files/468/237/188/history-clock-button-icon.png"></span>&nbsp;' + hours + 'h&nbsp;' + minutes + 'm</div>');
 
 
         var is_money_optimized = true;
@@ -220,36 +236,30 @@ function fill_route_data(data) {
 
             ///// Initialize Buy Which Product From Where
             var where_to_buy_text = "";
-            var items_to_buy_from_retailers = [];
             where_to_buy_text = '<div class="datagrid"><table><thead> <tr><th>Retailer Name/ Product Info<br></th> <th>Product Name<br></th> <th>Unit Price</th> <th>Count</th> <th>Total Price</th> </tr> </thead>';
             var k = 0;
             var unique_retailers = current_route['retailer_names'].filter(onlyUnique);
             var retailer_products = [];
             var l = 0;
+            // TODO Solve what's going on here, wrong prices for retailer lists with non-unique members
             for (k; k < unique_retailers.length; k++) {
                 retailer_products = [];
-                var temp_product_names = [];
                 var retailer_product_prices = [];
-                l = 0;
-                for (l; l < current_route['retailer_names'].length; l++) {
+                for (l = 0;l < current_route['retailer_names'].length; l++) {
                     if (current_route['retailer_names'][l] === unique_retailers[k]) {
                         retailer_products.push(current_route['product_names'][l]);
                         retailer_product_prices.push(current_route['product_prices'][l]);
                     }
                 }
 
-                temp_product_names.push(retailer_products); // This is required for right panel of map modal
-
                 where_to_buy_text += '<tbody><tr><td rowspan="' + retailer_products.length + '">' + unique_retailers[k] + '<br></td>';
                 where_to_buy_text += '<td>' + retailer_products[0] + '<br></td> <td>' + retailer_product_prices[0] + 'TL' + '</td> <td>' + current_route['product_quantities'][0] + '</td> <td>' + current_route['product_quantities'][0] * retailer_product_prices[0] + 'TL' + '</td> </tr>';
 
-                l = 1;
-                for (l; l < retailer_products.length; l++) {
+                for (l = 1;l < retailer_products.length; l++) {
                     where_to_buy_text += '<tr> <td>' + retailer_products[l] + '</td> <td>' + retailer_product_prices[l] + 'TL' + '</td> <td>' + current_route['product_quantities'][l] + '</td> <td>' + current_route['product_quantities'][l] * retailer_product_prices[l] + 'TL' + '</td> </tr>'
                 }
             }
 
-            items_to_buy_from_retailers.push(temp_product_names);
             where_to_buy_text += '</tbody></table></div>';
             product_prices.append(where_to_buy_text);
             ///////////////
@@ -257,6 +267,7 @@ function fill_route_data(data) {
             details.append('<br><div class="choose"></div>');
         }
     }
+    show_cart_notif("You can click the title of a route to select it", 5000);
 }
 
 function fill_cart(product_names, product_ids, product_quantities, product_added_by_names, product_changed_by_names) {
