@@ -45,6 +45,7 @@ class Retailer(models.Model):
     zip_code = models.CharField(max_length=8, editable=False, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+    total_blame_points = models.IntegerField(null=False, default=0)
 
     gis = gis_models.GeoManager()
     objects = models.Manager()
@@ -140,6 +141,7 @@ class RetailerProduct(models.Model):
     unitPrice = models.FloatField("Unit Price(₺)")
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+    blame_point = models.IntegerField('Blame Points', null=False, default=0)
 
     def __str__(self):
         product = BaseProduct.objects.get(productID=self.baseProduct.productID)
@@ -167,6 +169,7 @@ class User(models.Model):
     email = models.EmailField("Email", max_length=64, null=True)
     active_list = models.ForeignKey(ShoppingList, null="True", blank=True)
     preferences = models.ForeignKey('UserPreferences', null="True")
+    reputation = models.IntegerField('Reputation', null=False, default=0)
 
     def __str__(self):
         return self.username
@@ -308,3 +311,28 @@ class Role(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Blame(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey('User', null=True)
+    retailer_product = models.ForeignKey('RetailerProduct', null=True)
+    date = models.DateTimeField(auto_now_add=True, null=True)
+
+    # Status codes for blames:
+    # 0: On hold (Waiting for enough blames for same product of same retailer)
+    # 1: On review (Required amount of blames are achieved, taken to review state)
+    # 2: Accepted (Blame is accepted)
+    # 3: Rejected (Blame is rejected)
+
+    STATUS_CHOICES = (
+        (0, 'On Hold'),
+        (1, 'On Review'),
+        (2, 'Accepted'),
+        (3, 'Rejected')
+    )
+
+    status_code = models.IntegerField(null=False, choices=STATUS_CHOICES, default=0)
+
+    def __str__(self):
+        return "%s -> %s" % (self.user.username, self.retailer_product.__str__())

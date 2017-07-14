@@ -728,65 +728,23 @@ def shop(request):
         session_user = request.session['user_login_session']  # Get login information from current browser session
     except KeyError:
         return render(request, 'gisModule/login.html')
-    root_product_groups = models.ProductGroup.objects.filter(parent=None)
-    category_name_list = {}
-    for root in root_product_groups:
-        category_name_list.update({root.name: json.dumps(tools.iterate_product_groups(root))})
-    category_id_list = {}
-    for category in models.ProductGroup.objects.all():
-        category_id_list.update({category.name: str(category.id)})
-    user = models.User.objects.get(id=session_user['id'])  # Current user object
-    user_prefs = user.preferences
-    active_shopping_list = user.active_list
-    saved_addresses = models.UserSavedAddress.objects.filter(user=user)
-    address_names = []
-    address_coords = []
-    address_ids = []
-    for name in saved_addresses.values('name'):
-        address_names.append(name['name'])
-    for id in saved_addresses.values('id'):
-        address_ids.append(id)
-    for coord in saved_addresses.values('geolocation'):
-        address_coords.append(coord['geolocation'].coords)
-
-    # Temp solution for null objects
-    if user.active_list is None:
-        shopping_lists_info = None
-    else:
-        shopping_lists_info = tools.return_shopping_list_info(user)
-
-    if active_shopping_list is None:
-        active_list_data = None
-    else:
-        active_list_data = tools.return_shopping_list_data(active_shopping_list)
-
-    if user_prefs.route_start_point is None:
-        start_point_name = ""
-    else:
-        start_point_name = user_prefs.route_start_point.name
-    if user_prefs.route_end_point is None:
-        end_point_name = ""
-    else:
-        end_point_name = user_prefs.route_end_point.name
 
     # Standard GET request for view
     if request.method == "GET":
+        root_product_groups = models.ProductGroup.objects.filter(parent=None)
+        category_name_list = {}
+        for root in root_product_groups:
+            category_name_list.update({root.name: json.dumps(tools.iterate_product_groups(root))})
+        category_id_list = {}
+        for category in models.ProductGroup.objects.all():
+            category_id_list.update({category.name: str(category.id)})
+
         return render(request, 'gisModule/shop.html',
                       {'title': 'Shop', 'category_name_list': tools.jsonify_dict(category_name_list),
                        'category_id_list': tools.jsonify_dict(category_id_list),
                        'user_info': tools.jsonify_str(
-                           request.session['user_login_session']),
-                       'shopping_lists_info': shopping_lists_info,
-                       'active_list_data': active_list_data,
-                       'search_radius': user_prefs.search_radius,
-                       'time_cost': user_prefs.time_factor,
-                       'money_cost': user_prefs.money_factor,
-                       'dist_cost': user_prefs.dist_factor,
-                       'address_names': address_names,
-                       'address_coords': address_coords,
-                       'address_ids': address_ids,
-                       'start_point_name': start_point_name,
-                       'end_point_name': end_point_name})
+                           request.session['user_login_session'])})
+
     # Handle AJAX Post Requests
     if request.method == "POST":
         if request.POST.get("post_load_products"):
@@ -796,6 +754,7 @@ def shop(request):
             for product in models.BaseProduct.objects.filter(group=group):
                 products.update({product.name: product.productID})
             return JsonResponse({'loaded_products': products, 'category_id': category_id})
+
         elif request.POST.get('post_add_to_cart'):
             product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
             editing_user = models.User.objects.get(id=request.session['user_login_session']['id'])
@@ -834,6 +793,28 @@ def shop(request):
                 products.update({product.name: product.productID})
             return JsonResponse({'loaded_products': products})
 
+        elif request.POST.get('fetch_product_details'):
+            product = models.BaseProduct.objects.all().get(productID=request.POST.get('product_id'))
+            retailer_prices = []
+            avg_price = 0
+            i = 0
+            for retailer_product in models.RetailerProduct.objects.all().filter(baseProduct=product):
+                retailer_prices.append(
+                    {'retailer_product_id': retailer_product.id, 'retailer_name': retailer_product.retailer.name
+                        , 'retailer_price': retailer_product.unitPrice})
+                avg_price += retailer_product.unitPrice
+                i += 1
+
+            no_retailers = False
+            if len(retailer_prices) == 0:
+                no_retailers = True
+
+            return JsonResponse(
+                {'product_name': product.name, 'product_id': product.productID, 'retailer_prices': retailer_prices,
+                 'no_retailers': no_retailers})
+        elif request.POST.get('blame_retailer'):
+            message = "Retailer successfully blamed"
+            return JsonResponse({'status': 'success', 'message': message})
 
 # View for login page
 def login(request):

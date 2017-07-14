@@ -26,8 +26,56 @@
                 <div class="col-sm-9 padding-right">
                     <div class="features_items"><!--features_items-->
                         <h2 class="title text-center">Products</h2>
-                        <div id="category_products"></div>
+                        <div id="category_products"></div><!--product-list-->
                     </div><!--features_items-->
+
+                    <div id="product_details" hidden><!--product-details-->
+                        <div class="product-details">
+                            <div class="col-sm-5">
+                                <div class="view-product">
+                                    <img src="{% static "shop/img/product.png" %}" alt=""/>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-7">
+                                <div class="product-information"><!--/product-information-->
+                                    <img src="images/product-details/new.jpg" class="newarrival" alt=""/>
+                                    <h2 id="product_name"></h2>
+                                    <p id="product_id"></p>
+                                    <img src="images/product-details/rating.png" alt=""/>
+                                    <span>
+									    <span id="product_avg_price"></span>
+									    <label>Quantity:</label>
+									    <input id="product_quantity" type="text" value="1"/>
+									    <button id="details_add_to_cart_button" type="button"
+                                                class="btn btn-default cart">
+										    <i class="fa fa-shopping-cart"></i>
+										    Add to cart
+									    </button>
+								    </span>
+                                </div><!--/product-information-->
+                            </div>
+                        </div><!--/product-details-->
+
+                        <div class="category-tab shop-details-tab"><!--category-tab-->
+                            <div class="col-sm-12">
+                                <ul class="nav nav-tabs">
+                                    <li class="active"><a href="#product_all_price" data-toggle="tab">All Prices</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="tab-content">
+                                <div class="datagrid">
+                                    <table>
+                                        <thead> <tr><th>Retailer Name<br></th> <th>Unit Price</th> <th>Blame</th></tr> </thead>
+                                        <tbody id="all_prices">
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div><!--/category-tab-->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
