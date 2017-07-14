@@ -6,6 +6,7 @@ from django.urls import reverse
 from ObjectiveCostOptimizer.differentialEvolution import init_optimization
 from gisModule import models, tools
 from django.contrib.gis import geos
+from BlameModule import EventHandler as BlameModule
 import pusher
 
 pusher_client = pusher.Pusher(
@@ -35,8 +36,8 @@ def account(request):
 
             # Notify receiver user
             notification = "<b>%s</b> has sent you a friend request" % active_user.username
-            pusher_client.trigger('user_%s' % request_user.id, 'friend_request_received', {'message': notification})
-
+            pusher_client.trigger('%s' % request_user.id, 'friend_request_received', {'message': notification})
+            pusher_client.channels_info()
             message = "Friend request successfully sent to <b>%s</b>" % request_user.username
             return JsonResponse({'status': 'success', 'message': message})
 
@@ -85,7 +86,7 @@ def account(request):
 
             # Notify denied user
             notification = "<b>%s</b> has declined your friend request" % active_user.username
-            pusher_client.trigger('user_%s' % notify_id, 'friend_request_denied', {'message': notification})
+            pusher_client.trigger('%s' % notify_id, 'friend_request_denied', {'message': notification})
 
             message = "Friend request is successfully denied"
             return JsonResponse({'status': 'success', 'message': message})
@@ -98,7 +99,7 @@ def account(request):
                 return tools.bad_request('Friend request not found')
 
             # No notification to show user
-            pusher_client.trigger('user_%s' % notify_id, 'friend_request_cancelled', {})
+            pusher_client.trigger('%s' % notify_id, 'friend_request_cancelled', {})
 
             message = "Pending friend request is successfully cancelled"
             return JsonResponse({'status': 'success', 'message': message})
@@ -118,7 +119,7 @@ def account(request):
 
             # Notify sender user
             notification = "<b>%s</b> has removed you from the friend list" % active_user.username
-            pusher_client.trigger('user_%s' % notify_id, 'removed_from_friendlist', {'message': notification})
+            pusher_client.trigger('%s' % notify_id, 'removed_from_friendlist', {'message': notification})
 
             message = "<b>%s</b> successfully removed from your friend list" % receiver_user.username
             return JsonResponse({'status': 'success', 'message': message})
@@ -135,7 +136,7 @@ def account(request):
 
             # Notify sender user
             notification = "<b>%s</b> has accepted your friend request" % friend_request.user_receiver.username
-            pusher_client.trigger('user_%s' % notify_id, 'friend_request_accepted',
+            pusher_client.trigger('%s' % notify_id, 'friend_request_accepted',
                                   {'message': notification})
 
             message = "Friend request successfully accepted"
@@ -187,7 +188,7 @@ def account(request):
             for member in models.GroupMember.objects.filter(group=group_to_quit):
                 if member.member.id != user_to_quit.id:
                     notification = "<b>%s</b> has quit from <b>%s</b>" % (user_to_quit.username, group_to_quit.name)
-                    pusher_client.trigger('user_%s' % member.member.id, 'member_quit_from_group',
+                    pusher_client.trigger('%s' % member.member.id, 'member_quit_from_group',
                                           {'message': notification})
             tools.is_group_empty(group_to_quit)  # TODO Store member count in group model, remove group if count is zero
 
@@ -207,7 +208,7 @@ def account(request):
                     notification = "<b>%s</b> is removed from <b>%s</b> by <b>%s</b>" % (
                         user_to_remove.username, group.name, active_user.username)
                 if member.member.id != active_user.id:
-                    pusher_client.trigger('user_%s' % member.member.id, 'member_removed_from_group',
+                    pusher_client.trigger('%s' % member.member.id, 'member_removed_from_group',
                                           {'message': notification})
             models.GroupMember.objects.get(member=user_to_remove, group=group).delete()
             tools.is_group_empty(group)
@@ -243,7 +244,7 @@ def account(request):
                     else:
                         notification = "<b>%s</b> is added to <b>%s</b> by <b>%s</b>" % (
                             user_to_add.username, group_to_add.name, active_user.username)
-                    pusher_client.trigger('user_%s' % member.member.id, 'member_added_to_group',
+                    pusher_client.trigger('%s' % member.member.id, 'member_added_to_group',
                                           {'message': notification})
 
             message = "User successfully added to the group"
@@ -305,7 +306,7 @@ def account(request):
             for member in models.ShoppingListMember.objects.filter(list=list_to_quit):
                 if member.user.id != user_to_quit.id:
                     notification = "<b>%s</b> has quit from <b>%s</b>" % (user_to_quit.username, list_to_quit.name)
-                    pusher_client.trigger('user_%s' % member.user.id, 'member_quit_from_list',
+                    pusher_client.trigger('%s' % member.user.id, 'member_quit_from_list',
                                           {'message': notification})
             tools.is_list_empty(list_to_quit)
 
@@ -330,7 +331,7 @@ def account(request):
                     notification = "<b>%s</b> is removed from <b>%s</b> by <b>%s</b>" % (
                         user_to_remove.username, list.name, active_user.username)
                 if member.user.id != active_user.id:
-                    pusher_client.trigger('user_%s' % member.user.id, 'member_removed_from_list',
+                    pusher_client.trigger('%s' % member.user.id, 'member_removed_from_list',
                                           {'message': notification})
 
             try:
@@ -368,7 +369,7 @@ def account(request):
                     else:
                         notification = "<b>%s</b> is added to shopping list <b>%s</b> by <b>%s</b>" % (
                             user_to_add.username, list_to_add.name, active_user.username)
-                    pusher_client.trigger('user_%s' % member.user.id, 'member_added_to_list', {'message': notification})
+                    pusher_client.trigger('%s' % member.user.id, 'member_added_to_list', {'message': notification})
 
             message = "Shopping list is successfully shared with user"
             return JsonResponse({'status': 'success', 'message': message})
@@ -462,6 +463,7 @@ def account(request):
 
 def cart(request):
     if request.method == "GET":
+        print(pusher_client.channels_info())
         return render(request, 'gisModule/cart.html',
                       {'title': 'Cart', 'user_info': tools.jsonify_str(request.session['user_login_session'])})
 
@@ -524,7 +526,7 @@ def cart(request):
                     if not user_shopping_list.user.preferences.get_notif_only_for_active_list or user_shopping_list.list.id == user_shopping_list.user.active_list.id:
                         notification = "<b>%s</b> has changed the quantity of <b>%s</b> as <b>%s</b> in <b>%s</b>" % (
                             active_user.username, product.name, new_quantity, active_list.name)
-                        pusher_client.trigger('user_%s' % notify_id, 'product_quantity_change',
+                        pusher_client.trigger('%s' % notify_id, 'product_quantity_change',
                                               {'message': notification, 'product_id': request.POST.get('product_id'),
                                                'new_quantity': new_quantity, 'new_changed_by': active_user.username})
 
@@ -555,7 +557,7 @@ def cart(request):
                     if not user_shopping_list.user.preferences.get_notif_only_for_active_list or user_shopping_list.list.id == user_shopping_list.user.active_list.id:
                         notification = "<b>%s</b> has changed the quantity of <b>%s</b> as <b>%s</b> in <b>%s</b>" % (
                             active_user.username, product.name, new_quantity, active_list.name)
-                        pusher_client.trigger('user_%s' % notify_id, 'product_quantity_change',
+                        pusher_client.trigger('%s' % notify_id, 'product_quantity_change',
                                               {'message': notification, 'product_id': request.POST.get('product_id'),
                                                'new_quantity': new_quantity, 'new_changed_by': active_user.username})
 
@@ -579,7 +581,7 @@ def cart(request):
                     if not user_shopping_list.user.preferences.get_notif_only_for_active_list or user_shopping_list.list.id == user_shopping_list.user.active_list.id:
                         notification = "<b>%s</b> has removed <b>%s</b> from <b>%s</b>" % (
                             active_user.username, product.name, active_list.name)
-                        pusher_client.trigger('user_%s' % notify_id, 'product_remove',
+                        pusher_client.trigger('%s' % notify_id, 'product_remove',
                                               {'message': notification,
                                                'product_changed_by': active_user.username,
                                                'product_id': request.POST.get('product_id')})
@@ -773,7 +775,7 @@ def shop(request):
                 if user_shopping_list.user.id != editing_user.id:  # Except current user
                     # Notify if cart is active on others users or their settings allow notifications from other carts
                     if not user_shopping_list.user.preferences.get_notif_only_for_active_list or user_shopping_list.list.id == user_shopping_list.user.active_list.id:
-                        pusher_client.trigger('user_%s' % notify_id, 'product_add',
+                        pusher_client.trigger('%s' % notify_id, 'product_add',
                                               {'message': notification, 'product_name': product.name,
                                                'product_id': request.POST.get('product_id'),
                                                'product_quantity': list_product.quantity,
@@ -813,8 +815,15 @@ def shop(request):
                 {'product_name': product.name, 'product_id': product.productID, 'retailer_prices': retailer_prices,
                  'no_retailers': no_retailers})
         elif request.POST.get('blame_retailer'):
-            message = "Retailer successfully blamed"
-            return JsonResponse({'status': 'success', 'message': message})
+            user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            retailer_product = models.RetailerProduct.objects.get(id=request.POST.get('retailer_product_id'))
+
+            result, message = BlameModule.new(retailer_product, user, pusher_client)
+            if result:
+                return JsonResponse({'status': 'success', 'message': message})
+            else:
+                return tools.bad_request(message)
+
 
 # View for login page
 def login(request):

@@ -45,7 +45,7 @@ class Retailer(models.Model):
     zip_code = models.CharField(max_length=8, editable=False, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
-    total_blame_points = models.IntegerField(null=False, default=0)
+    reputation = models.FloatField(null=False, default=0)
 
     gis = gis_models.GeoManager()
     objects = models.Manager()
@@ -169,7 +169,7 @@ class User(models.Model):
     email = models.EmailField("Email", max_length=64, null=True)
     active_list = models.ForeignKey(ShoppingList, null="True", blank=True)
     preferences = models.ForeignKey('UserPreferences', null="True")
-    reputation = models.IntegerField('Reputation', null=False, default=0)
+    reputation = models.FloatField('Reputation', null=False, default=0)
 
     def __str__(self):
         return self.username

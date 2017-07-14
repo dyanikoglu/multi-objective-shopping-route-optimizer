@@ -31,7 +31,7 @@
             encrypted: true
         });
         var user_info = {{ user_info|safe }};
-        var channel = pusher.subscribe('user_' + user_info['id']); // Subscribe to user's own channel
+        var channel = pusher.subscribe(String(user_info['id'])); // Subscribe to user's own channel
 
         channel.bind('product_quantity_change', function (data) {
             show_cart_notif(data['message'], 3000);
@@ -153,6 +153,10 @@
             if ('{{ title }}' === 'Account') {
                 fetch_shopping_lists();
             }
+        });
+
+        channel.bind('blame_verification_required', function(data) {
+            show_account_notif(data['message'], 10000);
         });
 
         function show_account_notif(msg, time) {
