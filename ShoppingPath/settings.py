@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'background_task',
 ]
 
 MIDDLEWARE = [
@@ -129,3 +130,5 @@ STATIC_URL = '/static/'
 
 GEOS_LIBRARY_PATH = '/home/dyanikoglu/anaconda3/lib/libgeos_c.so'
 GDAL_LIBRARY_PATH = '/home/dyanikoglu/anaconda3/lib/libgdal.so'
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

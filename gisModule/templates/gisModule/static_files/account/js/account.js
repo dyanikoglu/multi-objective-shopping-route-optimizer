@@ -3,6 +3,14 @@
  */
 
 $(document).ready(function () {
+    $('#received_proposals_button').click(function () {
+        hide_all();
+        $('#settings_header').html('Account | Received Proposals');
+        $('#received_proposals').toggle('normal');
+        // fetch_proposals();
+        return false;
+    });
+
     $('#route_default_settings_button').click(function () {
         hide_all();
         $('#settings_header').html('Route | Default Settings');
@@ -96,6 +104,7 @@ function hide_all() {
     $('#list_management').hide('normal');
     $('#route_defaults_settings').hide('normal');
     $('#address_book').hide('normal');
+    $('#received_proposals').hide('normal');
 }
 
 ///////////////////// ROUTE DEFAULTS START

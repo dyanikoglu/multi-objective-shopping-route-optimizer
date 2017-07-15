@@ -142,6 +142,8 @@ class RetailerProduct(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     blame_point = models.IntegerField('Blame Points', null=False, default=0)
+    proposal_ongoing = models.BooleanField('Has a proposal?', null=False, default=False)
+    removed_from_store = models.BooleanField('Do not show in store', null=False, default=False)
 
     def __str__(self):
         product = BaseProduct.objects.get(productID=self.baseProduct.productID)
@@ -313,12 +315,16 @@ class Role(models.Model):
         return self.name
 
 
-class Blame(models.Model):
+class ProposalSent(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey('User', null=True)
-    retailer_product = models.ForeignKey('RetailerProduct', null=True)
-    date = models.DateTimeField(auto_now_add=True, null=True)
+    false_price_proposal = models.ForeignKey('FalsePriceProposal', null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    response = models.NullBooleanField('Response', null=True)
 
+
+class FalsePriceProposal(models.Model):
     # Status codes for blames:
     # 0: On hold (Waiting for enough blames for same product of same retailer)
     # 1: On review (Required amount of blames are achieved, taken to review state)
@@ -327,12 +333,27 @@ class Blame(models.Model):
 
     STATUS_CHOICES = (
         (0, 'On Hold'),
-        (1, 'On Review'),
-        (2, 'Accepted'),
-        (3, 'Rejected')
+        (1, 'On Review By Users'),
+        (2, 'On Review By Auth'),
+        (3, 'Archived')
     )
 
+    id = models.AutoField(primary_key=True)
     status_code = models.IntegerField(null=False, choices=STATUS_CHOICES, default=0)
+    retailer_product = models.ForeignKey('RetailerProduct', null=True)
+    send_count = models.IntegerField("How many proposals exist?", null=False, default=0)
+    answer_count = models.IntegerField("How many replies this proposal got?", null=False, default=0)
+    retailer = models.ForeignKey('Retailer', null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+
+class Blame(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey('User', null=True)
+    retailer_product = models.ForeignKey('RetailerProduct', null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         return "%s -> %s" % (self.user.username, self.retailer_product.__str__())

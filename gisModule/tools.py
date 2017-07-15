@@ -7,8 +7,24 @@ from gisModule import models
 import urllib3
 from collections import OrderedDict
 from passlib.hash import pbkdf2_sha256
+from django.contrib.sessions.models import Session
+from django.utils import timezone
 
 http = urllib3.PoolManager()
+
+
+def get_all_logged_in_users():
+    # Query all non-expired sessions
+    # use timezone.now() instead of datetime.now() in latest versions of Django
+    sessions = Session.objects.filter(expire_date__gte=timezone.now())
+    uid_list = []
+
+    # Build a list of user ids from that query
+    for session in sessions:
+        data = session.get_decoded()
+        uid_list.append(data['user_login_session']['id'])
+    # Query all logged in users based on id list
+    return list(models.User.objects.filter(id__in=uid_list))
 
 
 def bad_request(message):

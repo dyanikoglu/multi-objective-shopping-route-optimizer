@@ -6,7 +6,7 @@ from django.urls import reverse
 from ObjectiveCostOptimizer.differentialEvolution import init_optimization
 from gisModule import models, tools
 from django.contrib.gis import geos
-from BlameModule import EventHandler as BlameModule
+from BlameModule import event_handler as BlameModule
 import pusher
 
 pusher_client = pusher.Pusher(
@@ -37,7 +37,6 @@ def account(request):
             # Notify receiver user
             notification = "<b>%s</b> has sent you a friend request" % active_user.username
             pusher_client.trigger('%s' % request_user.id, 'friend_request_received', {'message': notification})
-            pusher_client.channels_info()
             message = "Friend request successfully sent to <b>%s</b>" % request_user.username
             return JsonResponse({'status': 'success', 'message': message})
 
@@ -818,11 +817,11 @@ def shop(request):
             user = models.User.objects.get(id=request.session['user_login_session']['id'])
             retailer_product = models.RetailerProduct.objects.get(id=request.POST.get('retailer_product_id'))
 
-            result, message = BlameModule.new(retailer_product, user, pusher_client)
+            result, message = BlameModule.new_blame(retailer_product, user)
             if result:
                 return JsonResponse({'status': 'success', 'message': message})
             else:
-                return tools.bad_request(message)
+                return JsonResponse({'status': 'error', 'message': message})
 
 
 # View for login page
