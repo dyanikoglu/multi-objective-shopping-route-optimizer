@@ -18,6 +18,10 @@ pusher_client = pusher.Pusher(
 )
 
 
+def handler404(request):
+    return render(request, 'gisModule/404.html', status=404)
+
+
 def account(request):
     if request.method == "GET":
         return render(request, 'gisModule/account.html',
@@ -462,7 +466,6 @@ def account(request):
 
 def cart(request):
     if request.method == "GET":
-        print(pusher_client.channels_info())
         return render(request, 'gisModule/cart.html',
                       {'title': 'Cart', 'user_info': tools.jsonify_str(request.session['user_login_session'])})
 
