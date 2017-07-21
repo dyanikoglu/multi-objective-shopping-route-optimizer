@@ -1,6 +1,6 @@
 # Multi-Objective Shopping Route Optimizer
 
-![Main Page](https://i.hizliresim.com/R0zdoR.png)
+![Main Page](https://i.hizliresim.com/N1GbVO.png)
 
 ### Server Installation
 
@@ -10,15 +10,15 @@ Because of the high count of dependencies of required modules, Anaconda must be 
 
 - Install Anaconda with default options:
 ```sh
-bash Anaconda3-4.3.1-Linux-x86_64.sh
+bash Anaconda3-4.4.0-Linux-x86_64.sh
 ```
 - Upgrade your default environment to Python 3.6.1:
 ```sh
 conda install python=3.6.1
 ```
-- Install Django 1.11:
+- Install Django 1.11.3:
 ```sh
-conda install -c conda-forge django=1.11
+conda install -c conda-forge django=1.11.3
 ```
 - Install PyGMO:
 ```sh
@@ -34,7 +34,7 @@ conda install -c anaconda psycopg2=2.7.1
 ```
 - Install urllib3:
 ```sh
-conda install -c conda-forge urllib3=1.20
+conda install -c conda-forge urllib3=1.21.1
 ```
 - Install passlib:
 ```sh
@@ -63,7 +63,7 @@ sudo apt-get install -y postgis postgresql-9.x-pgrouting # Change x with your po
 sudo -u postgres createuser -P USER_NAME_HERE
 sudo -u postgres createdb -O USER_NAME_HERE TEMP_DATABASE_NAME_HERE
 sudo su - postgres
-psql TEMP_DATABASE_NAME_HERE < PATH_TO_PROJECT_FOLDER_HERE/DjangoServer.backup
+psql TEMP_DATABASE_NAME_HERE < PATH_TO_PROJECT_FOLDER_HERE/backup.sql
 ```
 - Install PGAdmin III from Ubuntu Store.
 
@@ -77,10 +77,16 @@ source activate root
 ```sh
 python manage.py runserver --noreload
 ```
+- Start background tasks by running the command in project's root folder:
+```sh
+python manage.py process_tasks
+```
 
 ### Guide
 
 - Server can be accessed from `localhost:8000`.
-- Login is required for using shopping page. Login from http://localhost:8000/gisModule/login/ with using username `dyanikoglu` and password `Dc2216586*`(case sensitive). Login process won't redirect you to shopping page.
-- Shopping page can be found on http://localhost:8000/gisModule/shopping/. `User Panel` from `User Menu` can be used for changing route calculation's behaviour. Route calculation can be started from `Shopping Cart`.
-- Admin panel for server can be found on http://localhost:8000/admin/. Credentials are username `dyanikoglu` and password `Dc2216586*`(case sensitive).
+- Login is required for using shopping page. Login or register a new account from http://localhost:8000/gisModule/login/ 
+- Shopping page can be found on http://localhost:8000/gisModule/shop/.
+- Shopping cart can be found on http://localhost:8000/gisModule/cart/.
+- Account settings page can be found on http://localhost:8000/gisModule/account/.
+- Admin panel for server can be found on http://localhost:8000/admin/. Credentials are username `dyanikoglu` and password `django1234`.
