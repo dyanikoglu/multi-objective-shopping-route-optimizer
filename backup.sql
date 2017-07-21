@@ -2,7 +2,7 @@
 -- PostgreSQL database cluster dump
 --
 
--- Started on 2017-07-21 10:42:13 +03
+-- Started on 2017-07-21 10:48:08 +03
 
 SET default_transaction_read_only = off;
 
@@ -47,7 +47,7 @@ SET default_transaction_read_only = off;
 -- Dumped from database version 9.6.3
 -- Dumped by pg_dump version 9.6.3
 
--- Started on 2017-07-21 10:42:13 +03
+-- Started on 2017-07-21 10:48:08 +03
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1897,7 +1897,7 @@ SELECT pg_catalog.setval('auth_permission_id_seq', 123, true);
 --
 
 COPY auth_user (id, password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined) FROM stdin;
-1	pbkdf2_sha256$36000$Tt7QrdY0KPNH$8j5KWJcL4b8Xf/jMMypAnoxeF0XcgiCLAwPGVqTMjNc=	2017-07-21 09:31:32.665307+03	t	dyanikoglu	Doğa Can	Yanıkoğlu	dyanikoglu@outlook.com	t	t	2017-01-26 11:49:05+03
+1	pbkdf2_sha256$36000$YV0KXD0f6Gla$Rag9D6eNIdg4BLZUcT33wt7JezjHqJBG6gaOH2dj300=	2017-07-21 09:31:32.665307+03	t	dyanikoglu	Doğa Can	Yanıkoğlu	dyanikoglu@outlook.com	t	t	2017-01-26 11:49:05+03
 \.
 
 
@@ -3973,6 +3973,7 @@ COPY django_admin_log (id, action_time, object_id, object_repr, action_flag, cha
 1078	2017-07-21 10:08:39.45678+03	16	dyanikoglu	2	[{"changed": {"fields": ["reputation"]}}]	17	1
 1079	2017-07-21 10:08:51.761294+03	255	Test Retailer | Test Product 1L	2	[{"changed": {"fields": ["blame_point", "proposal_ongoing", "removed_from_store"]}}]	15	1
 1080	2017-07-21 10:09:00.508513+03	31	Test Retailer	2	[]	10	1
+1081	2017-07-21 10:47:51.209644+03	1	dyanikoglu	2	[{"changed": {"fields": ["password"]}}]	2	1
 \.
 
 
@@ -3982,7 +3983,7 @@ COPY django_admin_log (id, action_time, object_id, object_repr, action_flag, cha
 -- Name: django_admin_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('django_admin_log_id_seq', 1080, true);
+SELECT pg_catalog.setval('django_admin_log_id_seq', 1081, true);
 
 
 --
@@ -4205,8 +4206,8 @@ xna3en62tneal14gbtk066z3nf02ndxn	ZWRmYTYxZjVhMjU0MmRiNWJhNjRiMWJiODcwOGEwMDFhMGE
 y5dl21a3b6yf4jzpozthftcgyum577n2	ODZiZTE5YjY2ZTI5MWM2NTAzYzk5NDJlMzcxYWE3ZTRjYjhlY2YxOTp7InVzZXJfbG9naW5fc2Vzc2lvbiI6eyJzdGF0dXMiOiJsb2dnZWRfaW4iLCJpZCI6MTYsInVzZXJuYW1lIjoiZHlhbmlrb2dsdSIsImZpcnN0X25hbWUiOiJEb1x1MDExZmEgQ2FuIiwibGFzdF9uYW1lIjoiWWFuXHUwMTMxa29cdTAxMWZsdSJ9fQ==	2017-05-31 08:21:34.00498+03
 cl1ujzcxjiyf951yv8bbq11l1sqqgw1q	ZjUzNzg4NzNlYzQzYzMwNzRmYTdiNGZmNWIzMDE1ZjJlMTcxZmFhYjp7InVzZXJfbG9naW5fc2Vzc2lvbiI6eyJzdGF0dXMiOiJsb2dnZWRfaW4iLCJpZCI6MTksInVzZXJuYW1lIjoidGVzdF8xIiwiZmlyc3RfbmFtZSI6ImFhYSIsImxhc3RfbmFtZSI6ImJiYiJ9LCJfYXV0aF91c2VyX2lkIjoiMSIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiNTc2YjY1N2FlZjEzNzhhZmRlOGZjMzZjMzYxZTA1MmQxY2MxMjRiOCJ9	2017-06-05 15:10:33.269076+03
 w28n7t1qq1w7rfgaooug5ygtssncuxzc	Y2U5MDQ3Y2Q1ODIwYjY2MmJlZDUxZWRlNTRhYjUxNmZmODNhM2NmZTp7InVzZXJfbG9naW5fc2Vzc2lvbiI6eyJzdGF0dXMiOiJsb2dnZWRfaW4iLCJpZCI6MjAsInVzZXJuYW1lIjoidGVzdDIiLCJmaXJzdF9uYW1lIjoidGVzdDIiLCJsYXN0X25hbWUiOiJ0ZXN0MiJ9LCJfYXV0aF91c2VyX2lkIjoiMSIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiNTc2YjY1N2FlZjEzNzhhZmRlOGZjMzZjMzYxZTA1MmQxY2MxMjRiOCJ9	2017-06-05 15:10:52.27789+03
-l24i6k1wcza1fn9jmbkdlwysigvfmnqd	YWNkNWVkZGE3MjZhNmZiNmJlNDUwMzExYjlkNTE5YTI2NWZlMzg1Mjp7InVzZXJfbG9naW5fc2Vzc2lvbiI6eyJzdGF0dXMiOiJsb2dnZWRfaW4iLCJpZCI6MTYsInVzZXJuYW1lIjoiZHlhbmlrb2dsdSIsImZpcnN0X25hbWUiOiJEb1x1MDExZmEgQ2FuIiwibGFzdF9uYW1lIjoiWWFuXHUwMTMxa29cdTAxMWZsdSJ9LCJfYXV0aF91c2VyX2lkIjoiMSIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiNTc2YjY1N2FlZjEzNzhhZmRlOGZjMzZjMzYxZTA1MmQxY2MxMjRiOCJ9	2017-07-28 14:07:56.895412+03
 n2b3pnpelx0ha4y9s9vlr82d504cn3bq	NGEwNzBlNWRhZTc0NWZlMTg5YmQ1YTYxNDIzODllODAzMzBkMGM3Yzp7InVzZXJfbG9naW5fc2Vzc2lvbiI6eyJzdGF0dXMiOiJsb2dnZWRfaW4iLCJpZCI6MTgsInVzZXJuYW1lIjoidGVzdCIsImZpcnN0X25hbWUiOiJUZXN0IiwibGFzdF9uYW1lIjoiQWNjIn0sIl9hdXRoX3VzZXJfaWQiOiIxIiwiX2F1dGhfdXNlcl9iYWNrZW5kIjoiZGphbmdvLmNvbnRyaWIuYXV0aC5iYWNrZW5kcy5Nb2RlbEJhY2tlbmQiLCJfYXV0aF91c2VyX2hhc2giOiI1NzZiNjU3YWVmMTM3OGFmZGU4ZmMzNmMzNjFlMDUyZDFjYzEyNGI4In0=	2017-08-04 09:31:32.669955+03
+31q1xnr2cxw7gzuwhsbke7yjz7xjhoe5	MGIzNmMzY2NlZGVlYTA5MDc1MGZiMjc5OWI2NjE0ZWQwOGE2NGEwNTp7InVzZXJfbG9naW5fc2Vzc2lvbiI6eyJzdGF0dXMiOiJsb2dnZWRfaW4iLCJpZCI6MTYsInVzZXJuYW1lIjoiZHlhbmlrb2dsdSIsImZpcnN0X25hbWUiOiJEb1x1MDExZmEgQ2FuIiwibGFzdF9uYW1lIjoiWWFuXHUwMTMxa29cdTAxMWZsdSJ9LCJfYXV0aF91c2VyX2lkIjoiMSIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiMDUyNjdlN2Y4NTRmMjVkNmIxZGI3YjcwY2E3OTI0OTczNGMxOWM3YiJ9	2017-08-04 10:47:51.222721+03
 \.
 
 
@@ -7210,7 +7211,7 @@ ALTER TABLE ONLY "gisModule_userpreferences"
     ADD CONSTRAINT "route_start_point_id_d14e5950_fk_gisModule_usersavedaddress_id" FOREIGN KEY (route_start_point_id) REFERENCES "gisModule_usersavedaddress"(id) DEFERRABLE INITIALLY DEFERRED;
 
 
--- Completed on 2017-07-21 10:42:14 +03
+-- Completed on 2017-07-21 10:48:09 +03
 
 --
 -- PostgreSQL database dump complete
@@ -7227,7 +7228,7 @@ SET default_transaction_read_only = off;
 -- Dumped from database version 9.6.3
 -- Dumped by pg_dump version 9.6.3
 
--- Started on 2017-07-21 10:42:14 +03
+-- Started on 2017-07-21 10:48:09 +03
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -7446,7 +7447,7 @@ COPY layer (topology_id, layer_id, schema_name, table_name, feature_column, feat
 \.
 
 
--- Completed on 2017-07-21 10:42:15 +03
+-- Completed on 2017-07-21 10:48:10 +03
 
 --
 -- PostgreSQL database dump complete
@@ -7463,7 +7464,7 @@ SET default_transaction_read_only = off;
 -- Dumped from database version 9.6.3
 -- Dumped by pg_dump version 9.6.3
 
--- Started on 2017-07-21 10:42:15 +03
+-- Started on 2017-07-21 10:48:10 +03
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -7517,7 +7518,7 @@ CREATE EXTENSION IF NOT EXISTS adminpack WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION adminpack IS 'administrative functions for PostgreSQL';
 
 
--- Completed on 2017-07-21 10:42:15 +03
+-- Completed on 2017-07-21 10:48:10 +03
 
 --
 -- PostgreSQL database dump complete
@@ -7534,7 +7535,7 @@ SET default_transaction_read_only = off;
 -- Dumped from database version 9.6.3
 -- Dumped by pg_dump version 9.6.3
 
--- Started on 2017-07-21 10:42:15 +03
+-- Started on 2017-07-21 10:48:10 +03
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -7562,7 +7563,7 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
--- Completed on 2017-07-21 10:42:15 +03
+-- Completed on 2017-07-21 10:48:10 +03
 
 --
 -- PostgreSQL database dump complete
@@ -7579,7 +7580,7 @@ SET default_transaction_read_only = off;
 -- Dumped from database version 9.6.3
 -- Dumped by pg_dump version 9.6.3
 
--- Started on 2017-07-21 10:42:15 +03
+-- Started on 2017-07-21 10:48:10 +03
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -7616,13 +7617,13 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
--- Completed on 2017-07-21 10:42:15 +03
+-- Completed on 2017-07-21 10:48:10 +03
 
 --
 -- PostgreSQL database dump complete
 --
 
--- Completed on 2017-07-21 10:42:15 +03
+-- Completed on 2017-07-21 10:48:10 +03
 
 --
 -- PostgreSQL database cluster dump complete
