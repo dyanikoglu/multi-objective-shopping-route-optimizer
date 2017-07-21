@@ -19,5 +19,5 @@ application = get_wsgi_application()
 
 background_models.Task.objects.all().delete()  # DELETE OLD TASKS FROM TABLE
 
-tasks.blame_module_check_blame_status(repeat=10)
-tasks.blame_module_check_proposal(repeat=10)
+tasks.blame_module_check_blame_status(repeat=30)
+tasks.blame_module_check_proposal(repeat=30)

@@ -155,7 +155,7 @@
             }
         });
 
-        channel.bind('blame_verification_required', function(data) {
+        channel.bind('new_proposal', function(data) {
             show_account_notif(data['message'], 10000);
         });
 

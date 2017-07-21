@@ -19,7 +19,7 @@ def calculate_points(user, retailer):
     # Retailer reputation increases -> Blame Point decreases
     # Blamer user reputation increases -> Blame Point increases
     return params.BLAME_MULTIPLIER * (user.reputation / params.USER_REPUTATION_REQ_FOR_BLAMING) * (
-        params.INITIAL_REPUTATION_FOR_RETAILER / (retailer.reputation + 0.001))
+        params.INITIAL_REPUTATION_FOR_RETAILER / (retailer.reputation + 0.001)) + 1
 
 
 def check_reputation(user):

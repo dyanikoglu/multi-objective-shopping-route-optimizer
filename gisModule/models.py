@@ -53,6 +53,9 @@ class Retailer(models.Model):
     def __str__(self):
         return self.name
 
+    def save_without_address(self, **kwargs):
+        super(Retailer, self).save()
+
     def save(self, **kwargs):
         results = http.request('GET', "http://maps.googleapis.com/maps/api/geocode/json?address=%s+%s" %
                                (quote_plus(self.address), quote_plus(self.name)))

@@ -22,7 +22,7 @@ def new_blame(retailer_product, user):
 
 
 # Creates a new false price proposal on db
-@transaction.atomic # Guarantee that db process was completely successful
+@transaction.atomic  # Guarantee that db process was completely successful
 def new_proposal(retailer_product):
     if tools.check_blame_points(retailer_product):
         # No action required
@@ -42,12 +42,17 @@ def check_proposal(proposal):
         send_proposals(proposal)  # Send new ones if inactive ones are removed
         check_complete_responded_proposals(proposal)  # Update status of proposal if eligible
     elif proposal.status_code == 2:
-        # TODO Connect with admin panel
-        auth_confirm_proposal(proposal)
+        # TODO Can be connected with admin panel for actual auth. review
+        auth_confirm_proposal(proposal) # Auto confirm proposal
+    elif proposal.status_code == 3:
+        # Do nothing, this proposal is archived
+        # TODO Carry these reports into another table for performance in long run
+        return
 
 
 @transaction.atomic
 def auth_confirm_proposal(proposal):
+    print("%s report is automatically accepted by auth." % proposal.retailer_product.__str__())
     for proposal_sent in models.ProposalSent.objects.filter(false_price_proposal=proposal):
         if proposal_sent.response == True:
             proposal_sent.user.reputation += parameters.PRIZE_FOR_CORRECT_RESPONSE
@@ -58,11 +63,13 @@ def auth_confirm_proposal(proposal):
     # Archive the proposal
     proposal.status_code = 3
     proposal.save()
+    proposal.retailer.reputation += parameters.PENALTY_FOR_ACCEPTED_REPORT
+    proposal.retailer.save_without_address()
     proposal.retailer_product.removed_from_store = True
     proposal.retailer_product.save()
 
 
-@transaction.atomic # Guarantee that db process was completely successful
+@transaction.atomic  # Guarantee that db process was completely successful
 def send_proposals(proposal):
     tools.propose_to_random_users(proposal, parameters.USER_COUNT_TO_SEND_PROPOSAL - proposal.send_count)
     proposal.status_code = 1  # Proposal is now on review by users
@@ -81,26 +88,45 @@ def check_inactive_sent_proposals_to_users(proposal):
             tools.notify_timeout(proposal_sent.user)
 
 
+# Checks old blame reports, and removes them. Users will be able to report same product after this action.
+@transaction.atomic
+def remove_old_blame_reports(proposal):
+    current_date = datetime.now(tzlocal())
+    for blame in models.Blame.objects.all():
+        if (current_date - blame.created_at).days > parameters.MAX_INACTIVE_DAY_FOR_PROPOSAL + 1:
+            print("Blame of %s is timed out, deleting..." % blame.user.username)
+            blame.delete()
+
+
 @transaction.atomic
 def check_complete_responded_proposals(proposal):
     if proposal.answer_count == parameters.USER_COUNT_TO_SEND_PROPOSAL:
-        print("Proposal with id%s is going to be evaluated:" % proposal.id)
+        print("Proposal with id:%s is going to be evaluated:" % proposal.id)
         responses = []
         for proposal_sent in models.ProposalSent.objects.filter(false_price_proposal=proposal):
             responses.append(proposal_sent.response)
 
-        if responses.count(True) >= int(parameters.USER_COUNT_TO_SEND_PROPOSAL / 2):
+        if responses.count(True) > int(parameters.USER_COUNT_TO_SEND_PROPOSAL / 2.0):
             print("Accepted by users!")
+            # Prizes and penalties will be decided with auth.'s decision
             proposal.status_code = 2  # To be reviewed by Auth.
             proposal.save()
-            print(proposal.status_code)
         else:
             print("Rejected by users")
+            # Give prizes and penalties:
             for proposal_sent in models.ProposalSent.objects.filter(false_price_proposal=proposal):
                 if proposal_sent.response == True:
+                    print("%s got a penalty for wrong response" % proposal_sent.user.username)
                     proposal_sent.user.reputation += parameters.PENALTY_FOR_FALSE_RESPONSE
                 else:
+                    print("%s got a prize for correct response" % proposal_sent.user.username)
                     proposal_sent.user.reputation += parameters.PRIZE_FOR_CORRECT_RESPONSE
                 proposal_sent.user.save()
-            proposal.status_code = 4  # Rejected by users
+
+            # Reset status of related retailer product:
+            proposal.retailer_product.blame_point = 0
+            proposal.retailer_product.proposal_ongoing = False
+            proposal.retailer_product.save()
+
+            proposal.status_code = 3  # Rejected by users, archive it
             proposal.save()

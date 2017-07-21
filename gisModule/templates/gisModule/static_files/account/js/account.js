@@ -7,7 +7,7 @@ $(document).ready(function () {
         hide_all();
         $('#settings_header').html('Account | Received Proposals');
         $('#received_proposals').toggle('normal');
-        // fetch_proposals();
+        fetch_pending_proposals();
         return false;
     });
 
@@ -31,9 +31,9 @@ $(document).ready(function () {
         fetch_addresses();
         return false;
     });
-    
+
     $('#create_address_button').click(function () {
-        if(!$('#address_name').val()) {
+        if (!$('#address_name').val()) {
             show_account_notif("<b>Address Name</b> field can\'t be empty", 2000);
             return false;
         }
@@ -127,7 +127,7 @@ function fetch_route_default_settings() {
             default_start_point.append('<option value="-1">- Select -</option>');
             default_end_point.append('<option value="-1">- Select -</option>');
 
-            for(var i = 0;i<data['addresses'].length;i++) {
+            for (var i = 0; i < data['addresses'].length; i++) {
                 default_start_point.append('<option value="' + data['addresses'][i]['address_id'] + '">' + data['addresses'][i]['address_name'] + '</option>')
                 default_end_point.append('<option value="' + data['addresses'][i]['address_id'] + '">' + data['addresses'][i]['address_name'] + '</option>')
             }
@@ -155,6 +155,7 @@ function save_route_defaults(serialized_form) {
         }
     });
 }
+
 ///////////////////// ROUTE DEFAULTS END
 
 ///////////////////// ADDRESS BOOK START
@@ -182,7 +183,7 @@ function fetch_addresses() {
         success: function (data) {
             var saved_addresses = $('#saved_addresses');
             saved_addresses.empty();
-            for(var i = 0;i<data['addresses'].length;i++) {
+            for (var i = 0; i < data['addresses'].length; i++) {
                 saved_addresses.append('<div class="row"> <div class="col-sm-2">' + data['addresses'][i]['address_name'] + '</div> <div class="col-sm-8">' + data['addresses'][i]['address'] + '</div> <div class="col-sm-1"> <button onclick="remove_address(' + data['addresses'][i]['address_id'] + ');return false;" class="btn btn-primary">X</button> </div> </div>');
             }
         },
@@ -206,6 +207,7 @@ function remove_address(address_id) {
         }
     });
 }
+
 ///////////////////// ADDRESS BOOK END
 
 
@@ -315,6 +317,7 @@ function fetch_shopping_lists() {
         }
     });
 }
+
 ///////////////////// SHOPPING LIST MANAGEMENT END
 
 
@@ -424,6 +427,7 @@ function fetch_group_list() {
         }
     });
 }
+
 ///////////////////// GROUP MANAGEMENT END
 
 
@@ -559,7 +563,58 @@ function fetch_friend_list() {
         }
     });
 }
+
 ///////////////////// FRIEND MANAGEMENT END
+
+
+//////////////////// FALSE PRICE PROPOSAL MANAGEMENT START
+
+function fetch_pending_proposals() {
+    $.ajax({
+        type: "POST",
+        data: {'fetch_pending_proposal': 'fetch_pending_proposal'},
+        success: function (data) {
+            var received_proposals = $('#received_proposals');
+            received_proposals.empty();
+
+            // Fill prices for each retailer
+            var all_prices_table = $('#all_prices');
+            all_prices_table.empty();
+            received_proposals.append('<h3 style="color: darkorange">Other Prices Of This Product:</h3>');
+            received_proposals.append('<div class="tab-content"><div class="datagrid"><table><thead> <tr><th>Retailer Name<br></th> <th>Unit Price</th></tr></thead><tbody id="all_prices">');
+            for (var i = 0; i < data['other_prices'].length; i++) {
+                received_proposals.append('<tr><td>' + data['other_prices'][i]['retailer_name'] + '</td><td>' + data['other_prices'][i]['retailer_price'] + '</td></tr>');
+            }
+            received_proposals.append('</tbody></table></div></div>')
+            received_proposals.append('<h3 style="color: darkorange">Reported Retailer Name:</h3> <h5>' + data['related_retailer_name'] + '</h5>');
+            received_proposals.append('<h3 style="color: darkorange">Reported Product:</h3> <h5>' + data['related_product_name'] + '</h5>');
+            received_proposals.append('<h3 style="color: darkorange">Reported Price Of The Product:</h3> <h5>' + data['related_product_price'] + 'TL</h5>');
+            received_proposals.append('<h3 style="color: darkorange">Your Reply:</h3> <button onclick="send_reply_to_proposal(' + data['sent_proposal_id'] + ', ' + true + '); return false;">False Price</button> <button onclick="send_reply_to_proposal(' + data['sent_proposal_id'] + ', ' + false + '); return false;">Not False Price</button>');
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+            var received_proposals = $('#received_proposals');
+            received_proposals.empty();
+            received_proposals.append('<h3>No pending proposal available</h3>');
+        }
+    });
+}
+
+function send_reply_to_proposal(proposal_id, response) {
+    $.ajax({
+        type: "POST",
+        data: {'send_reply_to_proposal': 'send_reply_to_proposal', 'proposal_id': proposal_id, 'response': response},
+        success: function (data) {
+            show_account_notif(data['message'], 2000);
+            fetch_pending_proposals(); // Fetch next available proposal if it exist
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+}
+
+//////////////////// FALSE PRICE PROPOSAL MANAGEMENT END
 
 
 function show_account_notif(msg, time) {

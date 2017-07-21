@@ -86,7 +86,12 @@ def convert_to_markets_for_items_list(active_list, midpoint, dist):
         for retailer in retailer_list:
             try:
                 retailer_product = models.RetailerProduct.objects.get(baseProduct=base_product, retailer=retailer)
-                product_list[itemid][retailer.id] = retailer_product.unitPrice
+                # If product is removed from store, do not include it
+                if retailer_product.removed_from_store:
+                    product_list[itemid][
+                        retailer.id] = 99999999  # TODO Find more clever way to exclude out-of-stock retailers
+                else:
+                    product_list[itemid][retailer.id] = retailer_product.unitPrice
             except ObjectDoesNotExist:  # If item with this market does not exist, give a high price to product for this market
                 product_list[itemid][
                     retailer.id] = 99999999  # TODO Find more clever way to exclude out-of-stock retailers

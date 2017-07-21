@@ -463,6 +463,40 @@ def account(request):
             message = "Default settings are successfully changed"
             return JsonResponse({'status': 'success', 'message': message})
 
+        elif request.POST.get('fetch_pending_proposal'):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+
+            try:
+                # Find non-replied proposals of this user
+                current_proposal = models.ProposalSent.objects.get(user=active_user, response=None)
+            except ObjectDoesNotExist:
+                return tools.bad_request('No pending proposal exists')
+
+            related_retailer = current_proposal.false_price_proposal.retailer
+            related_product = current_proposal.false_price_proposal.retailer_product
+
+            product = related_product.baseProduct
+            other_prices = []
+            for retailer_product in models.RetailerProduct.objects.all().filter(baseProduct=product):
+                if retailer_product.id != related_product.id:
+                    other_prices.append(
+                        {'retailer_name': retailer_product.retailer.name, 'retailer_price': retailer_product.unitPrice})
+
+            return JsonResponse({'other_prices': other_prices, 'sent_proposal_id': current_proposal.id,
+                                 'related_retailer_name': related_retailer.name, 'related_product_price': related_product.unitPrice,
+                                 'related_product_name': related_product.baseProduct.name})
+
+        elif request.POST.get('send_reply_to_proposal'):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            current_proposal = models.ProposalSent.objects.get(id=request.POST.get('proposal_id'))
+            current_proposal.response = request.POST.get('response') == 'true'
+            current_proposal.save()
+            current_proposal.false_price_proposal.answer_count += 1
+            current_proposal.false_price_proposal.save()
+
+            message = "Reply successfully sent"
+            return JsonResponse({'status': 'success', 'message': message})
+
 
 def cart(request):
     if request.method == "GET":
@@ -803,6 +837,9 @@ def shop(request):
             avg_price = 0
             i = 0
             for retailer_product in models.RetailerProduct.objects.all().filter(baseProduct=product):
+                if retailer_product.removed_from_store:
+                    continue
+
                 retailer_prices.append(
                     {'retailer_product_id': retailer_product.id, 'retailer_name': retailer_product.retailer.name
                         , 'retailer_price': retailer_product.unitPrice})
@@ -816,6 +853,7 @@ def shop(request):
             return JsonResponse(
                 {'product_name': product.name, 'product_id': product.productID, 'retailer_prices': retailer_prices,
                  'no_retailers': no_retailers})
+
         elif request.POST.get('blame_retailer'):
             user = models.User.objects.get(id=request.session['user_login_session']['id'])
             retailer_product = models.RetailerProduct.objects.get(id=request.POST.get('retailer_product_id'))
