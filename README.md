@@ -48,6 +48,10 @@ source activate root
 ```sh
 pip install -U googlemaps
 ```
+- Install django-background-tasks via pip:
+```sh
+pip install -U django-background-tasks
+```
 
 - Go to directory:`/home/<UserName>/anaconda3/lib/python3.6/site-packages/django/contrib/admin/static`
 
