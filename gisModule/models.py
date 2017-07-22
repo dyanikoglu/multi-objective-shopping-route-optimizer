@@ -181,6 +181,11 @@ class User(models.Model):
 
 
 class UserPreferences(models.Model):
+    ALGORITHM_CHOICES = (
+        (0, 'Non-dominated Sorting GA (NSGA2)'),
+        (1, 'Strength Pareto EA 2 (SPEA2)'),
+    )
+
     owner = models.ForeignKey('User', null=True)
     money_factor = models.BooleanField("Money Factor")
     dist_factor = models.BooleanField("Distance Factor")
@@ -189,6 +194,7 @@ class UserPreferences(models.Model):
     route_start_point = models.ForeignKey('UserSavedAddress', related_name='StartAddress', null=True, blank=True)
     route_end_point = models.ForeignKey('UserSavedAddress', related_name='EndAddress', null=True, blank=True)
     get_notif_only_for_active_list = models.BooleanField("Get notifications only for active shopping list?", default=True)
+    algorithm = models.IntegerField(null=False, choices=ALGORITHM_CHOICES, default=0)
 
     def __str__(self):
         return str(self.owner.username + "\'s Preferences")

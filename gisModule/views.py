@@ -483,7 +483,8 @@ def account(request):
                         {'retailer_name': retailer_product.retailer.name, 'retailer_price': retailer_product.unitPrice})
 
             return JsonResponse({'other_prices': other_prices, 'sent_proposal_id': current_proposal.id,
-                                 'related_retailer_name': related_retailer.name, 'related_product_price': related_product.unitPrice,
+                                 'related_retailer_name': related_retailer.name,
+                                 'related_product_price': related_product.unitPrice,
                                  'related_product_name': related_product.baseProduct.name})
 
         elif request.POST.get('send_reply_to_proposal'):
@@ -709,7 +710,7 @@ def cart(request):
                 converted_list, item_quantity_list,
                 len(item_quantity_list),
                 retailer_count, frm.geolocation, to.geolocation,
-                [user_prefs.money_factor, user_prefs.dist_factor, user_prefs.time_factor])
+                [user_prefs.money_factor, user_prefs.dist_factor, user_prefs.time_factor], user_prefs.algorithm)
 
             routes = []
             for i in range(0, len(route_dicts)):

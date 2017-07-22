@@ -191,6 +191,7 @@ class CostOptimization(base):
         time_cost /= 3600  # to hours
         dist_cost /= 1000  # to meters
 
+        # For debugging purposes
         # print([models.Retailer.objects.get(
         #     id=list(list(self.products_in_markets.values())[0].keys())[int(i)]).name for i in
         #        unique_list_of_retailers])
@@ -218,15 +219,22 @@ class CostOptimization(base):
         return "\n\tSingle-Objective problem"
 
 
-def init_optimization(market_list, quantity_list, product_count, market_count, frm, to, facts):
+def init_optimization(market_list, quantity_list, product_count, market_count, frm, to, facts, algorithm_type=0):
     routes = Routes(retailer_ids=list(list(market_list.values())[0].keys()), frm=frm, to=to)
     prob = CostOptimization(product_count=product_count, product_quantities=quantity_list, market_count=market_count,
                             products_in_markets=market_list,
                             routes=routes, facts=facts)
     if facts.count(True) == 1:
+        # Not multi-objective, use different algorithm
         algo = algorithm.de_1220(gen=400)
     else:
-        algo = algorithm.nsga_II(gen=400, cr=0.95, eta_c=10, m=0.01, eta_m=50)
+        # Multi-objective
+        # Bound to algorithm attribute choice order of user preferences model
+        if algorithm_type == 0:
+            algo = algorithm.nsga_II(gen=400)
+        elif algorithm_type == 1:
+            algo = algorithm.spea2(gen=400)
+
     pop = population(prob, 64)
     pop = algo.evolve(pop)
 
