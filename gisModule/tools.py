@@ -65,7 +65,8 @@ def convert_to_unique_list(ls):
     start = ls[0]
     end = ls[len(ls) - 1]
     ls.pop(0)
-    ls.pop()
+    if len(ls) != 0:
+        ls.pop()
     waypoints = list(OrderedDict.fromkeys(ls))
     waypoints.insert(0, start)
     waypoints.append(end)

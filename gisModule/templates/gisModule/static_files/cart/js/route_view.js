@@ -59,6 +59,21 @@ function fillRouteDirectives(stopover_order, route_index) {
         }
         right_panel.append('<br><div class="choose"></div><br>');
     }
+
+    right_panel.append('<button onclick="complete_shopping_list(); return false;">Complete Shopping</button><br><br>');
+}
+
+function complete_shopping_list() {
+    $.ajax({
+        type: "POST",
+        data: {'complete_shopping_list': 'complete_shopping_list'},
+        success: function (data) {
+            location.reload();
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_cart_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
 }
 
 function calcRoute(coordinates, route_index) {

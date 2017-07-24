@@ -507,18 +507,25 @@ def cart(request):
     if request.method == "POST":
         if request.POST.get('get_shopping_list_data'):
             active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
-            active_list = active_user.active_list
+            if active_user.active_list is not None:
+                if not active_user.active_list.completed:
+                    active_list = active_user.active_list
+                else:
+                    active_list = None
+            else:
+                active_list = None
 
             # Keep database integrity clean, if active list is null while opening cart page, assign a existing cart
             # or create an empty cart immediately
             another_list_exists = False
             if active_list is None:
                 for shopping_list_membership in models.ShoppingListMember.objects.filter(user=active_user):
-                    active_user.active_list = shopping_list_membership.list
-                    active_user.save()
-                    another_list_exists = True
-                    active_list = shopping_list_membership.list
-                    break
+                    if not shopping_list_membership.list.completed:
+                        active_user.active_list = shopping_list_membership.list
+                        active_user.save()
+                        another_list_exists = True
+                        active_list = shopping_list_membership.list
+                        break
                 if not another_list_exists:
                     active_list = models.ShoppingList.objects.create(name="My First Shopping List")
                     role = models.Role.objects.get(name='Admin')  # TODO Change role assignments
@@ -630,8 +637,9 @@ def cart(request):
             active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             lists = []
             for shopping_list_membership in models.ShoppingListMember.objects.filter(user=active_user):
-                lists.append(
-                    {'list_name': shopping_list_membership.list.name, 'list_id': shopping_list_membership.list.id})
+                if not shopping_list_membership.list.completed:
+                    lists.append(
+                        {'list_name': shopping_list_membership.list.name, 'list_id': shopping_list_membership.list.id})
             return JsonResponse({'lists': lists, 'active_list_id': active_user.active_list.id})
 
         elif request.POST.get('change_active_list'):
@@ -692,6 +700,9 @@ def cart(request):
             active_list = active_user.active_list
             frm = user_prefs.route_start_point
             to = user_prefs.route_end_point
+
+            if len(models.ShoppingListItem.objects.filter(list=active_list)) == 0:
+                return tools.bad_request('Your cart is empty')
 
             start_end_dist = tools.calc_dist(frm.geolocation.coords[0], frm.geolocation.coords[1],
                                              to.geolocation.coords[0],
@@ -760,6 +771,18 @@ def cart(request):
                      'dist_diff': route_dicts[i]['dist_diff'], 'time_diff': route_dicts[i]['time_diff']})
 
             return JsonResponse({'routes': routes, 'champ_indexes': champ_indexes})
+
+        elif request.POST.get("complete_shopping_list"):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            user_prefs = active_user.preferences
+            active_list = active_user.active_list
+
+            # Shopping list is completed, mark as completed.
+            active_list.completed = True
+            active_list.save()
+
+            message = "Successfully completed the shopping list: <b>%s</b>" % active_list.name
+            return JsonResponse({'status': 'success', 'message': message})
 
 
 def shop(request):

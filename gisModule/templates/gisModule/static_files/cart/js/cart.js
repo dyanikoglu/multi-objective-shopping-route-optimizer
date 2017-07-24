@@ -112,13 +112,16 @@ function initiate_route_calculation() {
         type: "POST",
         data: {'initiate_route_calculation': 'initiate_route_calculation'},
         success: function (data) {
-            console.log(data);
             $('#loading').hide('slow');
             var route_selection = $('#route_selection');
             fill_route_data(data);
             route_selection.show('slow');
         },
         error: function (xhr, ajaxOptions, thrownError) {
+            $('#cart_items').show('slow');
+            $('#do_action').show('slow');
+            $('#footer').show('slow');
+            $('#loading').hide('slow');
             show_cart_notif(xhr['responseJSON']['message'], 2000);
         }
     });

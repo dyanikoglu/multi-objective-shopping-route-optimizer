@@ -200,6 +200,16 @@ class UserPreferences(models.Model):
         return str(self.owner.username + "\'s Preferences")
 
 
+class UserStatistics(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey('User')
+    moneySpent = models.FloatField('Money Spent', null=False, default=0)
+    itemsBought = models.PositiveIntegerField('Items Bought', null=False, default=0)
+    shoppingListsComplete = models.PositiveIntegerField('Shopping Lists Completed', null=False, default=0)
+    favoriteCategory = models.CharField('Favorite Category', null=True, max_length=64)
+    favoriteProduct = models.ForeignKey('BaseProduct')
+
+
 class UserSavedAddress(models.Model):
     name = models.CharField("Address Name", max_length=256, null=False)
     id = models.AutoField(primary_key=True)
@@ -280,9 +290,6 @@ class ShoppingListItem(models.Model):
     addedBy = models.ForeignKey(User, null=True, related_name='added_by')
     edited_by = models.ForeignKey(User, null=True, related_name='edited_by')
     quantity = models.PositiveIntegerField("Quantity")
-
-    def __str__(self):
-        return "%s:%s" % (self.list.name, self.product.brand)
 
 
 class Friend(models.Model):
