@@ -21,3 +21,5 @@ background_models.Task.objects.all().delete()  # DELETE OLD TASKS FROM TABLE
 
 tasks.blame_module_check_blame_status(repeat=30)
 tasks.blame_module_check_proposal(repeat=30)
+tasks.statistic_module_basic_statistics(repeat=30)
+

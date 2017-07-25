@@ -25,7 +25,7 @@ SECRET_KEY = '9=$-haw59#io2%&7ggoxu$k6%a!i%77agkx91hjqb!=7n0(%hs'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["10.2.43.199", "localhost"]
+ALLOWED_HOSTS = ["192.168.1.28", "localhost"]
 
 # Application definition
 
@@ -130,5 +130,3 @@ STATIC_URL = '/static/'
 
 GEOS_LIBRARY_PATH = '/home/dyanikoglu/anaconda3/lib/libgeos_c.so'
 GDAL_LIBRARY_PATH = '/home/dyanikoglu/anaconda3/lib/libgdal.so'
-
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True

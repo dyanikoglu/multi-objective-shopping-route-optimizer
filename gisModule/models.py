@@ -174,6 +174,7 @@ class User(models.Model):
     email = models.EmailField("Email", max_length=64, null=True)
     active_list = models.ForeignKey(ShoppingList, null="True", blank=True)
     preferences = models.ForeignKey('UserPreferences', null="True")
+    statistics = models.ForeignKey('UserStatistics', null="True")
     reputation = models.FloatField('Reputation', null=False, default=0)
 
     def __str__(self):
@@ -186,7 +187,6 @@ class UserPreferences(models.Model):
         (1, 'Strength Pareto EA 2 (SPEA2)'),
     )
 
-    owner = models.ForeignKey('User', null=True)
     money_factor = models.BooleanField("Money Factor")
     dist_factor = models.BooleanField("Distance Factor")
     time_factor = models.BooleanField("Time Factor")
@@ -196,18 +196,16 @@ class UserPreferences(models.Model):
     get_notif_only_for_active_list = models.BooleanField("Get notifications only for active shopping list?", default=True)
     algorithm = models.IntegerField(null=False, choices=ALGORITHM_CHOICES, default=0)
 
-    def __str__(self):
-        return str(self.owner.username + "\'s Preferences")
-
 
 class UserStatistics(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey('User')
     moneySpent = models.FloatField('Money Spent', null=False, default=0)
+    blame_count = models.PositiveIntegerField('Blame Count', null=False, default=0)
+    reputation = models.FloatField('Reputation', null=False, default=0)
     itemsBought = models.PositiveIntegerField('Items Bought', null=False, default=0)
     shoppingListsComplete = models.PositiveIntegerField('Shopping Lists Completed', null=False, default=0)
-    favoriteCategory = models.CharField('Favorite Category', null=True, max_length=64)
-    favoriteProduct = models.ForeignKey('BaseProduct')
+    favoriteCategory = models.CharField('Favorite Category', blank=True, null=True, max_length=64)
+    favoriteProduct = models.CharField('Favorite Product', blank=True, null=True, max_length=64)
 
 
 class UserSavedAddress(models.Model):

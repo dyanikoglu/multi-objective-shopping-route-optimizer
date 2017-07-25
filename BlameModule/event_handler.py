@@ -55,10 +55,10 @@ def auth_confirm_proposal(proposal):
     print("%s report is automatically accepted by auth." % proposal.retailer_product.__str__())
     for proposal_sent in models.ProposalSent.objects.filter(false_price_proposal=proposal):
         if proposal_sent.response == True:
-            proposal_sent.user.reputation += parameters.PRIZE_FOR_CORRECT_RESPONSE
+            proposal_sent.user.statistics.reputation += parameters.PRIZE_FOR_CORRECT_RESPONSE
         else:
-            proposal_sent.user.reputation += parameters.PENALTY_FOR_FALSE_RESPONSE
-        proposal_sent.user.save()
+            proposal_sent.user.statistics.reputation += parameters.PENALTY_FOR_FALSE_RESPONSE
+        proposal_sent.user.statistics.save()
 
     # Archive the proposal
     proposal.status_code = 3
@@ -117,11 +117,11 @@ def check_complete_responded_proposals(proposal):
             for proposal_sent in models.ProposalSent.objects.filter(false_price_proposal=proposal):
                 if proposal_sent.response == True:
                     print("%s got a penalty for wrong response" % proposal_sent.user.username)
-                    proposal_sent.user.reputation += parameters.PENALTY_FOR_FALSE_RESPONSE
+                    proposal_sent.user.statistics.reputation += parameters.PENALTY_FOR_FALSE_RESPONSE
                 else:
                     print("%s got a prize for correct response" % proposal_sent.user.username)
-                    proposal_sent.user.reputation += parameters.PRIZE_FOR_CORRECT_RESPONSE
-                proposal_sent.user.save()
+                    proposal_sent.user.statistics.reputation += parameters.PRIZE_FOR_CORRECT_RESPONSE
+                proposal_sent.user.statistics.save()
 
             # Reset status of related retailer product:
             proposal.retailer_product.blame_point = 0

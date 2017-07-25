@@ -26,13 +26,15 @@ class Routes:
             self.coordinates.append(ret.geolocation)  # Lat Long values are reversed for Google API defaults
 
     def calculate_legs(self, current_retailers):
-        request_str = "http://router.project-osrm.org/trip/v1/driving/"
+        request_str = "http://localhost:5000/trip/v1/driving/"
         request_str += "%s,%s" % (self.frm.coords[0], self.frm.coords[1])
         for i in current_retailers:
             request_str += ";%s,%s" % (self.coordinates[int(i)].coords[0], self.coordinates[int(i)].coords[1])
         request_str += ";%s,%s" % (self.to.coords[0], self.to.coords[1])
         request_str += "?source=first&destination=last&roundtrip=false"
         results = self.http.request('GET', request_str)
+        print(request_str)
+        print(results)
         js = json.loads(results.data.decode('utf-8'))
 
         total_dist = 0.0

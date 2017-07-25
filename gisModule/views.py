@@ -498,6 +498,16 @@ def account(request):
             message = "Reply successfully sent"
             return JsonResponse({'status': 'success', 'message': message})
 
+        elif request.POST.get("fetch_statistics"):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+            statistics = active_user.statistics
+
+            return JsonResponse({'total_blames': statistics.blame_count, 'total_products': statistics.itemsBought,
+                                 'total_shopping_lists': statistics.shoppingListsComplete,
+                                 'favorite_category': statistics.favoriteCategory,
+                                 'favorite_product': statistics.favoriteProduct,
+                                 'reputation': statistics.reputation})
+
 
 def cart(request):
     if request.method == "GET":
@@ -920,12 +930,14 @@ def login(request):
                     new_prefs = models.UserPreferences.objects.create(money_factor=True, dist_factor=True,
                                                                       time_factor=True, search_radius=100,
                                                                       route_start_point=None, route_end_point=None)
+
+                    new_stats = models.UserStatistics.objects.create()
+
                     new_usr = models.User.objects.create(username=username,
                                                          password=tools.encode_password(request.POST.get("password")),
                                                          email=email, first_name=first_name, last_name=last_name,
-                                                         preferences=new_prefs, active_list=None)
-                    new_usr.preferences.owner = new_usr
-                    new_usr.preferences.save()
+                                                         preferences=new_prefs, statistics=new_stats, active_list=None)
+
                     # Login with this new account
                     user_login_session = {'status': 'logged_in', 'id': new_usr.id, 'username': username,
                                           'first_name': new_usr.first_name,

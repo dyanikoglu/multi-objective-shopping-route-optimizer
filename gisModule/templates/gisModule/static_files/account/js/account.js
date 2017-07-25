@@ -3,11 +3,22 @@
  */
 
 $(document).ready(function () {
+    $('#settings_header').html('Account | Statistics');
+    fetch_statistics();
+
     $('#received_proposals_button').click(function () {
         hide_all();
         $('#settings_header').html('Account | Received Proposals');
         $('#received_proposals').toggle('normal');
         fetch_pending_proposals();
+        return false;
+    });
+
+    $('#statistics_button').click(function () {
+        hide_all();
+        $('#statistics').toggle('normal');
+        $('#settings_header').html('Account | Statistics');
+        fetch_statistics();
         return false;
     });
 
@@ -105,6 +116,7 @@ function hide_all() {
     $('#route_defaults_settings').hide('normal');
     $('#address_book').hide('normal');
     $('#received_proposals').hide('normal');
+    $('#statistics').hide('normal');
 }
 
 ///////////////////// ROUTE DEFAULTS START
@@ -615,6 +627,37 @@ function send_reply_to_proposal(proposal_id, response) {
 }
 
 //////////////////// FALSE PRICE PROPOSAL MANAGEMENT END
+
+
+
+/////////////////// STATISTICS START
+
+function fetch_statistics() {
+    $.ajax({
+        type: "POST",
+        data: {'fetch_statistics': 'fetch_statistics'},
+        success: function (data) {
+            $('#total_blames').empty();
+            $('#total_products').empty()
+            $('#total_shopping_lists').empty();
+            $('#favorite_category').empty();
+            $('#favorite_product').empty();
+            $('#reputation').empty();
+
+            $('#reputation').append(data['reputation']);
+            $('#total_blames').append(data['total_blames']);
+            $('#total_products').append(data['total_products']);
+            $('#total_shopping_lists').append(data['total_shopping_lists']);
+            $('#favorite_category').append(data['favorite_category']);
+            $('#favorite_product').append( data['favorite_product']);
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+}
+
+/////////////////// STATISTICS END
 
 
 function show_account_notif(msg, time) {

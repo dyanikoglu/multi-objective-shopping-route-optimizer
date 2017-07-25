@@ -33,9 +33,14 @@
                                         </div>
                                         <div class="panel-heading">
                                             <h4 class="panel-title">
-                                                <a href="">Regional Settings</a>
+                                                <a id="statistics_button" href="">Statistics</a>
                                             </h4>
                                         </div>
+{#                                        <div class="panel-heading">#}
+{#                                            <h4 class="panel-title">#}
+{#                                                <a href="">Regional Settings</a>#}
+{#                                            </h4>#}
+{#                                        </div>#}
                                         <div class="panel-heading">
                                             <h4 class="panel-title">
                                                 <a id="manage_friends_button" href="#">Manage Friends</a>
@@ -67,11 +72,11 @@
                                 </div>
                                 <div id="cart_alt" class="panel-collapse collapse">
                                     <div class="panel-body">
-                                        <div class="panel-heading">
-                                            <h4 class="panel-title">
-                                                <a href="">General Settings</a>
-                                            </h4>
-                                        </div>
+{#                                        <div class="panel-heading">#}
+{#                                            <h4 class="panel-title">#}
+{#                                                <a href="">General Settings</a>#}
+{#                                            </h4>#}
+{#                                        </div>#}
                                         <div class="panel-heading">
                                             <h4 class="panel-title">
                                                 <a id="manage_lists_button" href="#">Manage Lists</a>
@@ -98,11 +103,11 @@
                                                 <a id="route_default_settings_button" href="#">Default Settings</a>
                                             </h4>
                                         </div>
-                                        <div class="panel-heading">
-                                            <h4 class="panel-title">
-                                                <a href="">Algorithm Settings</a>
-                                            </h4>
-                                        </div>
+{#                                        <div class="panel-heading">#}
+{#                                            <h4 class="panel-title">#}
+{#                                                <a href="">Algorithm Settings</a>#}
+{#                                            </h4>#}
+{#                                        </div>#}
                                         <div class="panel-heading">
                                             <h4 class="panel-title">
                                                 <a id="address_book_button" href="#">Address Book</a>
@@ -308,21 +313,24 @@
                                             <div class="mk-trc" data-color="amber" data-radius="true">
                                                 <input name="opt_money" id="opt_money" type="checkbox">
                                                 <label for="opt_money"><i data-before-check="&#xf00d;"
-                                                                         data-after-check="&#xf00c;"></i>Optimize Money Cost</label>
+                                                                          data-after-check="&#xf00c;"></i>Optimize Money
+                                                    Cost</label>
                                             </div>
                                         </div>
                                         <div class="col-sm-4">
                                             <div class="mk-trc" data-color="amber" data-radius="true">
                                                 <input name="opt_dist" id="opt_dist" type="checkbox">
                                                 <label for="opt_dist"><i data-before-check="&#xf00d;"
-                                                                        data-after-check="&#xf00c;"></i>Optimize Distance</label>
+                                                                         data-after-check="&#xf00c;"></i>Optimize
+                                                    Distance</label>
                                             </div>
                                         </div>
                                         <div class="col-sm-4">
                                             <div class="mk-trc" data-color="amber" data-radius="true">
                                                 <input name="opt_time" id="opt_time" type="checkbox">
                                                 <label for="opt_time"><i data-before-check="&#xf00d;"
-                                                                        data-after-check="&#xf00c;"></i>Optimize Time Spent</label>
+                                                                         data-after-check="&#xf00c;"></i>Optimize Time
+                                                    Spent</label>
                                             </div>
                                         </div>
                                     </div>
@@ -361,7 +369,8 @@
                                             <div class="blank-arrow">
                                                 <label>Address Name</label>
                                             </div>
-                                            <input id="address_name" name="address_name" type="text" placeholder="address name...">
+                                            <input id="address_name" name="address_name" type="text"
+                                                   placeholder="address name...">
                                         </div>
                                         <div class="col-sm-6">
                                             <div class="blank-arrow">
@@ -384,11 +393,37 @@
                             <div id="received_proposals" class="replay-box" hidden> <!--Received Proposals-->
 
                             </div>
-                        </div>
-                    </div><!--/user_panel-->
+
+                            <div style="text-align: center" id="statistics"> <!--Statistics-->
+                                <div class="row"><span><img style="width: 2em; height: 2em;"
+                                                                                     src="http://freevector.co/wp-content/uploads/2009/12/56902-double-up-arrow.png"> &nbsp;Reputation<br> <div style="color: darkorange" id="reputation"></div></span>
+                                </div>
+                                <br><br>
+                                <div class="row"><span><img style="width: 2em; height: 2em;"
+                                                                                     src="http://classroomclipart.com/images/gallery/Clipart/Silhouettes/TN_star-silhouette-1108.jpg"> &nbsp;Favorite Product<br> <div style="color: darkorange" id="favorite_product"></div></span>
+                                </div>
+                                <br><br>
+                                <div class="row"><span><img style="width: 2em; height: 2em;"
+                                                                                     src="https://cdn3.iconfinder.com/data/icons/audio-and-video-3/512/110-128.png"> &nbsp;Favorite Category<br> <div style="color: darkorange" id="favorite_category"></div></span>
+                                </div>
+                                <br><br>
+                                <div class="row"><span><img style="width: 2em; height: 2em;"
+                                                                                     src="https://image.freepik.com/free-icon/plus-sign_318-54005.jpg"> &nbsp;Total Products Purchased<br> <div style="color: darkorange" id="total_products"></div></span>
+                                </div>
+                                <br><br>
+                                <div class="row"><span><img style="width: 2em; height: 2em;"
+                                                                                     src="https://phonegap.com/uploads/artwork/PhoneGap-Symbol-Black.svg"> &nbsp;Total Price Blames Created<br> <div style="color: darkorange" id="total_blames"></div></span>
+                                </div>
+                                <br><br>
+                                <div class="row"><span><img style="width: 2em; height: 2em;"
+                                                                                     src="https://image.flaticon.com/icons/svg/2/2772.svg"> &nbsp;Shopping Lists Completed<br> <div style="color: darkorange" id="total_shopping_lists"></div></span>
+                                </div>
+                                <br><br>
+                            </div> <!-- Statistics End -->
+                        </div><!--/user_panel-->
+                    </div>
                 </div>
             </div>
-        </div>
     </section>
 {% endblock %}
 

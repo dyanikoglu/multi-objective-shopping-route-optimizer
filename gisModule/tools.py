@@ -16,7 +16,7 @@ http = urllib3.PoolManager()
 def get_all_logged_in_users():
     # Query all non-expired sessions
     # use timezone.now() instead of datetime.now() in latest versions of Django
-    sessions = Session.objects.filter(expire_date__gte=timezone.now())
+    sessions = Session.objects.all()
     uid_list = []
 
     # Build a list of user ids from that query
