@@ -33,8 +33,6 @@ class Routes:
         request_str += ";%s,%s" % (self.to.coords[0], self.to.coords[1])
         request_str += "?source=first&destination=last&roundtrip=false"
         results = self.http.request('GET', request_str)
-        print(request_str)
-        print(results)
         js = json.loads(results.data.decode('utf-8'))
 
         total_dist = 0.0
