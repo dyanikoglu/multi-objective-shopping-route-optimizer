@@ -71,6 +71,8 @@ psql TEMP_DATABASE_NAME_HERE < PATH_TO_PROJECT_FOLDER_HERE/backup.sql
 ```
 - Install PGAdmin III from Ubuntu Store.
 
+- Setup and run OSRM-Backend server on localhost. Guide and source code can be found on https://github.com/Project-OSRM/osrm-backend
+
 ### Starting The Server
 
 - Switch to default Anaconda Environment:
