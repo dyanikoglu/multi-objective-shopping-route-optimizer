@@ -711,6 +711,9 @@ def cart(request):
             frm = user_prefs.route_start_point
             to = user_prefs.route_end_point
 
+            if user_prefs.money_factor is False and user_prefs.dist_factor is False and user_prefs.time_factor is False:
+                return tools.bad_request('You should enable at least one optimization')
+
             if len(models.ShoppingListItem.objects.filter(list=active_list)) == 0:
                 return tools.bad_request('Your cart is empty')
 
@@ -931,7 +934,8 @@ def login(request):
                                                                       time_factor=True, search_radius=100,
                                                                       route_start_point=None, route_end_point=None)
 
-                    new_stats = models.UserStatistics.objects.create()
+                    new_stats = models.UserStatistics.objects.create(
+                        reputation=BlameModule.parameters.INITIAL_REPUTATION_FOR_USER)
 
                     new_usr = models.User.objects.create(username=username,
                                                          password=tools.encode_password(request.POST.get("password")),

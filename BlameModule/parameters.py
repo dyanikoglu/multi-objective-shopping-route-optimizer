@@ -2,6 +2,7 @@ USER_REPUTATION_REQ_FOR_BLAMING = 100
 # False Price Report will be prepared after reaching this limit:
 BLAME_POINT_LIMIT_FOR_PRODUCT = 100
 INITIAL_REPUTATION_FOR_RETAILER = 500
+INITIAL_REPUTATION_FOR_USER = 200
 # Multiplier for each calculation:
 BLAME_MULTIPLIER = 25
 # Prize if user correctly responds a report:

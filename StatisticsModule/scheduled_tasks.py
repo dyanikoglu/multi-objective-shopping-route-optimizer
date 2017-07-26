@@ -17,6 +17,10 @@ def basic_statistics():
         product_freqs = {}
         category_freqs = {}
         for item_bought in models.ShoppingListItem.objects.filter(addedBy=user):
+            # Skip non-owned by a list products
+            if item_bought.list is None:
+                continue
+
             # Skip still not bought products
             if not item_bought.list.completed:
                 continue
