@@ -28,6 +28,7 @@ class Routes:
     def calculate_legs(self, current_retailers):
         request_str = "http://localhost:5000/trip/v1/driving/"
         request_str += "%s,%s" % (self.frm.coords[0], self.frm.coords[1])
+
         for i in current_retailers:
             request_str += ";%s,%s" % (self.coordinates[int(i)].coords[0], self.coordinates[int(i)].coords[1])
         request_str += ";%s,%s" % (self.to.coords[0], self.to.coords[1])

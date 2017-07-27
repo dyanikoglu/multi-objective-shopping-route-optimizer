@@ -123,7 +123,7 @@ class BaseProduct(models.Model):
     )
 
     group = models.ForeignKey('ProductGroup', null=True)
-    productID = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     brand = models.CharField("Brand", max_length=64)
     type = models.CharField("Type", max_length=64, blank=True)
     amount = models.PositiveIntegerField("Amount")
@@ -149,7 +149,7 @@ class RetailerProduct(models.Model):
     removed_from_store = models.BooleanField('Do not show in store', null=False, default=False)
 
     def __str__(self):
-        product = BaseProduct.objects.get(productID=self.baseProduct.productID)
+        product = BaseProduct.objects.get(id=self.baseProduct.id)
         retailer = Retailer.objects.get(id=self.retailer.id)
         return "%s | %s" % (retailer.name, product)
 
@@ -160,6 +160,10 @@ class ShoppingList(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     completed = models.BooleanField("Completed?", default=False)
+    completed_by = models.ForeignKey('User', null=True)
+    total_money_cost = models.FloatField('Total Money Cost', null=True)
+    total_distance_cost = models.FloatField('Total Distance Cost', null=True)
+    total_time_cost = models.FloatField('Total Time Cost', null=True)
 
     def __str__(self):
         return "%s" % self.name
@@ -190,7 +194,7 @@ class UserPreferences(models.Model):
     money_factor = models.BooleanField("Money Factor")
     dist_factor = models.BooleanField("Distance Factor")
     time_factor = models.BooleanField("Time Factor")
-    search_radius = models.PositiveIntegerField("Search Radius(km)", null="True")
+    search_radius = models.PositiveIntegerField("Search Radius(km)", null=False, default=100)
     route_start_point = models.ForeignKey('UserSavedAddress', related_name='StartAddress', null=True, blank=True)
     route_end_point = models.ForeignKey('UserSavedAddress', related_name='EndAddress', null=True, blank=True)
     get_notif_only_for_active_list = models.BooleanField("Get notifications only for active shopping list?", default=True)
@@ -285,8 +289,12 @@ class ShoppingListItem(models.Model):
     id = models.AutoField(primary_key=True)
     list = models.ForeignKey(ShoppingList, null=True)
     product = models.ForeignKey(BaseProduct, null=True)
-    addedBy = models.ForeignKey(User, null=True, related_name='added_by')
+    added_by = models.ForeignKey(User, null=True, related_name='added_by')
     edited_by = models.ForeignKey(User, null=True, related_name='edited_by')
+    is_purchased = models.BooleanField('Is this product purchased?', null=False, default=False)
+    purchased_by = models.ForeignKey(User, null=True, related_name='purchased_by')
+    unit_purchase_price = models.FloatField('Purchase Price', null=True)
+    purchase_date = models.DateTimeField(blank=True, null=True)
     quantity = models.PositiveIntegerField("Quantity")
 
 

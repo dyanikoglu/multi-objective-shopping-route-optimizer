@@ -42,7 +42,7 @@ function fillRouteDirectives(stopover_order, route_index) {
         right_panel.append('<span><img style="width: 2em; height: 2em;" src="http://housing.utk.edu/wp-content/uploads/sites/12/2016/10/Tour2.png"></span>' + route_data[route_index]['stopover_names'][stopover_order[j] + 1]);
         right_panel.append('<span style="color: orange; font-weight: bold">&nbsp;&nbsp;· · ·&nbsp;</span>');
     }
-    right_panel.append('<span><img style="width: 2em; height: 2em;" src="http://housing.utk.edu/wp-content/uploads/sites/12/2016/10/Tour2.png"></span>' + route_data[route_index]['stopover_names'][stopover_count-1]);
+    right_panel.append('<span><img style="width: 2em; height: 2em;" src="http://housing.utk.edu/wp-content/uploads/sites/12/2016/10/Tour2.png"></span>' + route_data[route_index]['stopover_names'][stopover_count - 1]);
 
 
     // Build full shopping guide
@@ -60,13 +60,20 @@ function fillRouteDirectives(stopover_order, route_index) {
         right_panel.append('<br><div class="choose"></div><br>');
     }
 
-    right_panel.append('<button onclick="complete_shopping_list(); return false;">Complete Shopping</button><br><br>');
+    right_panel.append('<button onclick="complete_shopping_list(\'' + route_index + '\'); return false;">Complete Shopping</button><br><br>');
 }
 
-function complete_shopping_list() {
+function complete_shopping_list(route_index) {
     $.ajax({
         type: "POST",
-        data: {'complete_shopping_list': 'complete_shopping_list'},
+        data: {
+            'complete_shopping_list': 'complete_shopping_list',
+            'money_cost': route_data[route_index]['costs'][0],
+            'distance_cost': route_data[route_index]['costs'][1],
+            'time_cost': route_data[route_index]['costs'][2],
+            'product_prices': JSON.stringify(route_data[route_index]['product_prices']),
+            'product_ids': JSON.stringify(route_data[route_index]['product_ids'])
+        },
         success: function (data) {
             location.reload();
         },
@@ -121,7 +128,6 @@ function initialize_route_view(route_index) {
 
     google.maps.event.trigger(map, 'resize');
     map.setCenter(new google.maps.LatLng(route_data[route_index]['stopover_coords'][0][1], route_data[route_index]['stopover_coords'][0][0]));
-    console.log(route_data[route_index]);
 
     var coordinates = route_data[route_index]['stopover_coords'];
     var stopover_names = route_data[route_index]['stopover_names'];

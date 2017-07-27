@@ -80,8 +80,8 @@ def convert_to_markets_for_items_list(active_list, midpoint, dist):
     for item in models.ShoppingListItem.objects.filter(list=active_list):
         quantity_list.append(item.quantity)
         itemid = item.id
-        product_id = item.product.productID
-        base_product = models.BaseProduct.objects.get(productID=product_id)
+        product_id = item.product.id
+        base_product = models.BaseProduct.objects.get(id=product_id)
         product_list[itemid] = OrderedDict()  # Uber Super Duper Fix For Wrong Retailer Names in Web-App, don't use plain dict
         retailer_list = get_retailers_in_dist(midpoint, dist)
         for retailer in retailer_list:

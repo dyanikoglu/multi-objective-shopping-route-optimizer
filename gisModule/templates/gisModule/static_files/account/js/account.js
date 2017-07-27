@@ -648,8 +648,18 @@ function fetch_statistics() {
             $('#total_blames').append(data['total_blames']);
             $('#total_products').append(data['total_products']);
             $('#total_shopping_lists').append(data['total_shopping_lists']);
-            $('#favorite_category').append(data['favorite_category']);
-            $('#favorite_product').append( data['favorite_product']);
+            if(data['favorite_category']) {
+                $('#favorite_category_toggle').show();
+                $('#favorite_category').append(data['favorite_category']);
+            } else {
+                $('#favorite_category_toggle').hide();
+            }
+            if(data['favorite_product']) {
+                $('#favorite_product_toggle').show();
+                $('#favorite_product').append(data['favorite_product']);
+            } else {
+                $('#favorite_product_toggle').hide();
+            }
         },
         error: function (xhr, ajaxOptions, thrownError) {
             show_account_notif(xhr['responseJSON']['message'], 2000);

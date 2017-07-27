@@ -7,6 +7,8 @@ from ObjectiveCostOptimizer.differentialEvolution import init_optimization
 from gisModule import models, tools
 from django.contrib.gis import geos
 from BlameModule import event_handler as BlameModule
+from datetime import datetime
+from dateutil.tz import tzlocal
 import pusher
 
 pusher_client = pusher.Pusher(
@@ -550,9 +552,9 @@ def cart(request):
             product_edited_by = []
             for product in models.ShoppingListItem.objects.filter(list=active_list):
                 product_name.append(product.product.name)
-                product_id.append(product.product.productID)
+                product_id.append(product.product.id)
                 product_quantity.append(product.quantity)
-                product_added_by.append(product.addedBy.username)
+                product_added_by.append(product.added_by.username)
                 product_edited_by.append(product.edited_by.username)
             return JsonResponse(
                 {'active_list_name': active_list.name, 'active_list_id': active_list.id, 'product_name': product_name,
@@ -560,7 +562,7 @@ def cart(request):
                  'product_added_by': product_added_by, 'product_changed_by': product_edited_by})
 
         elif request.POST.get('post_inc_dec_quantity'):
-            product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
+            product = models.BaseProduct.objects.get(id=request.POST.get('product_id'))
             active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             active_list = active_user.active_list
             try:
@@ -589,7 +591,7 @@ def cart(request):
                 {'message': message, 'new_quantity': new_quantity, 'new_changed_by': active_user.username})
 
         elif request.POST.get('post_change_quantity'):
-            product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
+            product = models.BaseProduct.objects.get(id=request.POST.get('product_id'))
             active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             active_list = active_user.active_list
 
@@ -619,7 +621,7 @@ def cart(request):
             return JsonResponse({'message': message, 'new_changed_by': active_user.username})
 
         elif request.POST.get('post_remove_from_cart'):
-            product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
+            product = models.BaseProduct.objects.get(id=request.POST.get('product_id'))
             active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             active_list = active_user.active_list
             try:
@@ -693,6 +695,10 @@ def cart(request):
             prefs.time_factor = bool(request.POST.get('opt_time'))
             prefs.money_factor = bool(request.POST.get('opt_money'))
             prefs.dist_factor = bool(request.POST.get('opt_dist'))
+
+            if request.POST.get('tolerance') == '':
+                return tools.bad_request('Route radius cannot be blank')
+
             prefs.search_radius = int(request.POST.get('tolerance'))
 
             if int(request.POST.get('start_point')) != -1:
@@ -716,6 +722,12 @@ def cart(request):
 
             if len(models.ShoppingListItem.objects.filter(list=active_list)) == 0:
                 return tools.bad_request('Your cart is empty')
+
+            if frm is None:
+                return tools.bad_request('Route start point cannot be blank')
+
+            if to is None:
+                return tools.bad_request('Route end point cannot be blank')
 
             start_end_dist = tools.calc_dist(frm.geolocation.coords[0], frm.geolocation.coords[1],
                                              to.geolocation.coords[0],
@@ -765,7 +777,7 @@ def cart(request):
                 j = 0
                 for product in list(route_dicts[i]['products']):
                     product_names.append(product.name)
-                    product_ids.append(product.productID)
+                    product_ids.append(product.id)
                     product_prices.append(models.RetailerProduct.objects.get(retailer=route_dicts[i]['retailers'][j],
                                                                              baseProduct=product).unitPrice)
                     product_quantities.append(
@@ -787,11 +799,28 @@ def cart(request):
 
         elif request.POST.get("complete_shopping_list"):
             active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
-            user_prefs = active_user.preferences
             active_list = active_user.active_list
+
+            active_list.total_distance_cost = request.POST.get("distance_cost")
+            active_list.total_money_cost = request.POST.get("money_cost")
+            active_list.total_time_cost = request.POST.get("time_cost")
+
+            # Update each item in this shopping list
+            for i in range(0, len(json.loads(request.POST.get("product_ids")))):
+                base_product_id = json.loads(request.POST.get("product_ids"))[i]
+                unit_price = json.loads(request.POST.get("product_prices"))[i]
+
+                base_product = models.BaseProduct.objects.get(id=base_product_id)
+                list_item = models.ShoppingListItem.objects.get(product=base_product, list=active_list)
+                list_item.is_purchased = True
+                list_item.purchased_by = active_user
+                list_item.unit_purchase_price = unit_price
+                list_item.purchase_date = datetime.now(tzlocal())
+                list_item.save()
 
             # Shopping list is completed, mark as completed.
             active_list.completed = True
+            active_list.completed_by = active_user
             active_list.save()
 
             message = "Successfully completed the shopping list: <b>%s</b>" % active_list.name
@@ -827,13 +856,23 @@ def shop(request):
             group = models.ProductGroup.objects.get(id=category_id)
             products = {}
             for product in models.BaseProduct.objects.filter(group=group):
-                products.update({product.name: product.productID})
+                products.update({product.name: product.id})
             return JsonResponse({'loaded_products': products, 'category_id': category_id})
 
         elif request.POST.get('post_add_to_cart'):
-            product = models.BaseProduct.objects.get(productID=request.POST.get('product_id'))
+            product = models.BaseProduct.objects.get(id=request.POST.get('product_id'))
             editing_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             shopping_list = editing_user.active_list
+
+            # If no shopping list exists, create new one
+            if shopping_list is None:
+                temp_list = models.ShoppingList.objects.create(name="My First Shopping List")
+                editing_user.active_list = temp_list
+                editing_user.save()
+                role = models.Role.objects.get(name="Admin") # TODO
+                models.ShoppingListMember.objects.create(user=editing_user, list=editing_user.active_list, role=role)
+                shopping_list = temp_list
+
             list_product, exists, new_quantity = tools.add_product_to_list(editing_user, product, shopping_list)
 
             # Notify other users sharing the cart
@@ -852,7 +891,7 @@ def shop(request):
                                               {'message': notification, 'product_name': product.name,
                                                'product_id': request.POST.get('product_id'),
                                                'product_quantity': list_product.quantity,
-                                               'product_added_by': list_product.addedBy.username,
+                                               'product_added_by': list_product.added_by.username,
                                                'product_changed_by': list_product.edited_by.username})
 
             message = "Product successfully added into shopping list"
@@ -865,11 +904,11 @@ def shop(request):
                 queryset = queryset.filter(name__icontains=string)
             products = {}
             for product in queryset:
-                products.update({product.name: product.productID})
+                products.update({product.name: product.id})
             return JsonResponse({'loaded_products': products})
 
         elif request.POST.get('fetch_product_details'):
-            product = models.BaseProduct.objects.all().get(productID=request.POST.get('product_id'))
+            product = models.BaseProduct.objects.all().get(id=request.POST.get('product_id'))
             retailer_prices = []
             avg_price = 0
             i = 0
@@ -888,7 +927,7 @@ def shop(request):
                 no_retailers = True
 
             return JsonResponse(
-                {'product_name': product.name, 'product_id': product.productID, 'retailer_prices': retailer_prices,
+                {'product_name': product.name, 'product_id': product.id, 'retailer_prices': retailer_prices,
                  'no_retailers': no_retailers})
 
         elif request.POST.get('blame_retailer'):
