@@ -390,11 +390,12 @@
                                 <div id="saved_addresses"></div>
                             </div>
 
-                            <div id="received_proposals" class="replay-box" hidden> <!--Received Proposals-->
-
-                            </div>
+                            <div id="received_proposals" class="replay-box" hidden> <!--Received Proposals--></div>
 
                             <div style="text-align: center" id="statistics"> <!--Statistics-->
+                                <div id="category_count_chart" style="display: block; margin: 0 auto; width: 600px; height: 600px;"></div>
+                                <div id="category_price_chart" style="display: block; margin: 0 auto; width: 600px; height: 600px;"></div>
+
                                 <div class="row"><span><img style="width: 2em; height: 2em;"
                                                                                      src="http://freevector.co/wp-content/uploads/2009/12/56902-double-up-arrow.png"> &nbsp;Reputation<br> <div style="color: darkorange" id="reputation"></div></span>
                                 </div>
@@ -424,9 +425,12 @@
                     </div>
                 </div>
             </div>
+        </div>
     </section>
+
 {% endblock %}
 
 {% block specific_js %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{% static 'account/js/account.js' %}"></script>
 {% endblock %}

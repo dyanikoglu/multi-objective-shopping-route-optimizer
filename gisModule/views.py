@@ -510,6 +510,28 @@ def account(request):
                                  'favorite_product': statistics.favoriteProduct,
                                  'reputation': statistics.reputation})
 
+        elif request.POST.get("fetch_categorical_statistics"):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+
+            category_price = {}
+            for purchase in models.ShoppingListItem.objects.filter(purchased_by=active_user, is_purchased=True):
+                category = str(purchase.product.group.name)
+                price = float(purchase.quantity * purchase.unit_purchase_price)
+                if category not in category_price:
+                    category_price[category] = price
+                else:
+                    category_price[category] += price
+
+            print(category_price)
+
+            categories = []
+            prices = []
+            for key, value in category_price.items():
+                categories.append(key)
+                prices.append(value)
+
+            return JsonResponse({'categories': categories, 'prices': prices})
+
 
 def cart(request):
     if request.method == "GET":

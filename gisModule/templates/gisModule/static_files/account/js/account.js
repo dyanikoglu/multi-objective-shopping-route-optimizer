@@ -106,7 +106,37 @@ $(document).ready(function () {
         create_new_list($(this).closest('form').serialize());
         return false;
     });
+
+    google.charts.load('current', {'packages': ['corechart']});
+    google.charts.setOnLoadCallback(drawCharts);
 });
+
+function drawCharts() {
+    $.ajax({
+        type: "POST",
+        data: {'fetch_categorical_statistics': 'fetch_categorical_statistics'},
+        success: function (data) {
+            // Money statistics
+
+            var price_array = data['prices'];
+            var category_array = data['categories'];
+
+            var result_array = [['Category', 'Total Money Spent']];
+            for(var i=0;i<price_array.length;i++) {
+                var tempArr = [];
+                tempArr.push(category_array[i]);
+                tempArr.push(parseFloat(price_array[i]));
+                result_array.push(tempArr);
+            }
+            var data = google.visualization.arrayToDataTable(result_array);
+            var options = {title: 'Total Money Spent Per Category'};
+            var chart = new google.visualization.PieChart(document.getElementById('category_price_chart'));
+            chart.draw(data, options);
+        }, error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+}
 
 function hide_all() {
     $('#account_general_settings').hide('normal');
@@ -629,7 +659,6 @@ function send_reply_to_proposal(proposal_id, response) {
 //////////////////// FALSE PRICE PROPOSAL MANAGEMENT END
 
 
-
 /////////////////// STATISTICS START
 
 function fetch_statistics() {
@@ -648,13 +677,13 @@ function fetch_statistics() {
             $('#total_blames').append(data['total_blames']);
             $('#total_products').append(data['total_products']);
             $('#total_shopping_lists').append(data['total_shopping_lists']);
-            if(data['favorite_category']) {
+            if (data['favorite_category']) {
                 $('#favorite_category_toggle').show();
                 $('#favorite_category').append(data['favorite_category']);
             } else {
                 $('#favorite_category_toggle').hide();
             }
-            if(data['favorite_product']) {
+            if (data['favorite_product']) {
                 $('#favorite_product_toggle').show();
                 $('#favorite_product').append(data['favorite_product']);
             } else {
