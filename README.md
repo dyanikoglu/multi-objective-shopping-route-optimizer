@@ -6,7 +6,7 @@
 
 Because of the high count of dependencies of required modules, Anaconda must be used for Python environment management.
 
-- Download Anaconda from https://repo.continuum.io/archive/Anaconda3-4.3.1-Linux-x86_64.sh
+- Download Anaconda from https://repo.continuum.io/archive/Anaconda3-4.4.0-Linux-x86_64.sh
 
 - Install Anaconda with default options:
 ```sh

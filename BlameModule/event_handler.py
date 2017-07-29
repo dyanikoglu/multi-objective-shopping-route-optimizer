@@ -106,7 +106,11 @@ def check_complete_responded_proposals(proposal):
         for proposal_sent in models.ProposalSent.objects.filter(false_price_proposal=proposal):
             responses.append(proposal_sent.response)
 
-        if responses.count(True) > int(parameters.USER_COUNT_TO_SEND_PROPOSAL / 2.0):
+        sum = 0
+        for response in responses:
+            sum += (response.user.reputation / parameters.INITIAL_REPUTATION_FOR_USER)
+
+        if sum > int(parameters.USER_COUNT_TO_SEND_PROPOSAL / 2.0):
             print("Accepted by users!")
             # Prizes and penalties will be decided with auth.'s decision
             proposal.status_code = 2  # To be reviewed by Auth.
