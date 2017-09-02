@@ -210,6 +210,7 @@ class UserStatistics(models.Model):
     shoppingListsComplete = models.PositiveIntegerField('Shopping Lists Completed', null=False, default=0)
     favoriteCategory = models.CharField('Favorite Category', blank=True, null=True, max_length=64)
     favoriteProduct = models.CharField('Favorite Product', blank=True, null=True, max_length=64)
+    favorite_retailer = models.CharField('Favorite Retailer', blank=True, null=True, max_length=64)
 
 
 class UserSavedAddress(models.Model):
@@ -293,6 +294,7 @@ class ShoppingListItem(models.Model):
     edited_by = models.ForeignKey(User, null=True, related_name='edited_by')
     is_purchased = models.BooleanField('Is this product purchased?', null=False, default=False)
     purchased_by = models.ForeignKey(User, null=True, related_name='purchased_by')
+    purchased_from = models.ForeignKey(Retailer, null=True)
     unit_purchase_price = models.FloatField('Purchase Price', null=True)
     purchase_date = models.DateTimeField(blank=True, null=True)
     quantity = models.PositiveIntegerField("Quantity")

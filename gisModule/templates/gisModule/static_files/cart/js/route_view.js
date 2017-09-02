@@ -72,7 +72,8 @@ function complete_shopping_list(route_index) {
             'distance_cost': route_data[route_index]['costs'][1],
             'time_cost': route_data[route_index]['costs'][2],
             'product_prices': JSON.stringify(route_data[route_index]['product_prices']),
-            'product_ids': JSON.stringify(route_data[route_index]['product_ids'])
+            'product_ids': JSON.stringify(route_data[route_index]['product_ids']),
+            'retailer_ids': JSON.stringify(route_data[route_index]['retailer_ids'])
         },
         success: function (data) {
             location.reload();

@@ -16,7 +16,8 @@ def basic_statistics():
         items_bought = 0
         product_freqs = {}
         category_freqs = {}
-        for item_bought in models.ShoppingListItem.objects.filter(addedBy=user):
+        retailer_freqs = {}
+        for item_bought in models.ShoppingListItem.objects.filter(added_by=user):
             # Skip non-owned by a list products
             if item_bought.list is None:
                 continue
@@ -35,12 +36,19 @@ def basic_statistics():
             else:
                 product_freqs[str(item_bought.product.name)] = 1
 
+            if item_bought.purchased_from.name in retailer_freqs:
+                retailer_freqs[str(item_bought.purchased_from.name)] += 1
+            else:
+                retailer_freqs[str(item_bought.purchased_from.name)] = 1
+
             items_bought += 1
 
         max_product_freq = 0
         max_category_freq = 0
+        max_retailer_freq = 0
         most_freq_product = None
         most_freq_category = None
+        most_freq_retailer = None
         for key in product_freqs.keys():
             if product_freqs[key] > max_product_freq:
                 max_product_freq = product_freqs[key]
@@ -51,7 +59,13 @@ def basic_statistics():
                 max_category_freq = category_freqs[key]
                 most_freq_category = str(key)
 
+        for key in retailer_freqs.keys():
+            if retailer_freqs[key] > max_retailer_freq:
+                max_retailer_freq = retailer_freqs[key]
+                most_freq_retailer = str(key)
+
         statistic.itemsBought = items_bought
         statistic.favoriteCategory = most_freq_category
         statistic.favoriteProduct = most_freq_product
+        statistic.favorite_retailer = most_freq_retailer
         statistic.save()

@@ -111,33 +111,6 @@ $(document).ready(function () {
     google.charts.setOnLoadCallback(drawCharts);
 });
 
-function drawCharts() {
-    $.ajax({
-        type: "POST",
-        data: {'fetch_categorical_statistics': 'fetch_categorical_statistics'},
-        success: function (data) {
-            // Money statistics
-
-            var price_array = data['prices'];
-            var category_array = data['categories'];
-
-            var result_array = [['Category', 'Total Money Spent']];
-            for(var i=0;i<price_array.length;i++) {
-                var tempArr = [];
-                tempArr.push(category_array[i]);
-                tempArr.push(parseFloat(price_array[i]));
-                result_array.push(tempArr);
-            }
-            var data = google.visualization.arrayToDataTable(result_array);
-            var options = {title: 'Total Money Spent Per Category'};
-            var chart = new google.visualization.PieChart(document.getElementById('category_price_chart'));
-            chart.draw(data, options);
-        }, error: function (xhr, ajaxOptions, thrownError) {
-            show_account_notif(xhr['responseJSON']['message'], 2000);
-        }
-    });
-}
-
 function hide_all() {
     $('#account_general_settings').hide('normal');
     $('#account_friend_management').hide('normal');
@@ -662,6 +635,8 @@ function send_reply_to_proposal(proposal_id, response) {
 /////////////////// STATISTICS START
 
 function fetch_statistics() {
+    // TODO Add favorite retailer
+
     $.ajax({
         type: "POST",
         data: {'fetch_statistics': 'fetch_statistics'},
@@ -670,6 +645,7 @@ function fetch_statistics() {
             $('#total_products').empty()
             $('#total_shopping_lists').empty();
             $('#favorite_category').empty();
+            $('#favorite_retailer').empty();
             $('#favorite_product').empty();
             $('#reputation').empty();
 
@@ -689,11 +665,83 @@ function fetch_statistics() {
             } else {
                 $('#favorite_product_toggle').hide();
             }
+            if (data['favorite_retailer']) {
+                $('#favorite_retailer_toggle').show();
+                $('#favorite_retailer').append(data['favorite_retailer']);
+            } else {
+                $('#favorite_retailer_toggle').hide();
+            }
         },
         error: function (xhr, ajaxOptions, thrownError) {
             show_account_notif(xhr['responseJSON']['message'], 2000);
         }
     });
+}
+
+function drawCharts() {
+    // Total Money Spent Per Category
+    $.ajax({
+        type: "POST",
+        data: {'fetch_categorical_statistics': 'fetch_categorical_statistics'},
+        success: function (data) {
+            drawPieChart(data['keys'], data['values'], data['key_name'], data['value_name'], data['title'], 'category_price_chart');
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+
+    // Total Money Spent Per Retailer
+    $.ajax({
+        type: "POST",
+        data: {'fetch_retailer_price_stats': 'fetch_retailer_price_stats'},
+        success: function (data) {
+            drawPieChart(data['keys'], data['values'], data['key_name'], data['value_name'], data['title'], 'retailer_price_chart');
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+
+    // Total Items Purchased Per Category
+    $.ajax({
+        type: "POST",
+        data: {'fetch_category_item_count_stats': 'fetch_category_item_count_stats'},
+        success: function (data) {
+            drawPieChart(data['keys'], data['values'], data['key_name'], data['value_name'], data['title'], 'category_count_chart');
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+
+    // Total Items Purchased Per Retailer
+    $.ajax({
+        type: "POST",
+        data: {'fetch_retailer_item_count_stats': 'fetch_retailer_item_count_stats'},
+        success: function (data) {
+            drawPieChart(data['keys'], data['values'], data['key_name'], data['value_name'], data['title'], 'retailer_count_chart');
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
+}
+
+function drawPieChart(keys, values, key_name, value_name, title, div_id) {
+    var price_array = values; // value
+    var category_array = keys; // key
+    var result_array = [[key_name, value_name]]; // [key_name, value_name]
+    for (var i = 0; i < price_array.length; i++) {
+        var tempArr = [];
+        tempArr.push(category_array[i]);
+        tempArr.push(parseFloat(price_array[i]));
+        result_array.push(tempArr);
+    }
+    var data = google.visualization.arrayToDataTable(result_array);
+    var options = {title: title};
+    var chart = new google.visualization.PieChart(document.getElementById(div_id));
+    chart.draw(data, options);
 }
 
 /////////////////// STATISTICS END

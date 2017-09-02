@@ -121,7 +121,7 @@ def check_shopping_list_integrity(user, shopping_list):
 # Add specified product to specified list
 def add_product_to_list(editing_user, product, shopping_list):
     if models.ShoppingListItem.objects.filter(list=shopping_list, product=product).count() is 0:
-        return models.ShoppingListItem.objects.create(list=shopping_list, product=product, addedBy=editing_user, edited_by=editing_user, quantity=1), False, 1
+        return models.ShoppingListItem.objects.create(list=shopping_list, product=product, added_by=editing_user, edited_by=editing_user, quantity=1), False, 1
     else:
         existing_product = models.ShoppingListItem.objects.get(list=shopping_list, product=product)
         existing_product.quantity = existing_product.quantity + 1
@@ -140,7 +140,7 @@ def return_shopping_list_data(list):
         shoppinglist_data['ListProducts'].append(
             {'name': "%s %s %s%s" % (
                 product.product.brand, product.product.type, product.product.amount, product.product.unit),
-             'added_by': product.addedBy.username, 'quantity': product.quantity, 'item_id': product.id})
+             'added_by': product.added_by.username, 'quantity': product.quantity, 'item_id': product.id})
     return jsonify_dict(shoppinglist_data)
 
 

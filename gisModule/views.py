@@ -508,6 +508,7 @@ def account(request):
                                  'total_shopping_lists': statistics.shoppingListsComplete,
                                  'favorite_category': statistics.favoriteCategory,
                                  'favorite_product': statistics.favoriteProduct,
+                                 'favorite_retailer': statistics.favorite_retailer,
                                  'reputation': statistics.reputation})
 
         elif request.POST.get("fetch_categorical_statistics"):
@@ -522,16 +523,77 @@ def account(request):
                 else:
                     category_price[category] += price
 
-            print(category_price)
-
             categories = []
             prices = []
             for key, value in category_price.items():
                 categories.append(key)
                 prices.append(value)
 
-            return JsonResponse({'categories': categories, 'prices': prices})
+            return JsonResponse({'keys': categories, 'values': prices, 'title': 'Total Money Spent Per Category',
+                                 'key_name': 'Category', 'value_name': 'Total Money Spent'})
 
+        elif request.POST.get("fetch_retailer_price_stats"):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+
+            retailer_price = {}
+            for purchase in models.ShoppingListItem.objects.filter(purchased_by=active_user, is_purchased=True):
+                retailer = str(purchase.purchased_from.name)
+                price = float(purchase.quantity * purchase.unit_purchase_price)
+                if retailer not in retailer_price:
+                    retailer_price[retailer] = price
+                else:
+                    retailer_price[retailer] += price
+
+            retailers = []
+            prices = []
+            for key, value in retailer_price.items():
+                retailers.append(key)
+                prices.append(value)
+
+            return JsonResponse({'keys': retailers, 'values': prices, 'title': 'Total Money Spent Per Retailer',
+                                 'key_name': 'Retailer', 'value_name': 'Total Money Spent'})
+
+        elif request.POST.get("fetch_category_item_count_stats"):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+
+            category_count = {}
+            for purchase in models.ShoppingListItem.objects.filter(purchased_by=active_user, is_purchased=True):
+                category = str(purchase.product.group.name)
+                count = purchase.quantity
+                if category not in category_count:
+                    category_count[category] = count
+                else:
+                    category_count[category] += count
+
+            categories = []
+            counts = []
+            for key, value in category_count.items():
+                categories.append(key)
+                counts.append(value)
+
+            return JsonResponse({'keys': categories, 'values': counts, 'title': 'Purchased Product Count Per Category',
+                                 'key_name': 'Category', 'value_name': 'Purchased Product Count'})
+
+        elif request.POST.get("fetch_retailer_item_count_stats"):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+
+            retailer_count = {}
+            for purchase in models.ShoppingListItem.objects.filter(purchased_by=active_user, is_purchased=True):
+                retailer = str(purchase.purchased_from.name)
+                count = purchase.quantity
+                if retailer not in retailer_count:
+                    retailer_count[retailer] = count
+                else:
+                    retailer_count[retailer] += count
+
+            retailers = []
+            counts = []
+            for key, value in retailer_count.items():
+                retailers.append(key)
+                counts.append(value)
+
+            return JsonResponse({'keys': retailers, 'values': counts, 'title': 'Purchased Product Count Per Retailer',
+                                 'key_name': 'Retailer', 'value_name': 'Purchased Product Count'})
 
 def cart(request):
     if request.method == "GET":
@@ -831,11 +893,13 @@ def cart(request):
             for i in range(0, len(json.loads(request.POST.get("product_ids")))):
                 base_product_id = json.loads(request.POST.get("product_ids"))[i]
                 unit_price = json.loads(request.POST.get("product_prices"))[i]
+                retailer_id = int(json.loads(request.POST.get("retailer_ids"))[i])
 
                 base_product = models.BaseProduct.objects.get(id=base_product_id)
                 list_item = models.ShoppingListItem.objects.get(product=base_product, list=active_list)
                 list_item.is_purchased = True
                 list_item.purchased_by = active_user
+                list_item.purchased_from = models.Retailer.objects.get(id=retailer_id)
                 list_item.unit_purchase_price = unit_price
                 list_item.purchase_date = datetime.now(tzlocal())
                 list_item.save()
