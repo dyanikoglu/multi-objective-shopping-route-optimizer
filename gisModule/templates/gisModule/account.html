@@ -392,7 +392,9 @@
 
                             <div id="received_proposals" class="replay-box" hidden> <!--Received Proposals--></div>
 
-                            <div style="text-align: center" id="statistics"> <!--Statistics-->
+                            <!--Statistics-->
+                            <div style="text-align: center" id="statistics">
+                                <div id="statistics_panel">
                                 <div class="row"><span><img style="width: 2em; height: 2em;"
                                                             src="http://freevector.co/wp-content/uploads/2009/12/56902-double-up-arrow.png"> &nbsp;Reputation<br> <div
                                         style="color: darkorange" id="reputation"></div></span>
@@ -439,6 +441,19 @@
                                      style="display: block; margin: 0 auto; width: 50%; height: 50%;"></div>
                                 <div id="retailer_price_chart"
                                      style="display: block; margin: 0 auto; width: 50%; height: 50%;"></div>
+
+                                <button id="show_shopping_log">Show Shopping Log</button> <br><br><br><br>
+                                </div>
+
+                                <div id="shopping_log" hidden>
+                                    <form id="filter_form" method="post">
+                                        <input name="start_date" type="date" placeholder="Start Date yyyy-mm-dd"></input>
+                                        <input name="end_date" type="date" placeholder="End Date yyyy-mm-dd"></input><br><br>
+                                        <button onclick="submit_date_filter(); return false;">Apply Filter</button>
+                                    </form>
+                                    <br><br>
+                                    <div id="log_table" style="display: block; margin: 0 auto;"></div>
+                                </div><br><br>
                             </div> <!-- Statistics End -->
                         </div><!--/user_panel-->
                     </div>

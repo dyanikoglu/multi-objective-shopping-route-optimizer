@@ -3,6 +3,9 @@
  */
 
 $(document).ready(function () {
+    google.charts.load('current', {'packages': ['corechart']});
+    google.charts.load('current', {'packages': ['table']});
+
     $('#settings_header').html('Account | Statistics');
     fetch_statistics();
 
@@ -17,6 +20,8 @@ $(document).ready(function () {
     $('#statistics_button').click(function () {
         hide_all();
         $('#statistics').toggle('normal');
+        $('#statistics_panel').show();
+        $('#shopping_log').hide();
         $('#settings_header').html('Account | Statistics');
         fetch_statistics();
         return false;
@@ -107,7 +112,22 @@ $(document).ready(function () {
         return false;
     });
 
-    google.charts.load('current', {'packages': ['corechart']});
+    $('#show_shopping_log').click(function () {
+        $.ajax({
+            type: "POST",
+            data: {'fetch_shopping_log': 'fetch_shopping_log'},
+            success: function (data) {
+                drawLogTable(data['table_data']);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                show_account_notif(xhr['responseJSON']['message'], 2000);
+            }
+        });
+
+        $('#statistics_panel').hide('normal');
+        $('#shopping_log').show('normal');
+    });
+
     google.charts.setOnLoadCallback(drawCharts);
 });
 
@@ -128,7 +148,6 @@ function fetch_route_default_settings() {
         type: "POST",
         data: {'fetch_route_default_settings': 'fetch_route_default_settings'},
         success: function (data) {
-            console.log(data['opt_money'])
             $('#opt_money').prop('checked', data['opt_money']);
             $('#opt_dist').prop('checked', data['opt_dist']);
             $('#opt_time').prop('checked', data['opt_time']);
@@ -635,8 +654,6 @@ function send_reply_to_proposal(proposal_id, response) {
 /////////////////// STATISTICS START
 
 function fetch_statistics() {
-    // TODO Add favorite retailer
-
     $.ajax({
         type: "POST",
         data: {'fetch_statistics': 'fetch_statistics'},
@@ -678,6 +695,7 @@ function fetch_statistics() {
     });
 }
 
+// Send a post request for each individual pie chart
 function drawCharts() {
     // Total Money Spent Per Category
     $.ajax({
@@ -728,6 +746,21 @@ function drawCharts() {
     });
 }
 
+// Draw all shopping logs as a table
+function drawLogTable(table_data) {
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'Product Name');
+    data.addColumn('string', 'Retailer Name');
+    data.addColumn('string', 'Date');
+    data.addColumn('number', 'Quantity');
+    data.addColumn('number', 'Unit Price');
+    data.addColumn('number', 'Total Price');
+    data.addRows(table_data);
+    var table = new google.visualization.Table(document.getElementById('log_table'));
+    table.draw(data, {showRowNumber: false, width: '100%', height: '100%'});
+}
+
+// Generic function for drawing a pie chart
 function drawPieChart(keys, values, key_name, value_name, title, div_id) {
     var price_array = values; // value
     var category_array = keys; // key
@@ -742,6 +775,21 @@ function drawPieChart(keys, values, key_name, value_name, title, div_id) {
     var options = {title: title};
     var chart = new google.visualization.PieChart(document.getElementById(div_id));
     chart.draw(data, options);
+}
+
+function submit_date_filter() {
+    form_data = $('#filter_form').serialize();
+    form_data = form_data + "&submit_date_filter=submit_date_filter"
+    $.ajax({
+        type: "POST",
+        data: form_data,
+        success: function (data) {
+            drawLogTable(data['table_data']);
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            show_account_notif(xhr['responseJSON']['message'], 2000);
+        }
+    });
 }
 
 /////////////////// STATISTICS END

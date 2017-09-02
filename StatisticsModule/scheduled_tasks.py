@@ -41,7 +41,7 @@ def basic_statistics():
             else:
                 retailer_freqs[str(item_bought.purchased_from.name)] = 1
 
-            items_bought += 1
+            items_bought += item_bought.quantity
 
         max_product_freq = 0
         max_category_freq = 0

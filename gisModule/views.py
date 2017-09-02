@@ -268,18 +268,19 @@ def account(request):
             active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
             lists = []
             for list_membership in models.ShoppingListMember.objects.filter(user=active_user):
-                list = list_membership.list
-                active_role = list_membership.role.name  # TODO Expand Role model with permissions
-                members = []
+                if not list_membership.list.completed:
+                    list = list_membership.list
+                    active_role = list_membership.role.name  # TODO Expand Role model with permissions
+                    members = []
 
-                for other_member in models.ShoppingListMember.objects.filter(list=list):
-                    other_user = other_member.user
-                    members.append({'user_id': other_user.id, 'username': other_user.username, 'name': "%s %s" % (
-                        other_user.first_name, other_user.last_name)})
+                    for other_member in models.ShoppingListMember.objects.filter(list=list):
+                        other_user = other_member.user
+                        members.append({'user_id': other_user.id, 'username': other_user.username, 'name': "%s %s" % (
+                            other_user.first_name, other_user.last_name)})
 
-                lists.append(
-                    {'list_id': list.id, 'active_role': active_role, 'members': members, 'list_name': list.name,
-                     'creation_date': list.created_at, })
+                    lists.append(
+                        {'list_id': list.id, 'active_role': active_role, 'members': members, 'list_name': list.name,
+                         'creation_date': list.created_at, })
 
             friends = []
             for friend in models.Friend.objects.filter(user_receiver=active_user, status=True):
@@ -594,6 +595,45 @@ def account(request):
 
             return JsonResponse({'keys': retailers, 'values': counts, 'title': 'Purchased Product Count Per Retailer',
                                  'key_name': 'Retailer', 'value_name': 'Purchased Product Count'})
+
+        elif request.POST.get("fetch_shopping_log"):
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+
+            table_data = []
+            for purchase in models.ShoppingListItem.objects.filter(purchased_by=active_user, is_purchased=True):
+                purchase_data = []
+                purchase_data.append(purchase.product.name)
+                purchase_data.append(purchase.purchased_from.name)
+                purchase_data.append(purchase.purchase_date.date().isoformat())
+                purchase_data.append(purchase.quantity)
+                purchase_data.append(purchase.unit_purchase_price)
+                purchase_data.append(purchase.quantity * purchase.unit_purchase_price)
+                table_data.append(purchase_data)
+
+            return JsonResponse({'table_data': table_data})
+
+        elif request.POST.get("submit_date_filter"):
+            print(request.POST)
+
+            active_user = models.User.objects.get(id=request.session['user_login_session']['id'])
+
+            table_data = []
+
+            for purchase in models.ShoppingListItem.objects.filter(purchased_by=active_user, is_purchased=True,
+                                                                   purchase_date__range=[
+                                                                       request.POST.get("start_date"),
+                                                                       request.POST.get("end_date")]):
+                purchase_data = []
+                purchase_data.append(purchase.product.name)
+                purchase_data.append(purchase.purchased_from.name)
+                purchase_data.append(purchase.purchase_date.date().isoformat())
+                purchase_data.append(purchase.quantity)
+                purchase_data.append(purchase.unit_purchase_price)
+                purchase_data.append(purchase.quantity * purchase.unit_purchase_price)
+                table_data.append(purchase_data)
+
+            return JsonResponse({'table_data': table_data})
+
 
 def cart(request):
     if request.method == "GET":
@@ -955,7 +995,7 @@ def shop(request):
                 temp_list = models.ShoppingList.objects.create(name="My First Shopping List")
                 editing_user.active_list = temp_list
                 editing_user.save()
-                role = models.Role.objects.get(name="Admin") # TODO
+                role = models.Role.objects.get(name="Admin")  # TODO
                 models.ShoppingListMember.objects.create(user=editing_user, list=editing_user.active_list, role=role)
                 shopping_list = temp_list
 
