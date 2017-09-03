@@ -102,12 +102,11 @@ def remove_old_blame_reports(proposal):
 def check_complete_responded_proposals(proposal):
     if proposal.answer_count == parameters.USER_COUNT_TO_SEND_PROPOSAL:
         print("Proposal with id:%s is going to be evaluated:" % proposal.id)
-        sum = 0
+        sum = 0.0
         for proposal_sent in models.ProposalSent.objects.filter(false_price_proposal=proposal):
             if proposal_sent.response == True:
-                sum += (proposal_sent.user.reputation / parameters.INITIAL_REPUTATION_FOR_USER)
-
-        if sum > int(parameters.USER_COUNT_TO_SEND_PROPOSAL / 2.0):
+                sum += proposal_sent.user.statistics.reputation / parameters.INITIAL_REPUTATION_FOR_USER
+        if sum > parameters.USER_COUNT_TO_SEND_PROPOSAL / 2.0:
             print("Accepted by users!")
             # Prizes and penalties will be decided with auth.'s decision
             proposal.status_code = 2  # To be reviewed by Auth.
