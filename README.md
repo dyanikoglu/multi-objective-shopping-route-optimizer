@@ -53,6 +53,11 @@ pip install -U googlemaps
 pip install -U django-background-tasks
 ```
 
+- Install pusher via pip:
+```sh
+pip install -U pusher
+```
+
 - Go to directory:`/home/<UserName>/anaconda3/lib/python3.6/site-packages/django/contrib/admin/static`
 
 - Copy js, img & css contents from `gisModule/Templates/gisModule` project folder to this directory.
