@@ -42,8 +42,8 @@ SET default_transaction_read_only = off;
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.3
--- Dumped by pg_dump version 9.6.3
+-- Dumped from database version 9.6.4
+-- Dumped by pg_dump version 9.6.4
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1167,6 +1167,7 @@ CREATE TABLE "gisModule_shoppinglistitem" (
     unit_purchase_price double precision,
     purchased_by_id integer,
     purchase_date timestamp with time zone,
+    purchased_from_id integer,
     CONSTRAINT "gisModule_shoppinglistitems_quantity_check" CHECK ((quantity >= 0))
 );
 
@@ -1364,6 +1365,7 @@ CREATE TABLE "gisModule_userstatistics" (
     "favoriteProduct" character varying(64),
     blame_count integer NOT NULL,
     reputation double precision NOT NULL,
+    favorite_retailer character varying(64),
     CONSTRAINT "gisModule_userstatistics_blame_count_check" CHECK ((blame_count >= 0)),
     CONSTRAINT "gisModule_userstatistics_itemsBought_check" CHECK (("itemsBought" >= 0)),
     CONSTRAINT "gisModule_userstatistics_shoppingListsComplete_check" CHECK (("shoppingListsComplete" >= 0))
@@ -1763,7 +1765,7 @@ SELECT pg_catalog.setval('auth_permission_id_seq', 126, true);
 --
 
 COPY auth_user (id, password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined) FROM stdin;
-1	pbkdf2_sha256$36000$YV0KXD0f6Gla$Rag9D6eNIdg4BLZUcT33wt7JezjHqJBG6gaOH2dj300=	2017-07-26 17:56:00.684558+03	t	dyanikoglu	Doğa Can	Yanıkoğlu	dyanikoglu@outlook.com	t	t	2017-01-26 11:49:05+03
+1	pbkdf2_sha256$36000$YV0KXD0f6Gla$Rag9D6eNIdg4BLZUcT33wt7JezjHqJBG6gaOH2dj300=	2017-09-03 22:38:40.156321+03	t	dyanikoglu	Doğa Can	Yanıkoğlu	dyanikoglu@outlook.com	t	t	2017-01-26 11:49:05+03
 \.
 
 
@@ -1809,9 +1811,9 @@ SELECT pg_catalog.setval('auth_user_user_permissions_id_seq', 1, false);
 --
 
 COPY background_task (id, task_name, task_params, task_hash, verbose_name, priority, run_at, repeat, repeat_until, queue, attempts, failed_at, last_error, locked_by, locked_at, creator_object_id, creator_content_type_id) FROM stdin;
-2508	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-29 18:00:06.857973+03	30	\N	\N	0	\N		\N	\N	\N	\N
-2509	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-29 18:00:06.862358+03	30	\N	\N	0	\N		\N	\N	\N	\N
-2510	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-29 18:00:06.865522+03	30	\N	\N	0	\N		\N	\N	\N	\N
+2952	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-04 13:50:11.000698+03	30	\N	\N	0	\N		\N	\N	\N	\N
+2953	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-04 13:50:11.010019+03	30	\N	\N	0	\N		\N	\N	\N	\N
+2954	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-04 13:50:11.013395+03	30	\N	\N	0	\N		\N	\N	\N	\N
 \.
 
 
@@ -1820,911 +1822,282 @@ COPY background_task (id, task_name, task_params, task_hash, verbose_name, prior
 --
 
 COPY background_task_completedtask (id, task_name, task_params, task_hash, verbose_name, priority, run_at, repeat, repeat_until, queue, attempts, failed_at, last_error, locked_by, locked_at, creator_object_id, creator_content_type_id) FROM stdin;
-1152	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:25:38.035565+03	30	\N	\N	1	\N		25134	2017-07-25 22:25:38.007503+03	\N	\N
-1153	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:25:39.348254+03	30	\N	\N	1	\N		25134	2017-07-25 22:25:39.339425+03	\N	\N
-1154	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:25:40.290972+03	30	\N	\N	1	\N		25134	2017-07-25 22:25:40.250209+03	\N	\N
-1155	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:26:06.363394+03	30	\N	\N	1	\N		25134	2017-07-25 22:26:06.340756+03	\N	\N
-1156	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:26:07.833639+03	30	\N	\N	1	\N		25134	2017-07-25 22:26:07.824646+03	\N	\N
-1157	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:26:08.919287+03	30	\N	\N	1	\N		25134	2017-07-25 22:26:08.878411+03	\N	\N
-1158	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:26:35.371147+03	30	\N	\N	1	\N		25134	2017-07-25 22:26:35.349374+03	\N	\N
-1159	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:26:36.239288+03	30	\N	\N	1	\N		25134	2017-07-25 22:26:36.232078+03	\N	\N
-1160	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:26:37.089625+03	30	\N	\N	1	\N		25134	2017-07-25 22:26:37.049516+03	\N	\N
-1161	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:27:08.242292+03	30	\N	\N	1	\N		25134	2017-07-25 22:27:08.221595+03	\N	\N
-1162	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:27:08.77919+03	30	\N	\N	1	\N		25134	2017-07-25 22:27:08.771059+03	\N	\N
-1163	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:27:09.359193+03	30	\N	\N	1	\N		25134	2017-07-25 22:27:09.329885+03	\N	\N
-1164	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:27:35.518813+03	30	\N	\N	1	\N		25134	2017-07-25 22:27:35.497594+03	\N	\N
-1165	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:27:36.42042+03	30	\N	\N	1	\N		25134	2017-07-25 22:27:36.413046+03	\N	\N
-1166	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:27:37.825153+03	30	\N	\N	1	\N		25134	2017-07-25 22:27:37.785667+03	\N	\N
-1167	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:28:08.713064+03	30	\N	\N	1	\N		25134	2017-07-25 22:28:08.69109+03	\N	\N
-1168	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:28:09.705373+03	30	\N	\N	1	\N		25134	2017-07-25 22:28:09.696374+03	\N	\N
-1169	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:28:10.893757+03	30	\N	\N	1	\N		25134	2017-07-25 22:28:10.852448+03	\N	\N
-1170	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:28:37.300393+03	30	\N	\N	1	\N		25134	2017-07-25 22:28:37.278825+03	\N	\N
-1171	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:28:38.09421+03	30	\N	\N	1	\N		25134	2017-07-25 22:28:38.085308+03	\N	\N
-1172	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:28:38.986222+03	30	\N	\N	1	\N		25134	2017-07-25 22:28:38.945369+03	\N	\N
-1173	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:29:09.805838+03	30	\N	\N	1	\N		25134	2017-07-25 22:29:09.784753+03	\N	\N
-1174	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:29:11.336595+03	30	\N	\N	1	\N		25134	2017-07-25 22:29:11.329072+03	\N	\N
-1175	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:29:12.838152+03	30	\N	\N	1	\N		25134	2017-07-25 22:29:12.79925+03	\N	\N
-1176	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:29:39.152824+03	30	\N	\N	1	\N		25134	2017-07-25 22:29:39.132253+03	\N	\N
-1177	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:29:39.790684+03	30	\N	\N	1	\N		25134	2017-07-25 22:29:39.782596+03	\N	\N
-1178	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:29:40.364737+03	30	\N	\N	1	\N		25134	2017-07-25 22:29:40.331142+03	\N	\N
-1179	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:30:06.818577+03	30	\N	\N	1	\N		25134	2017-07-25 22:30:06.794645+03	\N	\N
-1180	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:30:07.807853+03	30	\N	\N	1	\N		25134	2017-07-25 22:30:07.799039+03	\N	\N
-1181	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:30:08.906042+03	30	\N	\N	1	\N		25134	2017-07-25 22:30:08.87159+03	\N	\N
-1182	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:30:40.138072+03	30	\N	\N	1	\N		25134	2017-07-25 22:30:40.10973+03	\N	\N
-1183	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:30:41.597582+03	30	\N	\N	1	\N		25134	2017-07-25 22:30:41.590259+03	\N	\N
-1184	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:30:42.465715+03	30	\N	\N	1	\N		25134	2017-07-25 22:30:42.422848+03	\N	\N
-1185	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:31:08.566008+03	30	\N	\N	1	\N		25134	2017-07-25 22:31:08.544989+03	\N	\N
-1186	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:31:09.583583+03	30	\N	\N	1	\N		25134	2017-07-25 22:31:09.577732+03	\N	\N
-1187	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:31:10.956058+03	30	\N	\N	1	\N		25134	2017-07-25 22:31:10.926791+03	\N	\N
-1188	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:31:36.61956+03	30	\N	\N	1	\N		25134	2017-07-25 22:31:36.59901+03	\N	\N
-1189	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:31:38.047059+03	30	\N	\N	1	\N		25134	2017-07-25 22:31:38.039775+03	\N	\N
-1190	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:31:38.836154+03	30	\N	\N	1	\N		25134	2017-07-25 22:31:38.807372+03	\N	\N
-1191	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:32:10.006085+03	30	\N	\N	1	\N		25134	2017-07-25 22:32:09.984849+03	\N	\N
-1192	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:32:11.13364+03	30	\N	\N	1	\N		25134	2017-07-25 22:32:11.124771+03	\N	\N
-1193	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:32:12.660978+03	30	\N	\N	1	\N		25134	2017-07-25 22:32:12.620663+03	\N	\N
-1194	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:32:39.27232+03	30	\N	\N	1	\N		25134	2017-07-25 22:32:39.248512+03	\N	\N
-1195	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:32:40.575645+03	30	\N	\N	1	\N		25134	2017-07-25 22:32:40.569472+03	\N	\N
-1196	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:32:41.333753+03	30	\N	\N	1	\N		25134	2017-07-25 22:32:41.293941+03	\N	\N
-1197	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:33:07.731348+03	30	\N	\N	1	\N		25134	2017-07-25 22:33:07.708583+03	\N	\N
-1198	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:33:08.873122+03	30	\N	\N	1	\N		25134	2017-07-25 22:33:08.86474+03	\N	\N
-1199	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:33:09.911441+03	30	\N	\N	1	\N		25134	2017-07-25 22:33:09.882718+03	\N	\N
-1200	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:33:36.438025+03	30	\N	\N	1	\N		25134	2017-07-25 22:33:36.415313+03	\N	\N
-1201	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:33:37.699379+03	30	\N	\N	1	\N		25134	2017-07-25 22:33:37.691906+03	\N	\N
-1202	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:33:38.555872+03	30	\N	\N	1	\N		25134	2017-07-25 22:33:38.516702+03	\N	\N
-1203	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:34:09.65418+03	30	\N	\N	1	\N		25134	2017-07-25 22:34:09.631017+03	\N	\N
-1204	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:34:11.175222+03	30	\N	\N	1	\N		25134	2017-07-25 22:34:11.165817+03	\N	\N
-1205	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:34:12.479045+03	30	\N	\N	1	\N		25134	2017-07-25 22:34:12.438653+03	\N	\N
-1206	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:34:38.202141+03	30	\N	\N	1	\N		25134	2017-07-25 22:34:38.179502+03	\N	\N
-1207	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:34:39.329328+03	30	\N	\N	1	\N		25134	2017-07-25 22:34:39.321543+03	\N	\N
-1208	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:34:40.763909+03	30	\N	\N	1	\N		25134	2017-07-25 22:34:40.732951+03	\N	\N
-1209	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:35:07.395744+03	30	\N	\N	1	\N		25134	2017-07-25 22:35:07.376099+03	\N	\N
-1210	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:35:08.666614+03	30	\N	\N	1	\N		25134	2017-07-25 22:35:08.657629+03	\N	\N
-1211	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:35:09.688635+03	30	\N	\N	1	\N		25134	2017-07-25 22:35:09.649969+03	\N	\N
-1212	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:35:35.851541+03	30	\N	\N	1	\N		25134	2017-07-25 22:35:35.829565+03	\N	\N
-1213	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:35:36.681816+03	30	\N	\N	1	\N		25134	2017-07-25 22:35:36.671434+03	\N	\N
-1214	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:35:37.961036+03	30	\N	\N	1	\N		25134	2017-07-25 22:35:37.921452+03	\N	\N
-1215	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:36:08.638817+03	30	\N	\N	1	\N		25134	2017-07-25 22:36:08.618269+03	\N	\N
-1216	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:36:09.993004+03	30	\N	\N	1	\N		25134	2017-07-25 22:36:09.98274+03	\N	\N
-1217	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:36:11.252713+03	30	\N	\N	1	\N		25134	2017-07-25 22:36:11.221511+03	\N	\N
-1218	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:36:37.227576+03	30	\N	\N	1	\N		25134	2017-07-25 22:36:37.206421+03	\N	\N
-1219	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:36:38.715171+03	30	\N	\N	1	\N		25134	2017-07-25 22:36:38.707657+03	\N	\N
-1220	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:36:40.112365+03	30	\N	\N	1	\N		25134	2017-07-25 22:36:40.082728+03	\N	\N
-1221	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:37:05.861222+03	30	\N	\N	1	\N		25134	2017-07-25 22:37:05.838417+03	\N	\N
-1222	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:37:07.339381+03	30	\N	\N	1	\N		25134	2017-07-25 22:37:07.334648+03	\N	\N
-1223	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:37:07.965804+03	30	\N	\N	1	\N		25134	2017-07-25 22:37:07.925263+03	\N	\N
-1224	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:37:38.777592+03	30	\N	\N	1	\N		25134	2017-07-25 22:37:38.754295+03	\N	\N
-1225	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:37:39.49991+03	30	\N	\N	1	\N		25134	2017-07-25 22:37:39.491178+03	\N	\N
-1226	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:37:40.55188+03	30	\N	\N	1	\N		25134	2017-07-25 22:37:40.512387+03	\N	\N
-1227	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:38:06.770312+03	30	\N	\N	1	\N		25134	2017-07-25 22:38:06.746529+03	\N	\N
-1228	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:38:08.267445+03	30	\N	\N	1	\N		25134	2017-07-25 22:38:08.258541+03	\N	\N
-1229	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:38:08.94633+03	30	\N	\N	1	\N		25134	2017-07-25 22:38:08.904994+03	\N	\N
-1230	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:38:39.733096+03	30	\N	\N	1	\N		25134	2017-07-25 22:38:39.710943+03	\N	\N
-1231	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:38:40.516988+03	30	\N	\N	1	\N		25134	2017-07-25 22:38:40.510644+03	\N	\N
-1232	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:38:42.007647+03	30	\N	\N	1	\N		25134	2017-07-25 22:38:41.976949+03	\N	\N
-1233	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:39:08.097755+03	30	\N	\N	1	\N		25134	2017-07-25 22:39:08.07457+03	\N	\N
-1234	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:39:08.768682+03	30	\N	\N	1	\N		25134	2017-07-25 22:39:08.763112+03	\N	\N
-1235	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:39:09.376966+03	30	\N	\N	1	\N		25134	2017-07-25 22:39:09.343275+03	\N	\N
-1236	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:39:35.528844+03	30	\N	\N	1	\N		25134	2017-07-25 22:39:35.505284+03	\N	\N
-1237	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:39:36.19618+03	30	\N	\N	1	\N		25134	2017-07-25 22:39:36.18699+03	\N	\N
-1238	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:39:37.35461+03	30	\N	\N	1	\N		25134	2017-07-25 22:39:37.31747+03	\N	\N
-1239	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:40:08.370172+03	30	\N	\N	1	\N		25134	2017-07-25 22:40:08.349471+03	\N	\N
-1240	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:40:09.555198+03	30	\N	\N	1	\N		25134	2017-07-25 22:40:09.54756+03	\N	\N
-1241	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:40:10.223827+03	30	\N	\N	1	\N		25134	2017-07-25 22:40:10.19437+03	\N	\N
-1242	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:40:36.722975+03	30	\N	\N	1	\N		25134	2017-07-25 22:40:36.702218+03	\N	\N
-1243	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:40:38.047259+03	30	\N	\N	1	\N		25134	2017-07-25 22:40:38.03973+03	\N	\N
-1244	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:40:39.138419+03	30	\N	\N	1	\N		25134	2017-07-25 22:40:39.109045+03	\N	\N
-1245	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:41:05.446958+03	30	\N	\N	1	\N		25134	2017-07-25 22:41:05.426077+03	\N	\N
-1246	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:41:06.091849+03	30	\N	\N	1	\N		25134	2017-07-25 22:41:06.08422+03	\N	\N
-1247	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:41:06.631121+03	30	\N	\N	1	\N		25134	2017-07-25 22:41:06.602396+03	\N	\N
-1248	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:41:37.999749+03	30	\N	\N	1	\N		25134	2017-07-25 22:41:37.978173+03	\N	\N
-1249	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:41:38.762787+03	30	\N	\N	1	\N		25134	2017-07-25 22:41:38.755921+03	\N	\N
-1250	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:41:40.010661+03	30	\N	\N	1	\N		25134	2017-07-25 22:41:39.969943+03	\N	\N
-1251	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:42:06.104144+03	30	\N	\N	1	\N		25134	2017-07-25 22:42:06.082377+03	\N	\N
-1252	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:42:07.055357+03	30	\N	\N	1	\N		25134	2017-07-25 22:42:07.0483+03	\N	\N
-1253	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:42:08.142786+03	30	\N	\N	1	\N		25134	2017-07-25 22:42:08.113106+03	\N	\N
-1254	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:42:39.252843+03	30	\N	\N	1	\N		25134	2017-07-25 22:42:39.23184+03	\N	\N
-1255	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:42:40.392988+03	30	\N	\N	1	\N		25134	2017-07-25 22:42:40.384793+03	\N	\N
-1256	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:42:41.56564+03	30	\N	\N	1	\N		25134	2017-07-25 22:42:41.536571+03	\N	\N
-1257	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:43:07.837007+03	30	\N	\N	1	\N		25134	2017-07-25 22:43:07.813678+03	\N	\N
-1258	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:43:09.227311+03	30	\N	\N	1	\N		25134	2017-07-25 22:43:09.220741+03	\N	\N
-1259	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:43:10.719106+03	30	\N	\N	1	\N		25134	2017-07-25 22:43:10.674907+03	\N	\N
-1260	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:43:36.457979+03	30	\N	\N	1	\N		25134	2017-07-25 22:43:36.434302+03	\N	\N
-1261	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:43:37.908361+03	30	\N	\N	1	\N		25134	2017-07-25 22:43:37.89977+03	\N	\N
-1262	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:43:38.57735+03	30	\N	\N	1	\N		25134	2017-07-25 22:43:38.547775+03	\N	\N
-1263	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:44:09.507048+03	30	\N	\N	1	\N		25134	2017-07-25 22:44:09.483157+03	\N	\N
-1264	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:44:10.644394+03	30	\N	\N	1	\N		25134	2017-07-25 22:44:10.636111+03	\N	\N
-1265	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:44:11.874037+03	30	\N	\N	1	\N		25134	2017-07-25 22:44:11.834359+03	\N	\N
-1266	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:44:37.70429+03	30	\N	\N	1	\N		25134	2017-07-25 22:44:37.681952+03	\N	\N
-1267	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:44:38.350855+03	30	\N	\N	1	\N		25134	2017-07-25 22:44:38.341673+03	\N	\N
-1268	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:44:39.038424+03	30	\N	\N	1	\N		25134	2017-07-25 22:44:38.997407+03	\N	\N
-1269	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:45:09.887067+03	30	\N	\N	1	\N		25134	2017-07-25 22:45:09.864455+03	\N	\N
-1270	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:45:10.684159+03	30	\N	\N	1	\N		25134	2017-07-25 22:45:10.6778+03	\N	\N
-1271	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:45:11.229151+03	30	\N	\N	1	\N		25134	2017-07-25 22:45:11.200383+03	\N	\N
-1272	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:45:37.564461+03	30	\N	\N	1	\N		25134	2017-07-25 22:45:37.544114+03	\N	\N
-1273	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:45:38.981988+03	30	\N	\N	1	\N		25134	2017-07-25 22:45:38.972932+03	\N	\N
-1274	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:45:40.472941+03	30	\N	\N	1	\N		25134	2017-07-25 22:45:40.432559+03	\N	\N
-1275	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:46:06.878706+03	30	\N	\N	1	\N		25134	2017-07-25 22:46:06.855933+03	\N	\N
-1276	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:46:08.005692+03	30	\N	\N	1	\N		25134	2017-07-25 22:46:07.997531+03	\N	\N
-1277	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:46:09.070922+03	30	\N	\N	1	\N		25134	2017-07-25 22:46:09.034595+03	\N	\N
-1278	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:46:35.485611+03	30	\N	\N	1	\N		25134	2017-07-25 22:46:35.462141+03	\N	\N
-1279	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:46:36.530886+03	30	\N	\N	1	\N		25134	2017-07-25 22:46:36.522028+03	\N	\N
-1280	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:46:37.670782+03	30	\N	\N	1	\N		25134	2017-07-25 22:46:37.639682+03	\N	\N
-1281	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:47:08.769519+03	30	\N	\N	1	\N		25134	2017-07-25 22:47:08.746486+03	\N	\N
-1282	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:47:09.525668+03	30	\N	\N	1	\N		25134	2017-07-25 22:47:09.520903+03	\N	\N
-1283	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:47:11.064552+03	30	\N	\N	1	\N		25134	2017-07-25 22:47:11.025944+03	\N	\N
-1284	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:47:37.105038+03	30	\N	\N	1	\N		25134	2017-07-25 22:47:37.082823+03	\N	\N
-1285	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:47:37.765485+03	30	\N	\N	1	\N		25134	2017-07-25 22:47:37.75812+03	\N	\N
-1286	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:47:39.085778+03	30	\N	\N	1	\N		25134	2017-07-25 22:47:39.04662+03	\N	\N
-1287	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:48:10.089692+03	30	\N	\N	1	\N		25134	2017-07-25 22:48:10.065873+03	\N	\N
-1288	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:48:10.704227+03	30	\N	\N	1	\N		25134	2017-07-25 22:48:10.695516+03	\N	\N
-1289	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:48:12.166133+03	30	\N	\N	1	\N		25134	2017-07-25 22:48:12.126963+03	\N	\N
-1290	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:48:37.90036+03	30	\N	\N	1	\N		25134	2017-07-25 22:48:37.876913+03	\N	\N
-1291	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:48:38.884345+03	30	\N	\N	1	\N		25134	2017-07-25 22:48:38.875769+03	\N	\N
-1292	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:48:39.603152+03	30	\N	\N	1	\N		25134	2017-07-25 22:48:39.562773+03	\N	\N
-1293	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:49:05.597195+03	30	\N	\N	1	\N		25134	2017-07-25 22:49:05.574964+03	\N	\N
-1294	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:49:06.336555+03	30	\N	\N	1	\N		25134	2017-07-25 22:49:06.328138+03	\N	\N
-1295	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:49:07.333577+03	30	\N	\N	1	\N		25134	2017-07-25 22:49:07.301751+03	\N	\N
-1296	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:49:38.905179+03	30	\N	\N	1	\N		25134	2017-07-25 22:49:38.882634+03	\N	\N
-1297	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:49:39.991585+03	30	\N	\N	1	\N		25134	2017-07-25 22:49:39.982491+03	\N	\N
-1298	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:49:40.594605+03	30	\N	\N	1	\N		25134	2017-07-25 22:49:40.553187+03	\N	\N
-1299	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:50:06.636173+03	30	\N	\N	1	\N		25134	2017-07-25 22:50:06.613338+03	\N	\N
-1300	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:50:07.392348+03	30	\N	\N	1	\N		25134	2017-07-25 22:50:07.384017+03	\N	\N
-1301	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:50:08.516713+03	30	\N	\N	1	\N		25134	2017-07-25 22:50:08.477032+03	\N	\N
-1302	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:50:39.248978+03	30	\N	\N	1	\N		25134	2017-07-25 22:50:39.225041+03	\N	\N
-1303	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:50:40.690404+03	30	\N	\N	1	\N		25134	2017-07-25 22:50:40.681252+03	\N	\N
-1304	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:50:41.387674+03	30	\N	\N	1	\N		25134	2017-07-25 22:50:41.348698+03	\N	\N
-1305	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:51:08.03862+03	30	\N	\N	1	\N		25134	2017-07-25 22:51:08.014422+03	\N	\N
-1306	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:51:09.092591+03	30	\N	\N	1	\N		25134	2017-07-25 22:51:09.083391+03	\N	\N
-1307	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:51:10.620388+03	30	\N	\N	1	\N		25134	2017-07-25 22:51:10.588106+03	\N	\N
-1308	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:51:36.823622+03	30	\N	\N	1	\N		25134	2017-07-25 22:51:36.801885+03	\N	\N
-1309	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:51:37.784355+03	30	\N	\N	1	\N		25134	2017-07-25 22:51:37.775592+03	\N	\N
-1310	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:51:39.276494+03	30	\N	\N	1	\N		25134	2017-07-25 22:51:39.249058+03	\N	\N
-1311	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:52:05.381453+03	30	\N	\N	1	\N		25134	2017-07-25 22:52:05.358601+03	\N	\N
-1312	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:52:06.474992+03	30	\N	\N	1	\N		25134	2017-07-25 22:52:06.465984+03	\N	\N
-1313	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:52:07.268506+03	30	\N	\N	1	\N		25134	2017-07-25 22:52:07.228598+03	\N	\N
-1314	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:52:38.038321+03	30	\N	\N	1	\N		25134	2017-07-25 22:52:38.017815+03	\N	\N
-1315	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:52:38.953148+03	30	\N	\N	1	\N		25134	2017-07-25 22:52:38.945145+03	\N	\N
-1316	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:52:39.634518+03	30	\N	\N	1	\N		25134	2017-07-25 22:52:39.60466+03	\N	\N
-1317	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:53:05.276856+03	30	\N	\N	1	\N		25134	2017-07-25 22:53:05.255786+03	\N	\N
-1318	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:53:06.21245+03	30	\N	\N	1	\N		25134	2017-07-25 22:53:06.204227+03	\N	\N
-1319	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:53:06.823806+03	30	\N	\N	1	\N		25134	2017-07-25 22:53:06.784283+03	\N	\N
-1320	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:53:38.085084+03	30	\N	\N	1	\N		25134	2017-07-25 22:53:38.062708+03	\N	\N
-1321	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:53:39.036436+03	30	\N	\N	1	\N		25134	2017-07-25 22:53:39.027878+03	\N	\N
-1322	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:53:39.689833+03	30	\N	\N	1	\N		25134	2017-07-25 22:53:39.649425+03	\N	\N
-1323	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:54:05.505734+03	30	\N	\N	1	\N		25134	2017-07-25 22:54:05.4853+03	\N	\N
-1324	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:54:06.345006+03	30	\N	\N	1	\N		25134	2017-07-25 22:54:06.335951+03	\N	\N
-1325	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:54:07.794774+03	30	\N	\N	1	\N		25134	2017-07-25 22:54:07.75438+03	\N	\N
-1326	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:54:39.441988+03	30	\N	\N	1	\N		25134	2017-07-25 22:54:39.42133+03	\N	\N
-1327	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:54:40.937412+03	30	\N	\N	1	\N		25134	2017-07-25 22:54:40.929984+03	\N	\N
-1328	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:54:42.424396+03	30	\N	\N	1	\N		25134	2017-07-25 22:54:42.385579+03	\N	\N
-1329	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:55:08.547125+03	30	\N	\N	1	\N		25134	2017-07-25 22:55:08.527068+03	\N	\N
-1330	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:55:09.112643+03	30	\N	\N	1	\N		25134	2017-07-25 22:55:09.105791+03	\N	\N
-1331	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:55:09.859126+03	30	\N	\N	1	\N		25134	2017-07-25 22:55:09.819611+03	\N	\N
-1332	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:55:36.21842+03	30	\N	\N	1	\N		25134	2017-07-25 22:55:36.197817+03	\N	\N
-1333	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:55:37.479074+03	30	\N	\N	1	\N		25134	2017-07-25 22:55:37.471131+03	\N	\N
-1334	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:55:38.443731+03	30	\N	\N	1	\N		25134	2017-07-25 22:55:38.404295+03	\N	\N
-1335	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:56:09.542003+03	30	\N	\N	1	\N		25134	2017-07-25 22:56:09.519133+03	\N	\N
-1336	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:56:10.612672+03	30	\N	\N	1	\N		25134	2017-07-25 22:56:10.604505+03	\N	\N
-1337	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:56:11.502692+03	30	\N	\N	1	\N		25134	2017-07-25 22:56:11.462096+03	\N	\N
-1338	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:56:38.072743+03	30	\N	\N	1	\N		25134	2017-07-25 22:56:38.050142+03	\N	\N
-1339	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:56:38.879239+03	30	\N	\N	1	\N		25134	2017-07-25 22:56:38.871471+03	\N	\N
-1340	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:56:40.11827+03	30	\N	\N	1	\N		25134	2017-07-25 22:56:40.089079+03	\N	\N
-1341	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:57:06.215861+03	30	\N	\N	1	\N		25134	2017-07-25 22:57:06.19349+03	\N	\N
-1342	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:57:07.62207+03	30	\N	\N	1	\N		25134	2017-07-25 22:57:07.612362+03	\N	\N
-1343	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:57:08.732099+03	30	\N	\N	1	\N		25134	2017-07-25 22:57:08.702423+03	\N	\N
-1344	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:57:39.430489+03	30	\N	\N	1	\N		25134	2017-07-25 22:57:39.407304+03	\N	\N
-1345	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:57:40.546593+03	30	\N	\N	1	\N		25134	2017-07-25 22:57:40.537747+03	\N	\N
-1346	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:57:41.225476+03	30	\N	\N	1	\N		25134	2017-07-25 22:57:41.195489+03	\N	\N
-1347	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:58:07.384018+03	30	\N	\N	1	\N		25134	2017-07-25 22:58:07.362493+03	\N	\N
-1348	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 22:58:08.585505+03	30	\N	\N	1	\N		25134	2017-07-25 22:58:08.575678+03	\N	\N
-1349	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:58:09.396998+03	30	\N	\N	1	\N		25134	2017-07-25 22:58:09.357085+03	\N	\N
-1350	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:58:40.084957+03	30	\N	\N	1	\N		25134	2017-07-25 22:58:40.041557+03	\N	\N
-1351	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:58:41.876886+03	30	\N	\N	1	\N		25134	2017-07-25 22:58:41.839016+03	\N	\N
-1352	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:59:08.822671+03	30	\N	\N	1	\N		25134	2017-07-25 22:59:08.799765+03	\N	\N
-1353	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:59:09.405905+03	30	\N	\N	1	\N		25134	2017-07-25 22:59:09.36484+03	\N	\N
-1354	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 22:59:36.621975+03	30	\N	\N	1	\N		25134	2017-07-25 22:59:36.594297+03	\N	\N
-1355	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 22:59:38.005954+03	30	\N	\N	1	\N		25134	2017-07-25 22:59:37.968595+03	\N	\N
-1356	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:00:09.126739+03	30	\N	\N	1	\N		25134	2017-07-25 23:00:09.102902+03	\N	\N
-1357	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:00:09.928586+03	30	\N	\N	1	\N		25134	2017-07-25 23:00:09.889677+03	\N	\N
-1358	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:04:08.433267+03	30	\N	\N	1	\N		26693	2017-07-25 23:04:08.410088+03	\N	\N
-1359	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:04:09.394686+03	30	\N	\N	1	\N		26693	2017-07-25 23:04:09.385401+03	\N	\N
-1360	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:04:09.940803+03	30	\N	\N	1	\N		26693	2017-07-25 23:04:09.906692+03	\N	\N
-1361	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:04:35.859399+03	30	\N	\N	1	\N		26693	2017-07-25 23:04:35.836818+03	\N	\N
-1362	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:04:36.80532+03	30	\N	\N	1	\N		26693	2017-07-25 23:04:36.797902+03	\N	\N
-1363	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:04:38.003212+03	30	\N	\N	1	\N		26693	2017-07-25 23:04:37.968771+03	\N	\N
-1364	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:05:09.277459+03	30	\N	\N	1	\N		26693	2017-07-25 23:05:09.253086+03	\N	\N
-1365	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:05:10.517779+03	30	\N	\N	1	\N		26693	2017-07-25 23:05:10.50852+03	\N	\N
-1366	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:05:12.025909+03	30	\N	\N	1	\N		26693	2017-07-25 23:05:11.988263+03	\N	\N
-1367	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:05:38.132468+03	30	\N	\N	1	\N		26693	2017-07-25 23:05:38.109394+03	\N	\N
-1368	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:05:38.929105+03	30	\N	\N	1	\N		26693	2017-07-25 23:05:38.921195+03	\N	\N
-1369	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:05:39.876066+03	30	\N	\N	1	\N		26693	2017-07-25 23:05:39.841288+03	\N	\N
-1370	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:06:06.168237+03	30	\N	\N	1	\N		26693	2017-07-25 23:06:06.140648+03	\N	\N
-1371	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:06:07.35412+03	30	\N	\N	1	\N		26693	2017-07-25 23:06:07.34624+03	\N	\N
-1372	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:06:08.097035+03	30	\N	\N	1	\N		26693	2017-07-25 23:06:08.067307+03	\N	\N
-1373	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:06:38.994803+03	30	\N	\N	1	\N		26693	2017-07-25 23:06:38.973481+03	\N	\N
-1374	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:06:40.40648+03	30	\N	\N	1	\N		26693	2017-07-25 23:06:40.396738+03	\N	\N
-1375	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:06:41.170143+03	30	\N	\N	1	\N		26693	2017-07-25 23:06:41.133409+03	\N	\N
-1376	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:07:07.710145+03	30	\N	\N	1	\N		26693	2017-07-25 23:07:07.684869+03	\N	\N
-1377	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:07:08.244541+03	30	\N	\N	1	\N		26693	2017-07-25 23:07:08.235578+03	\N	\N
-1378	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:07:09.390381+03	30	\N	\N	1	\N		26693	2017-07-25 23:07:09.352784+03	\N	\N
-1379	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:07:35.434851+03	30	\N	\N	1	\N		26693	2017-07-25 23:07:35.411547+03	\N	\N
-1380	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:07:36.176039+03	30	\N	\N	1	\N		26693	2017-07-25 23:07:36.167013+03	\N	\N
-1381	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:07:37.502457+03	30	\N	\N	1	\N		26693	2017-07-25 23:07:37.464513+03	\N	\N
-1382	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:08:08.762684+03	30	\N	\N	1	\N		26693	2017-07-25 23:08:08.742211+03	\N	\N
-1383	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:08:10.129501+03	30	\N	\N	1	\N		26693	2017-07-25 23:08:10.121582+03	\N	\N
-1384	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:08:11.374304+03	30	\N	\N	1	\N		26693	2017-07-25 23:08:11.337609+03	\N	\N
-1385	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:08:37.825823+03	30	\N	\N	1	\N		26693	2017-07-25 23:08:37.794025+03	\N	\N
-1386	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:08:39.019024+03	30	\N	\N	1	\N		26693	2017-07-25 23:08:39.008498+03	\N	\N
-1387	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:08:40.07643+03	30	\N	\N	1	\N		26693	2017-07-25 23:08:40.03291+03	\N	\N
-1388	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:09:05.911172+03	30	\N	\N	1	\N		26693	2017-07-25 23:09:05.888206+03	\N	\N
-1389	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:09:07.214912+03	30	\N	\N	1	\N		26693	2017-07-25 23:09:07.206757+03	\N	\N
-1390	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:09:08.188729+03	30	\N	\N	1	\N		26693	2017-07-25 23:09:08.145129+03	\N	\N
-1391	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:09:34.692502+03	30	\N	\N	1	\N		26693	2017-07-25 23:09:34.673533+03	\N	\N
-1392	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:09:35.244724+03	30	\N	\N	1	\N		26693	2017-07-25 23:09:35.237387+03	\N	\N
-1393	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:09:35.870517+03	30	\N	\N	1	\N		26693	2017-07-25 23:09:35.834489+03	\N	\N
-1394	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:10:06.71545+03	30	\N	\N	1	\N		26693	2017-07-25 23:10:06.695064+03	\N	\N
-1395	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:10:07.726924+03	30	\N	\N	1	\N		26693	2017-07-25 23:10:07.717996+03	\N	\N
-1396	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:10:09.101271+03	30	\N	\N	1	\N		26693	2017-07-25 23:10:09.059455+03	\N	\N
-1397	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:10:35.636664+03	30	\N	\N	1	\N		26693	2017-07-25 23:10:35.615511+03	\N	\N
-1398	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:10:36.847819+03	30	\N	\N	1	\N		26693	2017-07-25 23:10:36.839235+03	\N	\N
-1399	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:10:38.375291+03	30	\N	\N	1	\N		26693	2017-07-25 23:10:38.336873+03	\N	\N
-1400	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:11:04.946454+03	30	\N	\N	1	\N		26693	2017-07-25 23:11:04.924848+03	\N	\N
-1401	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:11:06.475431+03	30	\N	\N	1	\N		26693	2017-07-25 23:11:06.467864+03	\N	\N
-1402	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:11:07.879137+03	30	\N	\N	1	\N		26693	2017-07-25 23:11:07.836515+03	\N	\N
-1403	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:11:39.199811+03	30	\N	\N	1	\N		26693	2017-07-25 23:11:39.179525+03	\N	\N
-1404	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:11:39.868478+03	30	\N	\N	1	\N		26693	2017-07-25 23:11:39.86014+03	\N	\N
-1405	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:11:41.397123+03	30	\N	\N	1	\N		26693	2017-07-25 23:11:41.358604+03	\N	\N
-1406	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:12:07.059341+03	30	\N	\N	1	\N		26693	2017-07-25 23:12:07.018794+03	\N	\N
-1407	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:12:09.068219+03	30	\N	\N	1	\N		26693	2017-07-25 23:12:09.033619+03	\N	\N
-1408	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:12:37.090696+03	30	\N	\N	1	\N		26693	2017-07-25 23:12:37.066572+03	\N	\N
-1409	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:12:38.004589+03	30	\N	\N	1	\N		26693	2017-07-25 23:12:37.972137+03	\N	\N
-1410	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:13:05.015766+03	30	\N	\N	1	\N		26693	2017-07-25 23:13:04.995035+03	\N	\N
-1411	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:13:06.032327+03	30	\N	\N	1	\N		26693	2017-07-25 23:13:05.996497+03	\N	\N
-1412	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:13:36.697143+03	30	\N	\N	1	\N		26693	2017-07-25 23:13:36.676079+03	\N	\N
-1413	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:13:37.967451+03	30	\N	\N	1	\N		26693	2017-07-25 23:13:37.935168+03	\N	\N
-1414	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:14:08.848936+03	30	\N	\N	1	\N		26693	2017-07-25 23:14:08.82813+03	\N	\N
-1415	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:14:09.725458+03	30	\N	\N	1	\N		26693	2017-07-25 23:14:09.685164+03	\N	\N
-1416	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:14:36.43446+03	30	\N	\N	1	\N		26693	2017-07-25 23:14:36.413476+03	\N	\N
-1417	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:14:37.475402+03	30	\N	\N	1	\N		26693	2017-07-25 23:14:37.441298+03	\N	\N
-1418	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:15:08.795744+03	30	\N	\N	1	\N		26693	2017-07-25 23:15:08.77297+03	\N	\N
-1419	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:15:09.66653+03	30	\N	\N	1	\N		26693	2017-07-25 23:15:09.632572+03	\N	\N
-1420	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:19:32.369876+03	30	\N	\N	1	\N		27871	2017-07-25 23:19:32.348258+03	\N	\N
-1421	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:19:33.240786+03	30	\N	\N	1	\N		27871	2017-07-25 23:19:33.232016+03	\N	\N
-1422	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:19:34.635684+03	30	\N	\N	1	\N		27871	2017-07-25 23:19:34.600231+03	\N	\N
-1423	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:20:17.950072+03	30	\N	\N	1	\N		27940	2017-07-25 23:20:17.925554+03	\N	\N
-1424	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:20:19.337881+03	30	\N	\N	1	\N		27940	2017-07-25 23:20:19.328372+03	\N	\N
-1425	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:20:20.590612+03	30	\N	\N	1	\N		27940	2017-07-25 23:20:20.553586+03	\N	\N
-1426	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:20:26.2562+03	30	\N	\N	1	\N		27940	2017-07-25 23:20:26.234627+03	\N	\N
-1427	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:20:27.263851+03	30	\N	\N	1	\N		27940	2017-07-25 23:20:27.255712+03	\N	\N
-1428	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:20:28.303604+03	30	\N	\N	1	\N		27940	2017-07-25 23:20:28.271617+03	\N	\N
-1429	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:20:54.598871+03	30	\N	\N	1	\N		27940	2017-07-25 23:20:54.575624+03	\N	\N
-1430	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:20:55.144641+03	30	\N	\N	1	\N		27940	2017-07-25 23:20:55.134707+03	\N	\N
-1431	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:20:56.195311+03	30	\N	\N	1	\N		27940	2017-07-25 23:20:56.164526+03	\N	\N
-1432	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:21:27.701558+03	30	\N	\N	1	\N		27940	2017-07-25 23:21:27.681373+03	\N	\N
-1433	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:21:28.845893+03	30	\N	\N	1	\N		27940	2017-07-25 23:21:28.837833+03	\N	\N
-1434	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:21:29.85921+03	30	\N	\N	1	\N		27940	2017-07-25 23:21:29.816783+03	\N	\N
-1435	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:21:56.463255+03	30	\N	\N	1	\N		27940	2017-07-25 23:21:56.436814+03	\N	\N
-1436	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:21:57.091712+03	30	\N	\N	1	\N		27940	2017-07-25 23:21:57.082379+03	\N	\N
-1437	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:21:58.018879+03	30	\N	\N	1	\N		27940	2017-07-25 23:21:57.980252+03	\N	\N
-1438	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:22:24.35629+03	30	\N	\N	1	\N		27940	2017-07-25 23:22:24.334626+03	\N	\N
-1439	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:22:25.14189+03	30	\N	\N	1	\N		27940	2017-07-25 23:22:25.135117+03	\N	\N
-1440	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:22:26.346491+03	30	\N	\N	1	\N		27940	2017-07-25 23:22:26.315775+03	\N	\N
-1441	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:22:58.012036+03	30	\N	\N	1	\N		27940	2017-07-25 23:22:57.9914+03	\N	\N
-1442	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:22:59.261695+03	30	\N	\N	1	\N		27940	2017-07-25 23:22:59.253641+03	\N	\N
-1443	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:23:00.760221+03	30	\N	\N	1	\N		27940	2017-07-25 23:23:00.720846+03	\N	\N
-1444	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:23:26.637926+03	30	\N	\N	1	\N		27940	2017-07-25 23:23:26.591134+03	\N	\N
-1445	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:23:28.728228+03	30	\N	\N	1	\N		27940	2017-07-25 23:23:28.067477+03	\N	\N
-1446	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:23:30.186572+03	30	\N	\N	1	\N		27940	2017-07-25 23:23:30.147881+03	\N	\N
-1447	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:23:56.094791+03	30	\N	\N	1	\N		27940	2017-07-25 23:23:56.073212+03	\N	\N
-1448	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:23:56.772915+03	30	\N	\N	1	\N		27940	2017-07-25 23:23:56.758734+03	\N	\N
-1449	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:23:58.186484+03	30	\N	\N	1	\N		27940	2017-07-25 23:23:58.155198+03	\N	\N
-1450	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:24:29.17006+03	30	\N	\N	1	\N		27940	2017-07-25 23:24:29.14385+03	\N	\N
-1451	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:24:30.587401+03	30	\N	\N	1	\N		27940	2017-07-25 23:24:30.571351+03	\N	\N
-1452	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:24:31.351853+03	30	\N	\N	1	\N		27940	2017-07-25 23:24:31.313998+03	\N	\N
-1453	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:24:57.396178+03	30	\N	\N	1	\N		27940	2017-07-25 23:24:57.370468+03	\N	\N
-1454	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:24:58.313132+03	30	\N	\N	1	\N		27940	2017-07-25 23:24:58.297628+03	\N	\N
-1455	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:24:59.481008+03	30	\N	\N	1	\N		27940	2017-07-25 23:24:59.442103+03	\N	\N
-1456	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:25:25.308418+03	30	\N	\N	1	\N		27940	2017-07-25 23:25:25.287714+03	\N	\N
-1457	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:25:26.233889+03	30	\N	\N	1	\N		27940	2017-07-25 23:25:26.221098+03	\N	\N
-1458	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:25:26.945002+03	30	\N	\N	1	\N		27940	2017-07-25 23:25:26.903894+03	\N	\N
-1459	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:25:57.777056+03	30	\N	\N	1	\N		27940	2017-07-25 23:25:57.759211+03	\N	\N
-1460	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:25:58.986614+03	30	\N	\N	1	\N		27940	2017-07-25 23:25:58.971789+03	\N	\N
-1461	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:25:59.944898+03	30	\N	\N	1	\N		27940	2017-07-25 23:25:59.913525+03	\N	\N
-1462	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:26:26.430865+03	30	\N	\N	1	\N		27940	2017-07-25 23:26:26.409025+03	\N	\N
-1463	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:26:27.290323+03	30	\N	\N	1	\N		27940	2017-07-25 23:26:27.282828+03	\N	\N
-1464	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:26:28.808462+03	30	\N	\N	1	\N		27940	2017-07-25 23:26:28.768412+03	\N	\N
-1465	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:26:55.142263+03	30	\N	\N	1	\N		27940	2017-07-25 23:26:55.119401+03	\N	\N
-1466	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:26:56.473968+03	30	\N	\N	1	\N		27940	2017-07-25 23:26:56.46626+03	\N	\N
-1467	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:26:57.245609+03	30	\N	\N	1	\N		27940	2017-07-25 23:26:57.203567+03	\N	\N
-1468	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:27:28.056532+03	30	\N	\N	1	\N		27940	2017-07-25 23:27:28.033216+03	\N	\N
-1469	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:27:29.379232+03	30	\N	\N	1	\N		27940	2017-07-25 23:27:29.370336+03	\N	\N
-1470	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:27:30.900393+03	30	\N	\N	1	\N		27940	2017-07-25 23:27:30.872043+03	\N	\N
-1471	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:27:56.901021+03	30	\N	\N	1	\N		27940	2017-07-25 23:27:56.880404+03	\N	\N
-1472	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:27:57.876603+03	30	\N	\N	1	\N		27940	2017-07-25 23:27:57.867156+03	\N	\N
-1473	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:27:59.16344+03	30	\N	\N	1	\N		27940	2017-07-25 23:27:59.121559+03	\N	\N
-1474	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:28:25.821527+03	30	\N	\N	1	\N		27940	2017-07-25 23:28:25.779414+03	\N	\N
-1475	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:28:32.759291+03	30	\N	\N	1	\N		27940	2017-07-25 23:28:27.013148+03	\N	\N
-1476	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:28:34.088715+03	30	\N	\N	1	\N		27940	2017-07-25 23:28:34.052453+03	\N	\N
-1477	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:28:55.599447+03	30	\N	\N	1	\N		27940	2017-07-25 23:28:55.574936+03	\N	\N
-1478	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:28:57.032386+03	30	\N	\N	1	\N		27940	2017-07-25 23:28:57.016499+03	\N	\N
-1479	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:28:57.716035+03	30	\N	\N	1	\N		27940	2017-07-25 23:28:57.684396+03	\N	\N
-1480	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:29:28.936715+03	30	\N	\N	1	\N		27940	2017-07-25 23:29:28.914475+03	\N	\N
-1481	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:29:29.921204+03	30	\N	\N	1	\N		27940	2017-07-25 23:29:29.878973+03	\N	\N
-1482	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:29:30.924769+03	30	\N	\N	1	\N		27940	2017-07-25 23:29:30.885633+03	\N	\N
-1483	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:29:56.765268+03	30	\N	\N	1	\N		27940	2017-07-25 23:29:56.741723+03	\N	\N
-1484	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:29:57.380944+03	30	\N	\N	1	\N		27940	2017-07-25 23:29:57.369942+03	\N	\N
-1485	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:29:58.371574+03	30	\N	\N	1	\N		27940	2017-07-25 23:29:58.330675+03	\N	\N
-1486	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:30:24.49231+03	30	\N	\N	1	\N		27940	2017-07-25 23:30:24.472258+03	\N	\N
-1487	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:30:25.410835+03	30	\N	\N	1	\N		27940	2017-07-25 23:30:25.401536+03	\N	\N
-1488	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:30:26.302012+03	30	\N	\N	1	\N		27940	2017-07-25 23:30:26.269248+03	\N	\N
-1489	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:30:57.373673+03	30	\N	\N	1	\N		27940	2017-07-25 23:30:57.350881+03	\N	\N
-1490	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:30:58.672869+03	30	\N	\N	1	\N		27940	2017-07-25 23:30:58.665334+03	\N	\N
-1491	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:30:59.853478+03	30	\N	\N	1	\N		27940	2017-07-25 23:30:59.815417+03	\N	\N
-1492	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:31:26.482445+03	30	\N	\N	1	\N		27940	2017-07-25 23:31:26.460929+03	\N	\N
-1493	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:31:27.856199+03	30	\N	\N	1	\N		27940	2017-07-25 23:31:27.847132+03	\N	\N
-1494	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:31:28.566504+03	30	\N	\N	1	\N		27940	2017-07-25 23:31:28.522465+03	\N	\N
-1495	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:32:57.537614+03	30	\N	\N	1	\N		28892	2017-07-25 23:32:57.513241+03	\N	\N
-1496	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:32:58.378333+03	30	\N	\N	1	\N		28892	2017-07-25 23:32:58.370216+03	\N	\N
-1497	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:32:59.049897+03	30	\N	\N	1	\N		28892	2017-07-25 23:32:59.015403+03	\N	\N
-1498	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:32:59.797763+03	30	\N	\N	1	\N		28892	2017-07-25 23:32:59.772337+03	\N	\N
-1499	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:33:00.538316+03	30	\N	\N	1	\N		28892	2017-07-25 23:33:00.529169+03	\N	\N
-1500	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:33:01.256474+03	30	\N	\N	1	\N		28892	2017-07-25 23:33:01.221722+03	\N	\N
-1501	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:33:15.642364+03	30	\N	\N	1	\N		28923	2017-07-25 23:33:15.611889+03	\N	\N
-1502	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:33:16.497959+03	30	\N	\N	1	\N		28923	2017-07-25 23:33:16.488796+03	\N	\N
-1503	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:33:17.452509+03	30	\N	\N	1	\N		28923	2017-07-25 23:33:17.417935+03	\N	\N
-1504	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:33:44.030733+03	30	\N	\N	1	\N		28923	2017-07-25 23:33:44.009104+03	\N	\N
-1505	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:33:44.650001+03	30	\N	\N	1	\N		28923	2017-07-25 23:33:44.641487+03	\N	\N
-1506	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:33:45.872964+03	30	\N	\N	1	\N		28923	2017-07-25 23:33:45.841615+03	\N	\N
-1507	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:34:16.576392+03	30	\N	\N	1	\N		28923	2017-07-25 23:34:16.554251+03	\N	\N
-1508	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:34:17.972421+03	30	\N	\N	1	\N		28923	2017-07-25 23:34:17.963532+03	\N	\N
-1509	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:34:19.285264+03	30	\N	\N	1	\N		28923	2017-07-25 23:34:19.247724+03	\N	\N
-1510	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:34:45.818512+03	30	\N	\N	1	\N		28923	2017-07-25 23:34:45.796495+03	\N	\N
-1511	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:34:46.858711+03	30	\N	\N	1	\N		28923	2017-07-25 23:34:46.850498+03	\N	\N
-1512	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:34:47.765153+03	30	\N	\N	1	\N		28923	2017-07-25 23:34:47.732443+03	\N	\N
-1513	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:35:14.315521+03	30	\N	\N	1	\N		28923	2017-07-25 23:35:14.293577+03	\N	\N
-1514	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:35:15.185886+03	30	\N	\N	1	\N		28923	2017-07-25 23:35:15.178759+03	\N	\N
-1515	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:35:15.98242+03	30	\N	\N	1	\N		28923	2017-07-25 23:35:15.947884+03	\N	\N
-1516	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:35:41.946756+03	30	\N	\N	1	\N		28923	2017-07-25 23:35:41.899198+03	\N	\N
-1517	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:35:44.02827+03	30	\N	\N	1	\N		28923	2017-07-25 23:35:43.280945+03	\N	\N
-1518	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:35:44.990701+03	30	\N	\N	1	\N		28923	2017-07-25 23:35:44.952745+03	\N	\N
-1519	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:36:15.715282+03	30	\N	\N	1	\N		28923	2017-07-25 23:36:15.694588+03	\N	\N
-1520	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:36:16.73988+03	30	\N	\N	1	\N		28923	2017-07-25 23:36:16.728213+03	\N	\N
-1521	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:36:17.959894+03	30	\N	\N	1	\N		28923	2017-07-25 23:36:17.928866+03	\N	\N
-1522	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:36:44.47622+03	30	\N	\N	1	\N		28923	2017-07-25 23:36:44.45553+03	\N	\N
-1523	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:36:45.427191+03	30	\N	\N	1	\N		28923	2017-07-25 23:36:45.385309+03	\N	\N
-1524	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:36:46.097252+03	30	\N	\N	1	\N		28923	2017-07-25 23:36:46.067225+03	\N	\N
-1525	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:37:12.067443+03	30	\N	\N	1	\N		28923	2017-07-25 23:37:12.044806+03	\N	\N
-1526	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:37:12.821963+03	30	\N	\N	1	\N		28923	2017-07-25 23:37:12.813539+03	\N	\N
-1527	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:37:13.530422+03	30	\N	\N	1	\N		28923	2017-07-25 23:37:13.500943+03	\N	\N
-1528	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-25 23:37:44.401426+03	30	\N	\N	1	\N		28923	2017-07-25 23:37:44.376789+03	\N	\N
-1529	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-25 23:37:45.547353+03	30	\N	\N	1	\N		28923	2017-07-25 23:37:45.538288+03	\N	\N
-1530	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-25 23:37:46.397437+03	30	\N	\N	1	\N		28923	2017-07-25 23:37:46.366233+03	\N	\N
-1531	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:17:01.323707+03	30	\N	\N	1	\N		3758	2017-07-26 11:17:01.296078+03	\N	\N
-1532	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:17:01.877921+03	30	\N	\N	1	\N		3758	2017-07-26 11:17:01.867613+03	\N	\N
-1533	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:17:02.656971+03	30	\N	\N	1	\N		3758	2017-07-26 11:17:02.616625+03	\N	\N
-1534	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:17:13.699515+03	30	\N	\N	1	\N		3758	2017-07-26 11:17:13.66695+03	\N	\N
-1535	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:17:14.255058+03	30	\N	\N	1	\N		3758	2017-07-26 11:17:14.246136+03	\N	\N
-1536	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:17:15.133565+03	30	\N	\N	1	\N		3758	2017-07-26 11:17:15.10793+03	\N	\N
-1537	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:17:41.729375+03	30	\N	\N	1	\N		3758	2017-07-26 11:17:41.709737+03	\N	\N
-1538	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:17:42.902507+03	30	\N	\N	1	\N		3758	2017-07-26 11:17:42.893221+03	\N	\N
-1539	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:17:44.425725+03	30	\N	\N	1	\N		3758	2017-07-26 11:17:44.392835+03	\N	\N
-1540	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:18:15.195089+03	30	\N	\N	1	\N		3758	2017-07-26 11:18:15.172447+03	\N	\N
-1541	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:18:16.083405+03	30	\N	\N	1	\N		3758	2017-07-26 11:18:16.075793+03	\N	\N
-1542	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:18:17.594884+03	30	\N	\N	1	\N		3758	2017-07-26 11:18:17.568803+03	\N	\N
-1543	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:18:43.695477+03	30	\N	\N	1	\N		3758	2017-07-26 11:18:43.672902+03	\N	\N
-1544	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:18:44.437076+03	30	\N	\N	1	\N		3758	2017-07-26 11:18:44.431309+03	\N	\N
-1545	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:18:45.627631+03	30	\N	\N	1	\N		3758	2017-07-26 11:18:45.59259+03	\N	\N
-1546	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:19:12.198999+03	30	\N	\N	1	\N		3758	2017-07-26 11:19:12.173866+03	\N	\N
-1547	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:19:13.644348+03	30	\N	\N	1	\N		3758	2017-07-26 11:19:13.63867+03	\N	\N
-1548	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:19:14.858453+03	30	\N	\N	1	\N		3758	2017-07-26 11:19:14.824917+03	\N	\N
-1549	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:19:46.175944+03	30	\N	\N	1	\N		3758	2017-07-26 11:19:46.145667+03	\N	\N
-1550	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:19:46.990948+03	30	\N	\N	1	\N		3758	2017-07-26 11:19:46.984052+03	\N	\N
-1551	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:19:48.014664+03	30	\N	\N	1	\N		3758	2017-07-26 11:19:47.974119+03	\N	\N
-1552	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:20:14.350451+03	30	\N	\N	1	\N		3758	2017-07-26 11:20:14.330045+03	\N	\N
-1553	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:20:15.39587+03	30	\N	\N	1	\N		3758	2017-07-26 11:20:15.386781+03	\N	\N
-1554	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:20:16.587869+03	30	\N	\N	1	\N		3758	2017-07-26 11:20:16.54888+03	\N	\N
-1555	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:20:43.018666+03	30	\N	\N	1	\N		3758	2017-07-26 11:20:42.994704+03	\N	\N
-1556	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:20:44.404779+03	30	\N	\N	1	\N		3758	2017-07-26 11:20:44.396662+03	\N	\N
-1557	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:20:45.42475+03	30	\N	\N	1	\N		3758	2017-07-26 11:20:45.394648+03	\N	\N
-1558	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:21:16.187575+03	30	\N	\N	1	\N		3758	2017-07-26 11:21:16.168187+03	\N	\N
-1559	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:21:16.7263+03	30	\N	\N	1	\N		3758	2017-07-26 11:21:16.720629+03	\N	\N
-1560	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:21:17.326791+03	30	\N	\N	1	\N		3758	2017-07-26 11:21:17.291868+03	\N	\N
-1561	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:21:43.797722+03	30	\N	\N	1	\N		3758	2017-07-26 11:21:43.765963+03	\N	\N
-1562	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:21:44.409913+03	30	\N	\N	1	\N		3758	2017-07-26 11:21:44.403074+03	\N	\N
-1563	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:21:45.437667+03	30	\N	\N	1	\N		3758	2017-07-26 11:21:45.414171+03	\N	\N
-1564	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:22:11.630481+03	30	\N	\N	1	\N		3758	2017-07-26 11:22:11.604092+03	\N	\N
-1565	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:22:12.604137+03	30	\N	\N	1	\N		3758	2017-07-26 11:22:12.5951+03	\N	\N
-1566	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:22:14.021454+03	30	\N	\N	1	\N		3758	2017-07-26 11:22:13.987708+03	\N	\N
-1567	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:22:44.936624+03	30	\N	\N	1	\N		3758	2017-07-26 11:22:44.905376+03	\N	\N
-1568	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:22:45.633045+03	30	\N	\N	1	\N		3758	2017-07-26 11:22:45.626779+03	\N	\N
-1569	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:22:46.242871+03	30	\N	\N	1	\N		3758	2017-07-26 11:22:46.215023+03	\N	\N
-1570	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:23:12.132022+03	30	\N	\N	1	\N		3758	2017-07-26 11:23:12.106989+03	\N	\N
-1571	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:23:12.735212+03	30	\N	\N	1	\N		3758	2017-07-26 11:23:12.727208+03	\N	\N
-1572	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:23:13.636081+03	30	\N	\N	1	\N		3758	2017-07-26 11:23:13.61178+03	\N	\N
-1573	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:23:45.0027+03	30	\N	\N	1	\N		3758	2017-07-26 11:23:44.981902+03	\N	\N
-1574	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:23:46.524025+03	30	\N	\N	1	\N		3758	2017-07-26 11:23:46.5166+03	\N	\N
-1575	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:23:47.16506+03	30	\N	\N	1	\N		3758	2017-07-26 11:23:47.131876+03	\N	\N
-1576	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:24:13.091217+03	30	\N	\N	1	\N		3758	2017-07-26 11:24:13.07031+03	\N	\N
-1577	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:24:13.901703+03	30	\N	\N	1	\N		3758	2017-07-26 11:24:13.88899+03	\N	\N
-1578	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:24:15.317847+03	30	\N	\N	1	\N		3758	2017-07-26 11:24:15.285736+03	\N	\N
-1579	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:24:46.19958+03	30	\N	\N	1	\N		3758	2017-07-26 11:24:46.176944+03	\N	\N
-1580	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:24:47.426724+03	30	\N	\N	1	\N		3758	2017-07-26 11:24:47.419153+03	\N	\N
-1581	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:24:48.463556+03	30	\N	\N	1	\N		3758	2017-07-26 11:24:48.438173+03	\N	\N
-1582	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:25:14.244171+03	30	\N	\N	1	\N		3758	2017-07-26 11:25:14.213638+03	\N	\N
-1583	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:25:15.585316+03	30	\N	\N	1	\N		3758	2017-07-26 11:25:15.57545+03	\N	\N
-1584	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:25:16.930293+03	30	\N	\N	1	\N		3758	2017-07-26 11:25:16.899373+03	\N	\N
-1585	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:25:43.248918+03	30	\N	\N	1	\N		3758	2017-07-26 11:25:43.225454+03	\N	\N
-1586	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:25:44.299796+03	30	\N	\N	1	\N		3758	2017-07-26 11:25:44.293318+03	\N	\N
-1587	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:25:45.027962+03	30	\N	\N	1	\N		3758	2017-07-26 11:25:44.997312+03	\N	\N
-1588	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:26:16.267621+03	30	\N	\N	1	\N		3758	2017-07-26 11:26:16.231053+03	\N	\N
-1589	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:26:17.382071+03	30	\N	\N	1	\N		3758	2017-07-26 11:26:17.376839+03	\N	\N
-1590	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:26:18.705519+03	30	\N	\N	1	\N		3758	2017-07-26 11:26:18.6823+03	\N	\N
-1591	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:26:44.925399+03	30	\N	\N	1	\N		3758	2017-07-26 11:26:44.90538+03	\N	\N
-1592	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:26:46.099192+03	30	\N	\N	1	\N		3758	2017-07-26 11:26:46.091412+03	\N	\N
-1593	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:26:47.486785+03	30	\N	\N	1	\N		3758	2017-07-26 11:26:47.459178+03	\N	\N
-1594	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:27:13.471611+03	30	\N	\N	1	\N		3758	2017-07-26 11:27:13.451454+03	\N	\N
-1595	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:27:14.062292+03	30	\N	\N	1	\N		3758	2017-07-26 11:27:14.054861+03	\N	\N
-1596	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:27:15.526577+03	30	\N	\N	1	\N		3758	2017-07-26 11:27:15.498168+03	\N	\N
-1597	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:27:41.639092+03	30	\N	\N	1	\N		3758	2017-07-26 11:27:41.615172+03	\N	\N
-1598	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:27:42.19866+03	30	\N	\N	1	\N		3758	2017-07-26 11:27:42.189374+03	\N	\N
-1599	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:27:43.389713+03	30	\N	\N	1	\N		3758	2017-07-26 11:27:43.359857+03	\N	\N
-1600	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:28:14.845853+03	30	\N	\N	1	\N		3758	2017-07-26 11:28:14.824724+03	\N	\N
-1601	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:28:15.825773+03	30	\N	\N	1	\N		3758	2017-07-26 11:28:15.819597+03	\N	\N
-1602	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:28:16.941683+03	30	\N	\N	1	\N		3758	2017-07-26 11:28:16.914652+03	\N	\N
-1603	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:28:43.560603+03	30	\N	\N	1	\N		3758	2017-07-26 11:28:43.537622+03	\N	\N
-1604	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:28:44.384252+03	30	\N	\N	1	\N		3758	2017-07-26 11:28:44.376402+03	\N	\N
-1605	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:28:45.417379+03	30	\N	\N	1	\N		3758	2017-07-26 11:28:45.395236+03	\N	\N
-1606	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:29:16.105883+03	30	\N	\N	1	\N		3758	2017-07-26 11:29:16.084717+03	\N	\N
-1607	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:29:17.034057+03	30	\N	\N	1	\N		3758	2017-07-26 11:29:17.024998+03	\N	\N
-1608	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:29:17.845019+03	30	\N	\N	1	\N		3758	2017-07-26 11:29:17.825801+03	\N	\N
-1609	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:29:44.295826+03	30	\N	\N	1	\N		3758	2017-07-26 11:29:44.256094+03	\N	\N
-1610	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:29:45.531765+03	30	\N	\N	1	\N		3758	2017-07-26 11:29:45.523884+03	\N	\N
-1611	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:29:46.246984+03	30	\N	\N	1	\N		3758	2017-07-26 11:29:46.210174+03	\N	\N
-1612	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:30:12.341998+03	30	\N	\N	1	\N		3758	2017-07-26 11:30:12.317416+03	\N	\N
-1613	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:30:13.400021+03	30	\N	\N	1	\N		3758	2017-07-26 11:30:13.391841+03	\N	\N
-1614	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:30:14.520534+03	30	\N	\N	1	\N		3758	2017-07-26 11:30:14.485861+03	\N	\N
-1615	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:30:46.049895+03	30	\N	\N	1	\N		3758	2017-07-26 11:30:46.027773+03	\N	\N
-1616	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:30:47.420351+03	30	\N	\N	1	\N		3758	2017-07-26 11:30:47.407794+03	\N	\N
-1617	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:30:48.641485+03	30	\N	\N	1	\N		3758	2017-07-26 11:30:48.611036+03	\N	\N
-1618	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:31:14.435081+03	30	\N	\N	1	\N		3758	2017-07-26 11:31:14.408242+03	\N	\N
-1619	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:31:15.767354+03	30	\N	\N	1	\N		3758	2017-07-26 11:31:15.75934+03	\N	\N
-1620	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:31:16.541057+03	30	\N	\N	1	\N		3758	2017-07-26 11:31:16.515239+03	\N	\N
-1621	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:31:42.233693+03	30	\N	\N	1	\N		3758	2017-07-26 11:31:42.207675+03	\N	\N
-1622	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:31:42.904347+03	30	\N	\N	1	\N		3758	2017-07-26 11:31:42.896448+03	\N	\N
-1623	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:31:44.405012+03	30	\N	\N	1	\N		3758	2017-07-26 11:31:44.36482+03	\N	\N
-1624	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:32:15.402374+03	30	\N	\N	1	\N		3758	2017-07-26 11:32:15.381232+03	\N	\N
-1625	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:32:16.616341+03	30	\N	\N	1	\N		3758	2017-07-26 11:32:16.608014+03	\N	\N
-1626	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:32:17.308904+03	30	\N	\N	1	\N		3758	2017-07-26 11:32:17.278507+03	\N	\N
-1627	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:32:43.411485+03	30	\N	\N	1	\N		3758	2017-07-26 11:32:43.384338+03	\N	\N
-1628	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:32:44.570084+03	30	\N	\N	1	\N		3758	2017-07-26 11:32:44.564852+03	\N	\N
-1629	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:32:45.700983+03	30	\N	\N	1	\N		3758	2017-07-26 11:32:45.677984+03	\N	\N
-1630	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:33:11.479753+03	30	\N	\N	1	\N		3758	2017-07-26 11:33:11.455096+03	\N	\N
-1631	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:33:12.957099+03	30	\N	\N	1	\N		3758	2017-07-26 11:33:12.944357+03	\N	\N
-1632	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:33:13.507283+03	30	\N	\N	1	\N		3758	2017-07-26 11:33:13.483827+03	\N	\N
-1633	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:33:44.673483+03	30	\N	\N	1	\N		3758	2017-07-26 11:33:44.647718+03	\N	\N
-1634	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:33:45.478957+03	30	\N	\N	1	\N		3758	2017-07-26 11:33:45.469113+03	\N	\N
-1635	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:34:13.475902+03	30	\N	\N	1	\N		3758	2017-07-26 11:34:13.452976+03	\N	\N
-1636	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:34:14.395554+03	30	\N	\N	1	\N		3758	2017-07-26 11:34:14.385807+03	\N	\N
-1637	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:34:42.369096+03	30	\N	\N	1	\N		3758	2017-07-26 11:34:42.348196+03	\N	\N
-1638	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:34:43.483008+03	30	\N	\N	1	\N		3758	2017-07-26 11:34:43.473326+03	\N	\N
-1639	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:35:14.881187+03	30	\N	\N	1	\N		3758	2017-07-26 11:35:14.85838+03	\N	\N
-1640	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:35:15.655724+03	30	\N	\N	1	\N		3758	2017-07-26 11:35:15.649343+03	\N	\N
-1641	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:35:42.041289+03	30	\N	\N	1	\N		3758	2017-07-26 11:35:42.020245+03	\N	\N
-1642	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:35:43.140572+03	30	\N	\N	1	\N		3758	2017-07-26 11:35:43.13166+03	\N	\N
-1643	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:36:15.571434+03	30	\N	\N	1	\N		3758	2017-07-26 11:36:15.549692+03	\N	\N
-1644	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:36:16.326078+03	30	\N	\N	1	\N		3758	2017-07-26 11:36:16.316977+03	\N	\N
-1645	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:36:42.734698+03	30	\N	\N	1	\N		3758	2017-07-26 11:36:42.714002+03	\N	\N
-1646	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:36:43.582859+03	30	\N	\N	1	\N		3758	2017-07-26 11:36:43.577738+03	\N	\N
-1647	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:37:15.029492+03	30	\N	\N	1	\N		3758	2017-07-26 11:37:15.004629+03	\N	\N
-1648	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:37:16.03236+03	30	\N	\N	1	\N		3758	2017-07-26 11:37:16.022629+03	\N	\N
-1649	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:37:42.539142+03	30	\N	\N	1	\N		3758	2017-07-26 11:37:42.51567+03	\N	\N
-1650	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:37:43.74953+03	30	\N	\N	1	\N		3758	2017-07-26 11:37:43.74262+03	\N	\N
-1651	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:38:15.024882+03	30	\N	\N	1	\N		3758	2017-07-26 11:38:15.004417+03	\N	\N
-1652	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:38:16.237553+03	30	\N	\N	1	\N		3758	2017-07-26 11:38:16.231953+03	\N	\N
-1653	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:38:42.692664+03	30	\N	\N	1	\N		3758	2017-07-26 11:38:42.661157+03	\N	\N
-1654	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:38:43.854373+03	30	\N	\N	1	\N		3758	2017-07-26 11:38:43.844667+03	\N	\N
-1655	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:39:14.82376+03	30	\N	\N	1	\N		3758	2017-07-26 11:39:14.801971+03	\N	\N
-1656	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:39:15.466251+03	30	\N	\N	1	\N		3758	2017-07-26 11:39:15.446677+03	\N	\N
-1657	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:39:41.52108+03	30	\N	\N	1	\N		3758	2017-07-26 11:39:41.430508+03	\N	\N
-1658	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:39:42.699495+03	30	\N	\N	1	\N		3758	2017-07-26 11:39:42.688868+03	\N	\N
-1659	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:40:14.200392+03	30	\N	\N	1	\N		3758	2017-07-26 11:40:14.18046+03	\N	\N
-1660	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:40:15.166429+03	30	\N	\N	1	\N		3758	2017-07-26 11:40:15.15733+03	\N	\N
-1661	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:40:36.063752+03	30	\N	\N	1	\N		3758	2017-07-26 11:40:36.027623+03	\N	\N
-1662	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:40:36.776762+03	30	\N	\N	1	\N		3758	2017-07-26 11:40:36.767947+03	\N	\N
-1663	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:41:05.432883+03	30	\N	\N	1	\N		3758	2017-07-26 11:41:05.406858+03	\N	\N
-1664	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:41:06.303369+03	30	\N	\N	1	\N		3758	2017-07-26 11:41:06.294886+03	\N	\N
-1665	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:41:33.481022+03	30	\N	\N	1	\N		3758	2017-07-26 11:41:33.458356+03	\N	\N
-1666	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:41:34.039383+03	30	\N	\N	1	\N		3758	2017-07-26 11:41:34.034797+03	\N	\N
-1667	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:42:05.54956+03	30	\N	\N	1	\N		3758	2017-07-26 11:42:05.527085+03	\N	\N
-1668	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:42:06.790988+03	30	\N	\N	1	\N		3758	2017-07-26 11:42:06.784066+03	\N	\N
-1669	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:42:32.617758+03	30	\N	\N	1	\N		3758	2017-07-26 11:42:32.597356+03	\N	\N
-1670	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:42:33.472086+03	30	\N	\N	1	\N		3758	2017-07-26 11:42:33.460831+03	\N	\N
-1671	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:43:05.279074+03	30	\N	\N	1	\N		3758	2017-07-26 11:43:05.252689+03	\N	\N
-1672	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:43:06.237705+03	30	\N	\N	1	\N		3758	2017-07-26 11:43:06.230428+03	\N	\N
-1673	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:43:31.97304+03	30	\N	\N	1	\N		3758	2017-07-26 11:43:31.95021+03	\N	\N
-1674	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:43:33.405876+03	30	\N	\N	1	\N		3758	2017-07-26 11:43:33.396493+03	\N	\N
-1675	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:44:04.759921+03	30	\N	\N	1	\N		3758	2017-07-26 11:44:04.738844+03	\N	\N
-1676	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:44:06.062227+03	30	\N	\N	1	\N		3758	2017-07-26 11:44:06.052963+03	\N	\N
-1677	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:44:31.861484+03	30	\N	\N	1	\N		3758	2017-07-26 11:44:31.842259+03	\N	\N
-1678	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:44:32.566859+03	30	\N	\N	1	\N		3758	2017-07-26 11:44:32.556685+03	\N	\N
-1679	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:45:03.49557+03	30	\N	\N	1	\N		3758	2017-07-26 11:45:03.474243+03	\N	\N
-1680	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:45:04.311924+03	30	\N	\N	1	\N		3758	2017-07-26 11:45:04.301834+03	\N	\N
-1681	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:45:35.458353+03	30	\N	\N	1	\N		3758	2017-07-26 11:45:35.435522+03	\N	\N
-1682	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:45:36.704638+03	30	\N	\N	1	\N		3758	2017-07-26 11:45:36.694971+03	\N	\N
-1683	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:46:02.66002+03	30	\N	\N	1	\N		3758	2017-07-26 11:46:02.600669+03	\N	\N
-1684	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:46:03.601494+03	30	\N	\N	1	\N		3758	2017-07-26 11:46:03.587144+03	\N	\N
-1685	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:46:34.789094+03	30	\N	\N	1	\N		3758	2017-07-26 11:46:34.762149+03	\N	\N
-1686	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:46:35.720516+03	30	\N	\N	1	\N		3758	2017-07-26 11:46:35.71323+03	\N	\N
-1687	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:46:51.67271+03	30	\N	\N	1	\N		3758	2017-07-26 11:46:51.645747+03	\N	\N
-1688	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:46:52.382526+03	30	\N	\N	1	\N		3758	2017-07-26 11:46:52.376126+03	\N	\N
-1689	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:47:05.401683+03	30	\N	\N	1	\N		3758	2017-07-26 11:47:05.378313+03	\N	\N
-1690	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:47:06.42624+03	30	\N	\N	1	\N		3758	2017-07-26 11:47:06.418698+03	\N	\N
-1691	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:47:39.122151+03	30	\N	\N	1	\N		3758	2017-07-26 11:47:39.09918+03	\N	\N
-1692	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:47:40.337484+03	30	\N	\N	1	\N		3758	2017-07-26 11:47:40.32925+03	\N	\N
-1693	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:48:08.003784+03	30	\N	\N	1	\N		3758	2017-07-26 11:48:07.974112+03	\N	\N
-1694	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:48:09.286963+03	30	\N	\N	1	\N		3758	2017-07-26 11:48:09.279047+03	\N	\N
-1695	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:48:35.063097+03	30	\N	\N	1	\N		3758	2017-07-26 11:48:35.044854+03	\N	\N
-1696	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:48:36.395962+03	30	\N	\N	1	\N		3758	2017-07-26 11:48:36.390552+03	\N	\N
-1697	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:49:07.172458+03	30	\N	\N	1	\N		3758	2017-07-26 11:49:07.144406+03	\N	\N
-1698	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:49:07.978737+03	30	\N	\N	1	\N		3758	2017-07-26 11:49:07.972238+03	\N	\N
-1699	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:49:26.871687+03	30	\N	\N	1	\N		6285	2017-07-26 11:49:26.847929+03	\N	\N
-1700	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:49:27.554538+03	30	\N	\N	1	\N		6285	2017-07-26 11:49:27.545197+03	\N	\N
-1701	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:49:55.69655+03	30	\N	\N	1	\N		6285	2017-07-26 11:49:55.667957+03	\N	\N
-1702	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:49:56.61822+03	30	\N	\N	1	\N		6285	2017-07-26 11:49:56.609523+03	\N	\N
-1703	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:50:23.968376+03	30	\N	\N	1	\N		6285	2017-07-26 11:50:23.94269+03	\N	\N
-1704	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:50:25.092793+03	30	\N	\N	1	\N		6285	2017-07-26 11:50:25.08439+03	\N	\N
-1705	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:50:56.254906+03	30	\N	\N	1	\N		6285	2017-07-26 11:50:56.228982+03	\N	\N
-1706	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:50:57.208395+03	30	\N	\N	1	\N		6285	2017-07-26 11:50:57.200691+03	\N	\N
-1707	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:51:28.235183+03	30	\N	\N	1	\N		6285	2017-07-26 11:51:28.208871+03	\N	\N
-1708	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:51:28.833568+03	30	\N	\N	1	\N		6285	2017-07-26 11:51:28.824744+03	\N	\N
-1709	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:51:56.39498+03	30	\N	\N	1	\N		6285	2017-07-26 11:51:56.372028+03	\N	\N
-1710	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:51:57.705829+03	30	\N	\N	1	\N		6285	2017-07-26 11:51:57.694089+03	\N	\N
-1711	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:52:24.310359+03	30	\N	\N	1	\N		6285	2017-07-26 11:52:24.277406+03	\N	\N
-1712	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:52:25.319543+03	30	\N	\N	1	\N		6285	2017-07-26 11:52:25.311373+03	\N	\N
-1713	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:52:56.738689+03	30	\N	\N	1	\N		6285	2017-07-26 11:52:56.713998+03	\N	\N
-1714	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:52:57.439938+03	30	\N	\N	1	\N		6285	2017-07-26 11:52:57.430302+03	\N	\N
-1715	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:53:32.61171+03	30	\N	\N	1	\N		6643	2017-07-26 11:53:32.589092+03	\N	\N
-1716	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:53:33.241678+03	30	\N	\N	1	\N		6643	2017-07-26 11:53:33.234324+03	\N	\N
-1717	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:53:34.724898+03	30	\N	\N	1	\N		6643	2017-07-26 11:53:34.690478+03	\N	\N
-1718	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:54:00.422823+03	30	\N	\N	1	\N		6643	2017-07-26 11:54:00.395777+03	\N	\N
-1719	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:54:01.083356+03	30	\N	\N	1	\N		6643	2017-07-26 11:54:01.074253+03	\N	\N
-1720	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:54:01.824811+03	30	\N	\N	1	\N		6643	2017-07-26 11:54:01.788889+03	\N	\N
-1721	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:54:32.528213+03	30	\N	\N	1	\N		6643	2017-07-26 11:54:32.476707+03	\N	\N
-1722	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:54:34.534513+03	30	\N	\N	1	\N		6643	2017-07-26 11:54:33.952331+03	\N	\N
-1723	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:54:35.761541+03	30	\N	\N	1	\N		6643	2017-07-26 11:54:35.727599+03	\N	\N
-1724	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:55:02.132422+03	30	\N	\N	1	\N		6643	2017-07-26 11:55:02.105555+03	\N	\N
-1725	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:55:03.117843+03	30	\N	\N	1	\N		6643	2017-07-26 11:55:03.094854+03	\N	\N
-1726	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:55:03.723308+03	30	\N	\N	1	\N		6643	2017-07-26 11:55:03.688735+03	\N	\N
-1727	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:55:29.824885+03	30	\N	\N	1	\N		6643	2017-07-26 11:55:29.800281+03	\N	\N
-1728	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:55:30.542305+03	30	\N	\N	1	\N		6643	2017-07-26 11:55:30.534529+03	\N	\N
-1729	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:55:31.922982+03	30	\N	\N	1	\N		6643	2017-07-26 11:55:31.894731+03	\N	\N
-1730	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:56:03.19894+03	30	\N	\N	1	\N		6643	2017-07-26 11:56:03.151707+03	\N	\N
-1731	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:56:04.710207+03	30	\N	\N	1	\N		6643	2017-07-26 11:56:04.09957+03	\N	\N
-1732	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:56:05.727423+03	30	\N	\N	1	\N		6643	2017-07-26 11:56:05.696955+03	\N	\N
-1733	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:56:32.09006+03	30	\N	\N	1	\N		6643	2017-07-26 11:56:32.068483+03	\N	\N
-1734	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:56:32.886008+03	30	\N	\N	1	\N		6643	2017-07-26 11:56:32.858231+03	\N	\N
-1735	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:56:34.065375+03	30	\N	\N	1	\N		6643	2017-07-26 11:56:34.038729+03	\N	\N
-1736	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:57:00.160539+03	30	\N	\N	1	\N		6643	2017-07-26 11:57:00.140431+03	\N	\N
-1737	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:57:01.222927+03	30	\N	\N	1	\N		6643	2017-07-26 11:57:01.216976+03	\N	\N
-1738	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:57:02.613614+03	30	\N	\N	1	\N		6643	2017-07-26 11:57:02.583358+03	\N	\N
-1739	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:57:34.11796+03	30	\N	\N	1	\N		6643	2017-07-26 11:57:34.074278+03	\N	\N
-1740	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:57:35.989847+03	30	\N	\N	1	\N		6643	2017-07-26 11:57:34.669269+03	\N	\N
-1741	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:57:36.552974+03	30	\N	\N	1	\N		6643	2017-07-26 11:57:36.526684+03	\N	\N
-1742	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:58:02.386172+03	30	\N	\N	1	\N		6643	2017-07-26 11:58:02.358766+03	\N	\N
-1743	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:58:02.99306+03	30	\N	\N	1	\N		6643	2017-07-26 11:58:02.970073+03	\N	\N
-1744	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:58:04.426381+03	30	\N	\N	1	\N		6643	2017-07-26 11:58:04.395839+03	\N	\N
-1745	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:58:30.998812+03	30	\N	\N	1	\N		6643	2017-07-26 11:58:30.979153+03	\N	\N
-1746	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:58:31.834383+03	30	\N	\N	1	\N		6643	2017-07-26 11:58:31.826387+03	\N	\N
-1747	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:58:32.509736+03	30	\N	\N	1	\N		6643	2017-07-26 11:58:32.473901+03	\N	\N
-1748	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 11:59:03.354449+03	30	\N	\N	1	\N		6643	2017-07-26 11:59:03.32569+03	\N	\N
-1749	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 11:59:04.022564+03	30	\N	\N	1	\N		6643	2017-07-26 11:59:04.016223+03	\N	\N
-1750	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 11:59:05.44699+03	30	\N	\N	1	\N		6643	2017-07-26 11:59:05.403595+03	\N	\N
-1751	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 15:02:08.331668+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:08.309504+03	\N	\N
-1752	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 15:02:09.199729+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:09.189392+03	\N	\N
-1753	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 15:02:10.213641+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:10.191445+03	\N	\N
-1754	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 15:02:11.344803+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:11.316279+03	\N	\N
-1755	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 15:02:11.941333+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:11.931602+03	\N	\N
-1756	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 15:02:13.460487+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:13.446145+03	\N	\N
-1757	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 15:02:14.506797+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:14.420829+03	\N	\N
-1758	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 15:02:15.356091+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:15.34811+03	\N	\N
-1759	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 15:02:16.167159+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:16.1548+03	\N	\N
-1760	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 15:02:16.727466+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:16.704409+03	\N	\N
-1761	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 15:02:18.169819+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:18.161705+03	\N	\N
-1762	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 15:02:19.326292+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:19.311073+03	\N	\N
-1763	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 15:02:25.174191+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:25.132483+03	\N	\N
-1764	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 15:02:25.924444+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:25.915734+03	\N	\N
-1765	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 15:02:27.412185+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:27.38784+03	\N	\N
-1766	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 15:02:53.415025+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:53.354372+03	\N	\N
-1767	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 15:02:54.103926+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:54.098371+03	\N	\N
-1768	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 15:02:54.696209+03	30	\N	\N	1	\N		7469	2017-07-26 15:02:54.636287+03	\N	\N
-1769	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 15:03:21.108696+03	30	\N	\N	1	\N		7469	2017-07-26 15:03:21.083536+03	\N	\N
-1770	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 15:03:22.60586+03	30	\N	\N	1	\N		7469	2017-07-26 15:03:22.596707+03	\N	\N
-1771	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 15:03:23.15977+03	30	\N	\N	1	\N		7469	2017-07-26 15:03:23.137709+03	\N	\N
-1772	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:05:46.226442+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:46.198941+03	\N	\N
-1773	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:05:46.966136+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:46.955016+03	\N	\N
-1774	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:05:47.754845+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:47.73076+03	\N	\N
-1775	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:05:49.199906+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:49.134676+03	\N	\N
-1776	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:05:50.024177+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:50.00733+03	\N	\N
-1777	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:05:50.881607+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:50.855778+03	\N	\N
-1778	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:05:52.091419+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:52.022894+03	\N	\N
-1779	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:05:52.719118+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:52.711044+03	\N	\N
-1780	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:05:54.248229+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:54.225902+03	\N	\N
-1781	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:05:54.966885+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:54.935235+03	\N	\N
-1782	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:05:55.822064+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:55.813443+03	\N	\N
-1783	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:05:56.943794+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:56.929944+03	\N	\N
-1784	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:05:57.862804+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:57.83673+03	\N	\N
-1785	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:05:58.880572+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:58.874239+03	\N	\N
-1786	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:05:59.824431+03	30	\N	\N	1	\N		3486	2017-07-26 17:05:59.805756+03	\N	\N
-1787	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:06:30.661344+03	30	\N	\N	1	\N		3486	2017-07-26 17:06:30.640141+03	\N	\N
-1788	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:06:31.735537+03	30	\N	\N	1	\N		3486	2017-07-26 17:06:31.728626+03	\N	\N
-1789	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:06:33.207825+03	30	\N	\N	1	\N		3486	2017-07-26 17:06:33.185165+03	\N	\N
-1790	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:06:59.035868+03	30	\N	\N	1	\N		3486	2017-07-26 17:06:59.006171+03	\N	\N
-1791	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:06:59.950911+03	30	\N	\N	1	\N		3486	2017-07-26 17:06:59.943464+03	\N	\N
-1792	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:07:01.154604+03	30	\N	\N	1	\N		3486	2017-07-26 17:07:01.140579+03	\N	\N
-1793	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:07:12.694867+03	30	\N	\N	1	\N		3486	2017-07-26 17:07:12.669021+03	\N	\N
-1794	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:07:13.820957+03	30	\N	\N	1	\N		3486	2017-07-26 17:07:13.813958+03	\N	\N
-1795	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:07:14.616813+03	30	\N	\N	1	\N		3486	2017-07-26 17:07:14.593953+03	\N	\N
-1796	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:07:40.983029+03	30	\N	\N	1	\N		3486	2017-07-26 17:07:40.962105+03	\N	\N
-1797	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:07:41.564264+03	30	\N	\N	1	\N		3486	2017-07-26 17:07:41.559207+03	\N	\N
-1798	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:07:42.106221+03	30	\N	\N	1	\N		3486	2017-07-26 17:07:42.08148+03	\N	\N
-1799	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:08:13.319141+03	30	\N	\N	1	\N		3486	2017-07-26 17:08:13.295193+03	\N	\N
-1800	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:08:13.967792+03	30	\N	\N	1	\N		3486	2017-07-26 17:08:13.958906+03	\N	\N
-1801	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:08:14.869575+03	30	\N	\N	1	\N		3486	2017-07-26 17:08:14.840458+03	\N	\N
-1802	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:08:41.165349+03	30	\N	\N	1	\N		3486	2017-07-26 17:08:41.145031+03	\N	\N
-1803	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:08:41.873855+03	30	\N	\N	1	\N		3486	2017-07-26 17:08:41.865106+03	\N	\N
-1804	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:08:42.958187+03	30	\N	\N	1	\N		3486	2017-07-26 17:08:42.929337+03	\N	\N
-1805	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:09:13.929208+03	30	\N	\N	1	\N		3486	2017-07-26 17:09:13.895284+03	\N	\N
-1806	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:09:15.011052+03	30	\N	\N	1	\N		3486	2017-07-26 17:09:15.005499+03	\N	\N
-1807	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:09:15.765246+03	30	\N	\N	1	\N		3486	2017-07-26 17:09:15.740896+03	\N	\N
-1808	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:09:41.696414+03	30	\N	\N	1	\N		3486	2017-07-26 17:09:41.675792+03	\N	\N
-1809	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:09:42.568285+03	30	\N	\N	1	\N		3486	2017-07-26 17:09:42.56014+03	\N	\N
-1810	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:09:43.208321+03	30	\N	\N	1	\N		3486	2017-07-26 17:09:43.184653+03	\N	\N
-1811	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:10:14.375208+03	30	\N	\N	1	\N		3486	2017-07-26 17:10:14.353362+03	\N	\N
-1812	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:10:15.156192+03	30	\N	\N	1	\N		3486	2017-07-26 17:10:15.148001+03	\N	\N
-1813	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:10:16.42764+03	30	\N	\N	1	\N		3486	2017-07-26 17:10:16.398467+03	\N	\N
-1814	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:10:42.8976+03	30	\N	\N	1	\N		3486	2017-07-26 17:10:42.873138+03	\N	\N
-1815	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:10:43.92515+03	30	\N	\N	1	\N		3486	2017-07-26 17:10:43.91678+03	\N	\N
-1816	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:10:44.988982+03	30	\N	\N	1	\N		3486	2017-07-26 17:10:44.966069+03	\N	\N
-1817	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:11:11.055329+03	30	\N	\N	1	\N		3486	2017-07-26 17:11:11.032605+03	\N	\N
-1818	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:11:11.793625+03	30	\N	\N	1	\N		3486	2017-07-26 17:11:11.786075+03	\N	\N
-1819	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:11:12.46442+03	30	\N	\N	1	\N		3486	2017-07-26 17:11:12.436888+03	\N	\N
-1820	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:11:43.652405+03	30	\N	\N	1	\N		3486	2017-07-26 17:11:43.63211+03	\N	\N
-1821	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:11:44.59566+03	30	\N	\N	1	\N		3486	2017-07-26 17:11:44.586359+03	\N	\N
-1822	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:11:45.997839+03	30	\N	\N	1	\N		3486	2017-07-26 17:11:45.954052+03	\N	\N
-1823	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:12:11.849299+03	30	\N	\N	1	\N		3486	2017-07-26 17:12:11.828988+03	\N	\N
-1824	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:12:12.387638+03	30	\N	\N	1	\N		3486	2017-07-26 17:12:12.381691+03	\N	\N
-1825	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:12:12.964709+03	30	\N	\N	1	\N		3486	2017-07-26 17:12:12.933067+03	\N	\N
-1826	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:12:43.729408+03	30	\N	\N	1	\N		3486	2017-07-26 17:12:43.710005+03	\N	\N
-1827	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:12:44.306469+03	30	\N	\N	1	\N		3486	2017-07-26 17:12:44.298733+03	\N	\N
-1828	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:12:45.39452+03	30	\N	\N	1	\N		3486	2017-07-26 17:12:45.37251+03	\N	\N
-1829	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:13:11.510611+03	30	\N	\N	1	\N		3486	2017-07-26 17:13:11.487003+03	\N	\N
-1830	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:13:12.747278+03	30	\N	\N	1	\N		3486	2017-07-26 17:13:12.736126+03	\N	\N
-1831	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:13:13.392611+03	30	\N	\N	1	\N		3486	2017-07-26 17:13:13.358018+03	\N	\N
-1832	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:13:39.886049+03	30	\N	\N	1	\N		3486	2017-07-26 17:13:39.86351+03	\N	\N
-1833	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:13:40.694519+03	30	\N	\N	1	\N		3486	2017-07-26 17:13:40.685618+03	\N	\N
-1834	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:13:42.105963+03	30	\N	\N	1	\N		3486	2017-07-26 17:13:42.076208+03	\N	\N
-1835	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:14:13.758379+03	30	\N	\N	1	\N		3486	2017-07-26 17:14:13.733333+03	\N	\N
-1836	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:14:14.941549+03	30	\N	\N	1	\N		3486	2017-07-26 17:14:14.93683+03	\N	\N
-1837	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:14:16.418373+03	30	\N	\N	1	\N		3486	2017-07-26 17:14:16.388091+03	\N	\N
-1838	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:14:42.758051+03	30	\N	\N	1	\N		3486	2017-07-26 17:14:42.737659+03	\N	\N
-1839	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:14:44.045138+03	30	\N	\N	1	\N		3486	2017-07-26 17:14:44.037064+03	\N	\N
-1840	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:14:45.586785+03	30	\N	\N	1	\N		3486	2017-07-26 17:14:45.557651+03	\N	\N
-1841	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:15:12.12431+03	30	\N	\N	1	\N		3486	2017-07-26 17:15:12.066992+03	\N	\N
-1842	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:15:12.967088+03	30	\N	\N	1	\N		3486	2017-07-26 17:15:12.960021+03	\N	\N
-1843	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:15:14.130736+03	30	\N	\N	1	\N		3486	2017-07-26 17:15:14.105126+03	\N	\N
-1844	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:15:45.371904+03	30	\N	\N	1	\N		3486	2017-07-26 17:15:45.349156+03	\N	\N
-1845	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:15:46.619297+03	30	\N	\N	1	\N		3486	2017-07-26 17:15:46.610498+03	\N	\N
-1846	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:15:47.694314+03	30	\N	\N	1	\N		3486	2017-07-26 17:15:47.655344+03	\N	\N
-1847	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:16:13.506566+03	30	\N	\N	1	\N		3486	2017-07-26 17:16:13.484221+03	\N	\N
-1848	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:16:14.055548+03	30	\N	\N	1	\N		3486	2017-07-26 17:16:14.047366+03	\N	\N
-1849	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:16:14.834241+03	30	\N	\N	1	\N		3486	2017-07-26 17:16:14.803795+03	\N	\N
-1850	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:16:45.623811+03	30	\N	\N	1	\N		3486	2017-07-26 17:16:45.59514+03	\N	\N
-1851	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:16:46.523486+03	30	\N	\N	1	\N		3486	2017-07-26 17:16:46.51638+03	\N	\N
-1852	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:16:47.397914+03	30	\N	\N	1	\N		3486	2017-07-26 17:16:47.371965+03	\N	\N
-1853	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:17:13.964718+03	30	\N	\N	1	\N		3486	2017-07-26 17:17:13.941314+03	\N	\N
-1854	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:17:14.561858+03	30	\N	\N	1	\N		3486	2017-07-26 17:17:14.55532+03	\N	\N
-1855	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:17:16.090116+03	30	\N	\N	1	\N		3486	2017-07-26 17:17:16.067006+03	\N	\N
-1856	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:17:42.688329+03	30	\N	\N	1	\N		3486	2017-07-26 17:17:42.664073+03	\N	\N
-1857	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:17:43.772941+03	30	\N	\N	1	\N		3486	2017-07-26 17:17:43.764091+03	\N	\N
-1858	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:17:45.329338+03	30	\N	\N	1	\N		3486	2017-07-26 17:17:45.287106+03	\N	\N
-1859	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:18:16.887594+03	30	\N	\N	1	\N		3486	2017-07-26 17:18:16.864412+03	\N	\N
-1860	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:18:17.743468+03	30	\N	\N	1	\N		3486	2017-07-26 17:18:17.737996+03	\N	\N
-1861	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:18:18.667746+03	30	\N	\N	1	\N		3486	2017-07-26 17:18:18.623851+03	\N	\N
-1862	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:18:44.660499+03	30	\N	\N	1	\N		3486	2017-07-26 17:18:44.639628+03	\N	\N
-1863	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:18:45.251366+03	30	\N	\N	1	\N		3486	2017-07-26 17:18:45.242881+03	\N	\N
-1864	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:18:46.733489+03	30	\N	\N	1	\N		3486	2017-07-26 17:18:46.697544+03	\N	\N
-1865	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:19:13.22697+03	30	\N	\N	1	\N		3486	2017-07-26 17:19:13.20022+03	\N	\N
-1866	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:19:13.781194+03	30	\N	\N	1	\N		3486	2017-07-26 17:19:13.77446+03	\N	\N
-1867	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:19:14.820923+03	30	\N	\N	1	\N		3486	2017-07-26 17:19:14.777125+03	\N	\N
-1868	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:19:46.072044+03	30	\N	\N	1	\N		3486	2017-07-26 17:19:46.048196+03	\N	\N
-1869	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:19:47.073466+03	30	\N	\N	1	\N		3486	2017-07-26 17:19:47.065516+03	\N	\N
-1870	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:19:48.391725+03	30	\N	\N	1	\N		3486	2017-07-26 17:19:48.360056+03	\N	\N
-1871	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:20:14.902856+03	30	\N	\N	1	\N		3486	2017-07-26 17:20:14.881839+03	\N	\N
-1872	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:20:15.778127+03	30	\N	\N	1	\N		3486	2017-07-26 17:20:15.770724+03	\N	\N
-1873	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:20:16.961451+03	30	\N	\N	1	\N		3486	2017-07-26 17:20:16.927381+03	\N	\N
-1874	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:20:43.308184+03	30	\N	\N	1	\N		3486	2017-07-26 17:20:43.255616+03	\N	\N
-1875	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:20:47.011353+03	30	\N	\N	1	\N		3486	2017-07-26 17:20:44.596514+03	\N	\N
-1876	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:20:47.952701+03	30	\N	\N	1	\N		3486	2017-07-26 17:20:47.917456+03	\N	\N
-1877	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:21:14.465858+03	30	\N	\N	1	\N		3486	2017-07-26 17:21:14.446323+03	\N	\N
-1878	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:21:15.611212+03	30	\N	\N	1	\N		3486	2017-07-26 17:21:15.594959+03	\N	\N
-1879	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:21:16.698372+03	30	\N	\N	1	\N		3486	2017-07-26 17:21:16.655284+03	\N	\N
-1880	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:21:43.092124+03	30	\N	\N	1	\N		3486	2017-07-26 17:21:43.072407+03	\N	\N
-1881	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:21:44.526762+03	30	\N	\N	1	\N		3486	2017-07-26 17:21:44.51196+03	\N	\N
-1882	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:21:45.205343+03	30	\N	\N	1	\N		3486	2017-07-26 17:21:45.170652+03	\N	\N
-1883	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:22:16.066381+03	30	\N	\N	1	\N		3486	2017-07-26 17:22:16.041732+03	\N	\N
-1884	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:22:17.33037+03	30	\N	\N	1	\N		3486	2017-07-26 17:22:17.319374+03	\N	\N
-1885	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:22:17.94351+03	30	\N	\N	1	\N		3486	2017-07-26 17:22:17.908655+03	\N	\N
-1886	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:22:44.255178+03	30	\N	\N	1	\N		3486	2017-07-26 17:22:44.232202+03	\N	\N
-1887	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:22:45.733112+03	30	\N	\N	1	\N		3486	2017-07-26 17:22:45.720396+03	\N	\N
-1888	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:22:46.62191+03	30	\N	\N	1	\N		3486	2017-07-26 17:22:46.588347+03	\N	\N
-1889	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:23:12.642527+03	30	\N	\N	1	\N		3486	2017-07-26 17:23:12.622162+03	\N	\N
-1890	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:23:13.660213+03	30	\N	\N	1	\N		3486	2017-07-26 17:23:13.647455+03	\N	\N
-1891	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:23:14.363821+03	30	\N	\N	1	\N		3486	2017-07-26 17:23:14.322476+03	\N	\N
-1892	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:23:45.014037+03	30	\N	\N	1	\N		3486	2017-07-26 17:23:44.990724+03	\N	\N
-1893	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:23:46.428721+03	30	\N	\N	1	\N		3486	2017-07-26 17:23:46.415417+03	\N	\N
-1894	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:23:47.226377+03	30	\N	\N	1	\N		3486	2017-07-26 17:23:47.184348+03	\N	\N
-1895	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:24:12.938135+03	30	\N	\N	1	\N		3486	2017-07-26 17:24:12.91673+03	\N	\N
-1896	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:24:14.443494+03	30	\N	\N	1	\N		3486	2017-07-26 17:24:14.431618+03	\N	\N
-1897	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:24:15.996493+03	30	\N	\N	1	\N		3486	2017-07-26 17:24:15.95553+03	\N	\N
-1898	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:24:42.452864+03	30	\N	\N	1	\N		3486	2017-07-26 17:24:42.429948+03	\N	\N
-1899	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:24:43.926008+03	30	\N	\N	1	\N		3486	2017-07-26 17:24:43.909912+03	\N	\N
-1900	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:24:44.526163+03	30	\N	\N	1	\N		3486	2017-07-26 17:24:44.49012+03	\N	\N
-1901	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:25:15.354887+03	30	\N	\N	1	\N		3486	2017-07-26 17:25:15.331475+03	\N	\N
-1902	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:25:16.767773+03	30	\N	\N	1	\N		3486	2017-07-26 17:25:16.711501+03	\N	\N
-1903	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:25:17.707009+03	30	\N	\N	1	\N		3486	2017-07-26 17:25:17.664988+03	\N	\N
-1904	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:25:43.689032+03	30	\N	\N	1	\N		3486	2017-07-26 17:25:43.66609+03	\N	\N
-1905	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:25:44.633034+03	30	\N	\N	1	\N		3486	2017-07-26 17:25:44.628311+03	\N	\N
-1906	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:25:45.602474+03	30	\N	\N	1	\N		3486	2017-07-26 17:25:45.561282+03	\N	\N
-1907	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:26:16.614405+03	30	\N	\N	1	\N		3486	2017-07-26 17:26:16.589109+03	\N	\N
-1908	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:26:17.783021+03	30	\N	\N	1	\N		3486	2017-07-26 17:26:17.773448+03	\N	\N
-1909	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:26:18.923818+03	30	\N	\N	1	\N		3486	2017-07-26 17:26:18.884705+03	\N	\N
-1910	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:26:45.079118+03	30	\N	\N	1	\N		3486	2017-07-26 17:26:45.056784+03	\N	\N
-1911	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:26:45.93935+03	30	\N	\N	1	\N		3486	2017-07-26 17:26:45.930267+03	\N	\N
-1912	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:26:46.805852+03	30	\N	\N	1	\N		3486	2017-07-26 17:26:46.769478+03	\N	\N
-1913	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:27:13.020544+03	30	\N	\N	1	\N		3486	2017-07-26 17:27:12.981991+03	\N	\N
-1914	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:27:14.545875+03	30	\N	\N	1	\N		3486	2017-07-26 17:27:14.536387+03	\N	\N
-1915	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:27:15.467963+03	30	\N	\N	1	\N		3486	2017-07-26 17:27:15.432325+03	\N	\N
-1916	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:27:42.08887+03	30	\N	\N	1	\N		3486	2017-07-26 17:27:42.068925+03	\N	\N
-1917	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:27:43.201238+03	30	\N	\N	1	\N		3486	2017-07-26 17:27:43.192998+03	\N	\N
-1918	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:27:43.924082+03	30	\N	\N	1	\N		3486	2017-07-26 17:27:43.893004+03	\N	\N
-1919	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:28:15.485629+03	30	\N	\N	1	\N		3486	2017-07-26 17:28:15.449095+03	\N	\N
-1920	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:28:16.278134+03	30	\N	\N	1	\N		3486	2017-07-26 17:28:16.271964+03	\N	\N
-1921	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:28:17.106926+03	30	\N	\N	1	\N		3486	2017-07-26 17:28:17.033196+03	\N	\N
-1922	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:28:43.414122+03	30	\N	\N	1	\N		3486	2017-07-26 17:28:43.390968+03	\N	\N
-1923	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:28:44.463407+03	30	\N	\N	1	\N		3486	2017-07-26 17:28:44.454353+03	\N	\N
-1924	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:28:45.02533+03	30	\N	\N	1	\N		3486	2017-07-26 17:28:44.981123+03	\N	\N
-1925	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:29:16.582538+03	30	\N	\N	1	\N		3486	2017-07-26 17:29:16.560359+03	\N	\N
-1926	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:29:17.120046+03	30	\N	\N	1	\N		3486	2017-07-26 17:29:17.111319+03	\N	\N
-1927	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:29:18.282555+03	30	\N	\N	1	\N		3486	2017-07-26 17:29:18.237548+03	\N	\N
-1928	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:29:44.695812+03	30	\N	\N	1	\N		3486	2017-07-26 17:29:44.671799+03	\N	\N
-1929	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:29:45.820726+03	30	\N	\N	1	\N		3486	2017-07-26 17:29:45.810017+03	\N	\N
-1930	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:29:46.390052+03	30	\N	\N	1	\N		3486	2017-07-26 17:29:46.34701+03	\N	\N
-1931	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:30:12.186187+03	30	\N	\N	1	\N		3486	2017-07-26 17:30:12.166442+03	\N	\N
-1932	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:30:12.863088+03	30	\N	\N	1	\N		3486	2017-07-26 17:30:12.854203+03	\N	\N
-1933	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:30:14.050488+03	30	\N	\N	1	\N		3486	2017-07-26 17:30:14.014276+03	\N	\N
-1934	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:30:44.727485+03	30	\N	\N	1	\N		3486	2017-07-26 17:30:44.706977+03	\N	\N
-1935	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:30:45.923455+03	30	\N	\N	1	\N		3486	2017-07-26 17:30:45.915007+03	\N	\N
-1936	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:30:46.689427+03	30	\N	\N	1	\N		3486	2017-07-26 17:30:46.645794+03	\N	\N
-1937	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:31:12.363425+03	30	\N	\N	1	\N		3486	2017-07-26 17:31:12.343952+03	\N	\N
-1938	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:31:13.378449+03	30	\N	\N	1	\N		3486	2017-07-26 17:31:13.372203+03	\N	\N
-1939	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:31:14.548062+03	30	\N	\N	1	\N		3486	2017-07-26 17:31:14.507637+03	\N	\N
-1940	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:31:45.887753+03	30	\N	\N	1	\N		3486	2017-07-26 17:31:45.867758+03	\N	\N
-1941	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:31:47.05008+03	30	\N	\N	1	\N		3486	2017-07-26 17:31:47.041092+03	\N	\N
-1942	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:31:48.0264+03	30	\N	\N	1	\N		3486	2017-07-26 17:31:47.99472+03	\N	\N
-1943	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:32:14.172693+03	30	\N	\N	1	\N		3486	2017-07-26 17:32:14.152723+03	\N	\N
-1944	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:32:14.804033+03	30	\N	\N	1	\N		3486	2017-07-26 17:32:14.797198+03	\N	\N
-1945	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:32:15.874345+03	30	\N	\N	1	\N		3486	2017-07-26 17:32:15.840461+03	\N	\N
-1946	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:32:42.504796+03	30	\N	\N	1	\N		3486	2017-07-26 17:32:42.484298+03	\N	\N
-1947	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:32:43.471086+03	30	\N	\N	1	\N		3486	2017-07-26 17:32:43.461692+03	\N	\N
-1948	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:32:44.626052+03	30	\N	\N	1	\N		3486	2017-07-26 17:32:44.583719+03	\N	\N
-1949	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:33:15.534741+03	30	\N	\N	1	\N		3486	2017-07-26 17:33:15.513589+03	\N	\N
-1950	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:33:16.745152+03	30	\N	\N	1	\N		3486	2017-07-26 17:33:16.736549+03	\N	\N
-1951	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:33:17.626504+03	30	\N	\N	1	\N		3486	2017-07-26 17:33:17.589701+03	\N	\N
-1952	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:33:44.059086+03	30	\N	\N	1	\N		3486	2017-07-26 17:33:44.03939+03	\N	\N
-1953	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:33:45.216355+03	30	\N	\N	1	\N		3486	2017-07-26 17:33:45.209429+03	\N	\N
-1954	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:33:46.354959+03	30	\N	\N	1	\N		3486	2017-07-26 17:33:46.318613+03	\N	\N
-1955	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:34:12.876086+03	30	\N	\N	1	\N		3486	2017-07-26 17:34:12.853161+03	\N	\N
-1956	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:34:13.695753+03	30	\N	\N	1	\N		3486	2017-07-26 17:34:13.687702+03	\N	\N
-1957	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:34:14.627941+03	30	\N	\N	1	\N		3486	2017-07-26 17:34:14.58657+03	\N	\N
-1958	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:34:46.098118+03	30	\N	\N	1	\N		3486	2017-07-26 17:34:46.07734+03	\N	\N
-1959	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:34:46.6417+03	30	\N	\N	1	\N		3486	2017-07-26 17:34:46.633763+03	\N	\N
-1960	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:34:47.208296+03	30	\N	\N	1	\N		3486	2017-07-26 17:34:47.165047+03	\N	\N
-1961	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:35:13.548462+03	30	\N	\N	1	\N		3486	2017-07-26 17:35:13.527945+03	\N	\N
-1962	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:35:15.005363+03	30	\N	\N	1	\N		3486	2017-07-26 17:35:14.998992+03	\N	\N
-1963	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:35:16.521259+03	30	\N	\N	1	\N		3486	2017-07-26 17:35:16.487295+03	\N	\N
-1964	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:35:42.857195+03	30	\N	\N	1	\N		3486	2017-07-26 17:35:42.837136+03	\N	\N
-1965	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:35:44.191225+03	30	\N	\N	1	\N		3486	2017-07-26 17:35:44.182206+03	\N	\N
-1966	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:35:45.40144+03	30	\N	\N	1	\N		3486	2017-07-26 17:35:45.35799+03	\N	\N
-1967	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:36:16.823928+03	30	\N	\N	1	\N		3486	2017-07-26 17:36:16.803887+03	\N	\N
-1968	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:36:18.246173+03	30	\N	\N	1	\N		3486	2017-07-26 17:36:18.23444+03	\N	\N
-1969	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:36:18.866521+03	30	\N	\N	1	\N		3486	2017-07-26 17:36:18.815299+03	\N	\N
-1970	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:36:44.948538+03	30	\N	\N	1	\N		3486	2017-07-26 17:36:44.925233+03	\N	\N
-1971	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:36:46.064546+03	30	\N	\N	1	\N		3486	2017-07-26 17:36:46.059864+03	\N	\N
-1972	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:36:46.92956+03	30	\N	\N	1	\N		3486	2017-07-26 17:36:46.878208+03	\N	\N
-1973	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:37:12.670964+03	30	\N	\N	1	\N		3486	2017-07-26 17:37:12.647278+03	\N	\N
-1974	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:37:13.977367+03	30	\N	\N	1	\N		3486	2017-07-26 17:37:13.970502+03	\N	\N
-1975	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:37:14.727881+03	30	\N	\N	1	\N		3486	2017-07-26 17:37:14.679522+03	\N	\N
-1976	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:37:45.400955+03	30	\N	\N	1	\N		3486	2017-07-26 17:37:45.381735+03	\N	\N
-1977	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:37:46.613261+03	30	\N	\N	1	\N		3486	2017-07-26 17:37:46.603326+03	\N	\N
-1978	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:37:48.015+03	30	\N	\N	1	\N		3486	2017-07-26 17:37:47.962767+03	\N	\N
-1979	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:38:13.808222+03	30	\N	\N	1	\N		3486	2017-07-26 17:38:13.787099+03	\N	\N
-1980	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:38:15.031322+03	30	\N	\N	1	\N		3486	2017-07-26 17:38:15.02157+03	\N	\N
-1981	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:38:15.803259+03	30	\N	\N	1	\N		3486	2017-07-26 17:38:15.7605+03	\N	\N
-1982	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:38:46.671128+03	30	\N	\N	1	\N		3486	2017-07-26 17:38:46.644609+03	\N	\N
-1983	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:38:47.650685+03	30	\N	\N	1	\N		3486	2017-07-26 17:38:47.641743+03	\N	\N
-1984	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:38:48.698322+03	30	\N	\N	1	\N		3486	2017-07-26 17:38:48.659332+03	\N	\N
-1985	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:39:14.816344+03	30	\N	\N	1	\N		3486	2017-07-26 17:39:14.796173+03	\N	\N
-1986	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:39:16.314818+03	30	\N	\N	1	\N		3486	2017-07-26 17:39:16.306145+03	\N	\N
-1987	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:39:17.390648+03	30	\N	\N	1	\N		3486	2017-07-26 17:39:17.351464+03	\N	\N
-1988	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:39:43.181915+03	30	\N	\N	1	\N		3486	2017-07-26 17:39:43.162778+03	\N	\N
-1989	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:39:44.3705+03	30	\N	\N	1	\N		3486	2017-07-26 17:39:44.362568+03	\N	\N
-1990	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:39:45.485698+03	30	\N	\N	1	\N		3486	2017-07-26 17:39:45.443381+03	\N	\N
-1991	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:40:16.257443+03	30	\N	\N	1	\N		3486	2017-07-26 17:40:16.238356+03	\N	\N
-1992	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:40:17.735092+03	30	\N	\N	1	\N		3486	2017-07-26 17:40:17.726404+03	\N	\N
-1993	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:40:18.900153+03	30	\N	\N	1	\N		3486	2017-07-26 17:40:18.857929+03	\N	\N
-1994	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:40:45.087296+03	30	\N	\N	1	\N		3486	2017-07-26 17:40:45.061221+03	\N	\N
-1995	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:40:45.805361+03	30	\N	\N	1	\N		3486	2017-07-26 17:40:45.796031+03	\N	\N
-1996	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:40:47.162171+03	30	\N	\N	1	\N		3486	2017-07-26 17:40:47.131405+03	\N	\N
-1997	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:41:13.130433+03	30	\N	\N	1	\N		3486	2017-07-26 17:41:13.110922+03	\N	\N
-1998	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:41:13.709125+03	30	\N	\N	1	\N		3486	2017-07-26 17:41:13.702318+03	\N	\N
-1999	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:41:14.543831+03	30	\N	\N	1	\N		3486	2017-07-26 17:41:14.509749+03	\N	\N
-2000	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:41:45.357475+03	30	\N	\N	1	\N		3486	2017-07-26 17:41:45.338349+03	\N	\N
-2001	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:41:46.672075+03	30	\N	\N	1	\N		3486	2017-07-26 17:41:46.667537+03	\N	\N
-2002	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:41:47.370186+03	30	\N	\N	1	\N		3486	2017-07-26 17:41:47.325703+03	\N	\N
-2003	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:42:13.54977+03	30	\N	\N	1	\N		3486	2017-07-26 17:42:13.528181+03	\N	\N
-2004	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:42:14.366709+03	30	\N	\N	1	\N		3486	2017-07-26 17:42:14.359483+03	\N	\N
-2005	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:42:15.094584+03	30	\N	\N	1	\N		3486	2017-07-26 17:42:15.052654+03	\N	\N
-2006	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:42:46.692592+03	30	\N	\N	1	\N		3486	2017-07-26 17:42:46.669099+03	\N	\N
-2007	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:42:48.04023+03	30	\N	\N	1	\N		3486	2017-07-26 17:42:48.032321+03	\N	\N
-2008	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:42:49.511462+03	30	\N	\N	1	\N		3486	2017-07-26 17:42:49.476677+03	\N	\N
-2009	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:43:15.611738+03	30	\N	\N	1	\N		3486	2017-07-26 17:43:15.589108+03	\N	\N
-2010	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:43:17.076121+03	30	\N	\N	1	\N		3486	2017-07-26 17:43:17.067458+03	\N	\N
-2011	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:43:17.843838+03	30	\N	\N	1	\N		3486	2017-07-26 17:43:17.811303+03	\N	\N
-2012	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:43:43.889947+03	30	\N	\N	1	\N		3486	2017-07-26 17:43:43.86928+03	\N	\N
-2013	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:43:45.086815+03	30	\N	\N	1	\N		3486	2017-07-26 17:43:45.077811+03	\N	\N
-2014	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:43:46.121379+03	30	\N	\N	1	\N		3486	2017-07-26 17:43:46.089098+03	\N	\N
-2015	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:44:12.714531+03	30	\N	\N	1	\N		3486	2017-07-26 17:44:12.693868+03	\N	\N
-2016	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:44:13.397638+03	30	\N	\N	1	\N		3486	2017-07-26 17:44:13.387339+03	\N	\N
-2017	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:44:14.074864+03	30	\N	\N	1	\N		3486	2017-07-26 17:44:14.032466+03	\N	\N
-2018	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:44:44.859614+03	30	\N	\N	1	\N		3486	2017-07-26 17:44:44.839889+03	\N	\N
-2019	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:44:46.225942+03	30	\N	\N	1	\N		3486	2017-07-26 17:44:46.216634+03	\N	\N
-2020	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:44:46.879311+03	30	\N	\N	1	\N		3486	2017-07-26 17:44:46.842983+03	\N	\N
-2021	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:45:13.256444+03	30	\N	\N	1	\N		3486	2017-07-26 17:45:13.234667+03	\N	\N
-2022	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:45:13.967281+03	30	\N	\N	1	\N		3486	2017-07-26 17:45:13.959928+03	\N	\N
-2023	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:45:15.003997+03	30	\N	\N	1	\N		3486	2017-07-26 17:45:14.961608+03	\N	\N
-2024	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:45:46.449529+03	30	\N	\N	1	\N		3486	2017-07-26 17:45:46.430213+03	\N	\N
-2025	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:45:47.605386+03	30	\N	\N	1	\N		3486	2017-07-26 17:45:47.598497+03	\N	\N
-2026	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:45:48.595547+03	30	\N	\N	1	\N		3486	2017-07-26 17:45:48.555318+03	\N	\N
-2027	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:46:14.88519+03	30	\N	\N	1	\N		3486	2017-07-26 17:46:14.861544+03	\N	\N
-2028	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:46:15.782948+03	30	\N	\N	1	\N		3486	2017-07-26 17:46:15.776791+03	\N	\N
-2029	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:46:17.336987+03	30	\N	\N	1	\N		3486	2017-07-26 17:46:17.295823+03	\N	\N
-2030	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:46:43.314116+03	30	\N	\N	1	\N		3486	2017-07-26 17:46:43.294291+03	\N	\N
-2031	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:46:44.207238+03	30	\N	\N	1	\N		3486	2017-07-26 17:46:44.198443+03	\N	\N
-2032	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:46:45.103239+03	30	\N	\N	1	\N		3486	2017-07-26 17:46:45.066384+03	\N	\N
-2033	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:47:16.66492+03	30	\N	\N	1	\N		3486	2017-07-26 17:47:16.642209+03	\N	\N
-2034	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:47:17.222981+03	30	\N	\N	1	\N		3486	2017-07-26 17:47:17.214326+03	\N	\N
-2035	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:47:18.113062+03	30	\N	\N	1	\N		3486	2017-07-26 17:47:18.070836+03	\N	\N
-2036	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:47:44.309061+03	30	\N	\N	1	\N		3486	2017-07-26 17:47:44.288477+03	\N	\N
-2037	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:47:45.011651+03	30	\N	\N	1	\N		3486	2017-07-26 17:47:45.003639+03	\N	\N
-2038	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:47:46.133188+03	30	\N	\N	1	\N		3486	2017-07-26 17:47:46.09954+03	\N	\N
-2039	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:48:16.821597+03	30	\N	\N	1	\N		3486	2017-07-26 17:48:16.796908+03	\N	\N
-2040	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:48:17.95346+03	30	\N	\N	1	\N		3486	2017-07-26 17:48:17.944573+03	\N	\N
-2041	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:48:19.186226+03	30	\N	\N	1	\N		3486	2017-07-26 17:48:19.14448+03	\N	\N
-2042	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:48:45.067556+03	30	\N	\N	1	\N		3486	2017-07-26 17:48:45.037694+03	\N	\N
-2043	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:48:45.668884+03	30	\N	\N	1	\N		3486	2017-07-26 17:48:45.661842+03	\N	\N
-2044	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:48:46.405407+03	30	\N	\N	1	\N		3486	2017-07-26 17:48:46.361995+03	\N	\N
-2045	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:49:12.485772+03	30	\N	\N	1	\N		3486	2017-07-26 17:49:12.465496+03	\N	\N
-2046	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:49:13.589506+03	30	\N	\N	1	\N		3486	2017-07-26 17:49:13.582452+03	\N	\N
-2047	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:49:14.583109+03	30	\N	\N	1	\N		3486	2017-07-26 17:49:14.538161+03	\N	\N
-2048	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:49:45.613765+03	30	\N	\N	1	\N		3486	2017-07-26 17:49:45.592389+03	\N	\N
-2049	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:49:46.537232+03	30	\N	\N	1	\N		3486	2017-07-26 17:49:46.528425+03	\N	\N
-2050	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:49:47.119994+03	30	\N	\N	1	\N		3486	2017-07-26 17:49:47.076867+03	\N	\N
-2051	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:50:13.643476+03	30	\N	\N	1	\N		3486	2017-07-26 17:50:13.625924+03	\N	\N
-2052	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:50:14.913333+03	30	\N	\N	1	\N		3486	2017-07-26 17:50:14.904337+03	\N	\N
-2053	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:50:15.709974+03	30	\N	\N	1	\N		3486	2017-07-26 17:50:15.665178+03	\N	\N
-2054	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-07-26 17:50:47.049255+03	30	\N	\N	1	\N		3486	2017-07-26 17:50:47.02426+03	\N	\N
-2055	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-07-26 17:50:48.050352+03	30	\N	\N	1	\N		3486	2017-07-26 17:50:48.0425+03	\N	\N
-2056	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-07-26 17:50:48.740489+03	30	\N	\N	1	\N		3486	2017-07-26 17:50:48.700717+03	\N	\N
+2123	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:42:22.318827+03	30	\N	\N	1	\N		5900	2017-09-03 22:42:22.295715+03	\N	\N
+2124	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:42:23.030946+03	30	\N	\N	1	\N		5900	2017-09-03 22:42:23.022151+03	\N	\N
+2125	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:42:24.252258+03	30	\N	\N	1	\N		5900	2017-09-03 22:42:24.242249+03	\N	\N
+2126	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:42:45.309329+03	30	\N	\N	1	\N		5900	2017-09-03 22:42:45.286417+03	\N	\N
+2127	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:42:46.03371+03	30	\N	\N	1	\N		5900	2017-09-03 22:42:46.028253+03	\N	\N
+2128	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:42:46.696375+03	30	\N	\N	1	\N		5900	2017-09-03 22:42:46.688743+03	\N	\N
+2129	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:43:12.805285+03	30	\N	\N	1	\N		5900	2017-09-03 22:43:12.784123+03	\N	\N
+2130	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:43:13.821889+03	30	\N	\N	1	\N		5900	2017-09-03 22:43:13.81374+03	\N	\N
+2131	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:43:14.946771+03	30	\N	\N	1	\N		5900	2017-09-03 22:43:14.935866+03	\N	\N
+2132	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:43:46.103358+03	30	\N	\N	1	\N		5900	2017-09-03 22:43:46.073426+03	\N	\N
+2133	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:43:46.963863+03	30	\N	\N	1	\N		5900	2017-09-03 22:43:46.957391+03	\N	\N
+2134	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:43:48.434004+03	30	\N	\N	1	\N		5900	2017-09-03 22:43:48.407736+03	\N	\N
+2135	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:44:14.775399+03	30	\N	\N	1	\N		5900	2017-09-03 22:44:14.746406+03	\N	\N
+2136	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:44:15.484651+03	30	\N	\N	1	\N		5900	2017-09-03 22:44:15.472332+03	\N	\N
+2137	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:44:16.668927+03	30	\N	\N	1	\N		5900	2017-09-03 22:44:16.649659+03	\N	\N
+2138	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:44:47.569367+03	30	\N	\N	1	\N		5900	2017-09-03 22:44:47.549751+03	\N	\N
+2139	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:44:48.753057+03	30	\N	\N	1	\N		5900	2017-09-03 22:44:48.742833+03	\N	\N
+2140	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:44:49.692979+03	30	\N	\N	1	\N		5900	2017-09-03 22:44:49.665607+03	\N	\N
+2141	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:45:16.319518+03	30	\N	\N	1	\N		5900	2017-09-03 22:45:16.296897+03	\N	\N
+2142	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:45:17.002234+03	30	\N	\N	1	\N		5900	2017-09-03 22:45:16.993737+03	\N	\N
+2143	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:45:17.772068+03	30	\N	\N	1	\N		5900	2017-09-03 22:45:17.74906+03	\N	\N
+2144	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:45:43.938472+03	30	\N	\N	1	\N		5900	2017-09-03 22:45:43.914215+03	\N	\N
+2145	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:45:45.03735+03	30	\N	\N	1	\N		5900	2017-09-03 22:45:45.0279+03	\N	\N
+2146	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:45:46.016388+03	30	\N	\N	1	\N		5900	2017-09-03 22:45:45.992158+03	\N	\N
+2147	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:46:16.907289+03	30	\N	\N	1	\N		5900	2017-09-03 22:46:16.882474+03	\N	\N
+2148	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:46:17.479083+03	30	\N	\N	1	\N		5900	2017-09-03 22:46:17.470274+03	\N	\N
+2149	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:46:18.441761+03	30	\N	\N	1	\N		5900	2017-09-03 22:46:18.412376+03	\N	\N
+2150	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:46:44.771965+03	30	\N	\N	1	\N		5900	2017-09-03 22:46:44.739247+03	\N	\N
+2151	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:46:45.939725+03	30	\N	\N	1	\N		5900	2017-09-03 22:46:45.932435+03	\N	\N
+2152	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:46:47.044894+03	30	\N	\N	1	\N		5900	2017-09-03 22:46:47.01065+03	\N	\N
+2153	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:47:13.421711+03	30	\N	\N	1	\N		5900	2017-09-03 22:47:13.401234+03	\N	\N
+2154	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:47:14.852584+03	30	\N	\N	1	\N		5900	2017-09-03 22:47:14.845447+03	\N	\N
+2155	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:47:15.393494+03	30	\N	\N	1	\N		5900	2017-09-03 22:47:15.367437+03	\N	\N
+2156	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:47:46.995921+03	30	\N	\N	1	\N		5900	2017-09-03 22:47:46.974469+03	\N	\N
+2157	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:47:48.245722+03	30	\N	\N	1	\N		5900	2017-09-03 22:47:48.238124+03	\N	\N
+2158	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:47:49.048521+03	30	\N	\N	1	\N		5900	2017-09-03 22:47:48.99817+03	\N	\N
+2159	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:48:14.801881+03	30	\N	\N	1	\N		5900	2017-09-03 22:48:14.75184+03	\N	\N
+2160	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:48:15.425932+03	30	\N	\N	1	\N		5900	2017-09-03 22:48:15.416516+03	\N	\N
+2161	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:48:16.062912+03	30	\N	\N	1	\N		5900	2017-09-03 22:48:16.009178+03	\N	\N
+2162	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:48:47.57856+03	30	\N	\N	1	\N		5900	2017-09-03 22:48:47.555845+03	\N	\N
+2163	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:48:48.240731+03	30	\N	\N	1	\N		5900	2017-09-03 22:48:48.231177+03	\N	\N
+2164	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:48:49.042134+03	30	\N	\N	1	\N		5900	2017-09-03 22:48:48.992683+03	\N	\N
+2165	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:49:14.784209+03	30	\N	\N	1	\N		5900	2017-09-03 22:49:14.760329+03	\N	\N
+2166	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:49:15.675815+03	30	\N	\N	1	\N		5900	2017-09-03 22:49:15.666706+03	\N	\N
+2167	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:49:16.652234+03	30	\N	\N	1	\N		5900	2017-09-03 22:49:16.600682+03	\N	\N
+2168	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:49:47.437242+03	30	\N	\N	1	\N		5900	2017-09-03 22:49:47.417824+03	\N	\N
+2169	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:49:48.822539+03	30	\N	\N	1	\N		5900	2017-09-03 22:49:48.81712+03	\N	\N
+2170	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:49:50.135135+03	30	\N	\N	1	\N		5900	2017-09-03 22:49:50.084244+03	\N	\N
+2171	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:50:16.754782+03	30	\N	\N	1	\N		5900	2017-09-03 22:50:16.682265+03	\N	\N
+2172	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:50:18.007965+03	30	\N	\N	1	\N		5900	2017-09-03 22:50:17.997411+03	\N	\N
+2173	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:50:18.65094+03	30	\N	\N	1	\N		5900	2017-09-03 22:50:18.596538+03	\N	\N
+2174	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:50:44.993404+03	30	\N	\N	1	\N		5900	2017-09-03 22:50:44.970446+03	\N	\N
+2175	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:50:46.261689+03	30	\N	\N	1	\N		5900	2017-09-03 22:50:46.250878+03	\N	\N
+2176	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:50:47.663814+03	30	\N	\N	1	\N		5900	2017-09-03 22:50:47.60428+03	\N	\N
+2177	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:51:13.630491+03	30	\N	\N	1	\N		5900	2017-09-03 22:51:13.610282+03	\N	\N
+2178	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:51:14.42166+03	30	\N	\N	1	\N		5900	2017-09-03 22:51:14.4142+03	\N	\N
+2179	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:51:15.663227+03	30	\N	\N	1	\N		5900	2017-09-03 22:51:15.620527+03	\N	\N
+2180	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:51:46.458761+03	30	\N	\N	1	\N		5900	2017-09-03 22:51:46.436923+03	\N	\N
+2181	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:51:47.624245+03	30	\N	\N	1	\N		5900	2017-09-03 22:51:47.617447+03	\N	\N
+2182	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:51:48.517634+03	30	\N	\N	1	\N		5900	2017-09-03 22:51:48.458982+03	\N	\N
+2183	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:52:15.043619+03	30	\N	\N	1	\N		5900	2017-09-03 22:52:15.010745+03	\N	\N
+2184	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:52:15.895685+03	30	\N	\N	1	\N		5900	2017-09-03 22:52:15.888512+03	\N	\N
+2185	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:52:16.731265+03	30	\N	\N	1	\N		5900	2017-09-03 22:52:16.681703+03	\N	\N
+2186	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:52:43.291596+03	30	\N	\N	1	\N		5900	2017-09-03 22:52:43.272168+03	\N	\N
+2187	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:52:44.60336+03	30	\N	\N	1	\N		5900	2017-09-03 22:52:44.596445+03	\N	\N
+2188	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:52:45.373545+03	30	\N	\N	1	\N		5900	2017-09-03 22:52:45.320733+03	\N	\N
+2189	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:53:16.338557+03	30	\N	\N	1	\N		5900	2017-09-03 22:53:16.31635+03	\N	\N
+2190	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:53:17.641756+03	30	\N	\N	1	\N		5900	2017-09-03 22:53:17.634206+03	\N	\N
+2191	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:53:18.417569+03	30	\N	\N	1	\N		5900	2017-09-03 22:53:18.357913+03	\N	\N
+2192	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:53:44.78559+03	30	\N	\N	1	\N		5900	2017-09-03 22:53:44.763549+03	\N	\N
+2193	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:53:46.041641+03	30	\N	\N	1	\N		5900	2017-09-03 22:53:46.035888+03	\N	\N
+2194	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:53:46.653224+03	30	\N	\N	1	\N		5900	2017-09-03 22:53:46.596693+03	\N	\N
+2195	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:54:13.092799+03	30	\N	\N	1	\N		5900	2017-09-03 22:54:13.073092+03	\N	\N
+2196	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:54:14.564515+03	30	\N	\N	1	\N		5900	2017-09-03 22:54:14.556608+03	\N	\N
+2197	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:54:16.106137+03	30	\N	\N	1	\N		5900	2017-09-03 22:54:16.047246+03	\N	\N
+2198	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:54:42.74159+03	30	\N	\N	1	\N		5900	2017-09-03 22:54:42.721811+03	\N	\N
+2199	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:54:43.855504+03	30	\N	\N	1	\N		5900	2017-09-03 22:54:43.848997+03	\N	\N
+2200	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:54:45.270497+03	30	\N	\N	1	\N		5900	2017-09-03 22:54:45.218488+03	\N	\N
+2201	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:55:16.630606+03	30	\N	\N	1	\N		5900	2017-09-03 22:55:16.60514+03	\N	\N
+2202	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:55:17.340116+03	30	\N	\N	1	\N		5900	2017-09-03 22:55:17.332793+03	\N	\N
+2203	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:55:18.749795+03	30	\N	\N	1	\N		5900	2017-09-03 22:55:18.680817+03	\N	\N
+2204	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:55:45.373003+03	30	\N	\N	1	\N		5900	2017-09-03 22:55:45.34562+03	\N	\N
+2205	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:55:46.478349+03	30	\N	\N	1	\N		5900	2017-09-03 22:55:46.472456+03	\N	\N
+2206	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:55:48.038829+03	30	\N	\N	1	\N		5900	2017-09-03 22:55:47.964489+03	\N	\N
+2207	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:56:13.978987+03	30	\N	\N	1	\N		5900	2017-09-03 22:56:13.957147+03	\N	\N
+2208	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:56:14.897525+03	30	\N	\N	1	\N		5900	2017-09-03 22:56:14.887283+03	\N	\N
+2209	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:56:15.965087+03	30	\N	\N	1	\N		5900	2017-09-03 22:56:15.876664+03	\N	\N
+2210	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:56:47.302625+03	30	\N	\N	1	\N		5900	2017-09-03 22:56:47.276107+03	\N	\N
+2211	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:56:48.516853+03	30	\N	\N	1	\N		5900	2017-09-03 22:56:48.507986+03	\N	\N
+2212	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:56:49.758577+03	30	\N	\N	1	\N		5900	2017-09-03 22:56:49.692923+03	\N	\N
+2213	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:57:15.425952+03	30	\N	\N	1	\N		5900	2017-09-03 22:57:15.401526+03	\N	\N
+2214	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:57:16.41899+03	30	\N	\N	1	\N		5900	2017-09-03 22:57:16.413581+03	\N	\N
+2215	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:57:17.08027+03	30	\N	\N	1	\N		5900	2017-09-03 22:57:17.001141+03	\N	\N
+2216	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:57:43.674825+03	30	\N	\N	1	\N		5900	2017-09-03 22:57:43.652911+03	\N	\N
+2217	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:57:44.557516+03	30	\N	\N	1	\N		5900	2017-09-03 22:57:44.548819+03	\N	\N
+2218	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:57:45.771123+03	30	\N	\N	1	\N		5900	2017-09-03 22:57:45.703869+03	\N	\N
+2219	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:58:17.15867+03	30	\N	\N	1	\N		5900	2017-09-03 22:58:17.125149+03	\N	\N
+2220	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:58:17.718555+03	30	\N	\N	1	\N		5900	2017-09-03 22:58:17.711113+03	\N	\N
+2221	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:58:18.904217+03	30	\N	\N	1	\N		5900	2017-09-03 22:58:18.837874+03	\N	\N
+2222	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:58:44.536722+03	30	\N	\N	1	\N		5900	2017-09-03 22:58:44.517923+03	\N	\N
+2223	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:58:45.923073+03	30	\N	\N	1	\N		5900	2017-09-03 22:58:45.912449+03	\N	\N
+2224	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:58:47.417+03	30	\N	\N	1	\N		5900	2017-09-03 22:58:47.354602+03	\N	\N
+2225	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:59:13.570134+03	30	\N	\N	1	\N		5900	2017-09-03 22:59:13.545438+03	\N	\N
+2226	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:59:14.399269+03	30	\N	\N	1	\N		5900	2017-09-03 22:59:14.391425+03	\N	\N
+2227	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:59:15.86543+03	30	\N	\N	1	\N		5900	2017-09-03 22:59:15.79654+03	\N	\N
+2228	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 22:59:46.589309+03	30	\N	\N	1	\N		5900	2017-09-03 22:59:46.542636+03	\N	\N
+2229	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 22:59:48.540763+03	30	\N	\N	1	\N		5900	2017-09-03 22:59:47.674077+03	\N	\N
+2230	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 22:59:49.663321+03	30	\N	\N	1	\N		5900	2017-09-03 22:59:49.613815+03	\N	\N
+2231	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:00:15.818583+03	30	\N	\N	1	\N		5900	2017-09-03 23:00:15.797815+03	\N	\N
+2232	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:00:16.676+03	30	\N	\N	1	\N		5900	2017-09-03 23:00:16.66142+03	\N	\N
+2233	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:00:17.874306+03	30	\N	\N	1	\N		5900	2017-09-03 23:00:17.805671+03	\N	\N
+2234	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:00:43.60678+03	30	\N	\N	1	\N		5900	2017-09-03 23:00:43.583457+03	\N	\N
+2235	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:00:44.590225+03	30	\N	\N	1	\N		5900	2017-09-03 23:00:44.578116+03	\N	\N
+2236	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:00:45.724429+03	30	\N	\N	1	\N		5900	2017-09-03 23:00:45.664795+03	\N	\N
+2237	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:01:16.734105+03	30	\N	\N	1	\N		5900	2017-09-03 23:01:16.71097+03	\N	\N
+2238	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:01:17.933586+03	30	\N	\N	1	\N		5900	2017-09-03 23:01:17.919144+03	\N	\N
+2239	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:01:19.024867+03	30	\N	\N	1	\N		5900	2017-09-03 23:01:18.955587+03	\N	\N
+2240	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:01:45.550936+03	30	\N	\N	1	\N		5900	2017-09-03 23:01:45.528529+03	\N	\N
+2241	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:01:46.703031+03	30	\N	\N	1	\N		5900	2017-09-03 23:01:46.671354+03	\N	\N
+2242	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:01:47.311947+03	30	\N	\N	1	\N		5900	2017-09-03 23:01:47.245964+03	\N	\N
+2243	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:02:13.401943+03	30	\N	\N	1	\N		5900	2017-09-03 23:02:13.381515+03	\N	\N
+2244	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:02:14.053012+03	30	\N	\N	1	\N		5900	2017-09-03 23:02:14.046219+03	\N	\N
+2245	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:02:15.242926+03	30	\N	\N	1	\N		5900	2017-09-03 23:02:15.173759+03	\N	\N
+2246	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:02:46.590935+03	30	\N	\N	1	\N		5900	2017-09-03 23:02:46.568296+03	\N	\N
+2247	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:02:48.095144+03	30	\N	\N	1	\N		5900	2017-09-03 23:02:48.087229+03	\N	\N
+2248	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:02:49.233108+03	30	\N	\N	1	\N		5900	2017-09-03 23:02:49.164934+03	\N	\N
+2249	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:03:15.350691+03	30	\N	\N	1	\N		5900	2017-09-03 23:03:15.329749+03	\N	\N
+2250	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:03:16.349823+03	30	\N	\N	1	\N		5900	2017-09-03 23:03:16.341073+03	\N	\N
+2251	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:03:17.867208+03	30	\N	\N	1	\N		5900	2017-09-03 23:03:17.787594+03	\N	\N
+2252	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:03:43.945537+03	30	\N	\N	1	\N		5900	2017-09-03 23:03:43.919098+03	\N	\N
+2253	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:03:44.622698+03	30	\N	\N	1	\N		5900	2017-09-03 23:03:44.612443+03	\N	\N
+2254	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:03:45.837239+03	30	\N	\N	1	\N		5900	2017-09-03 23:03:45.763309+03	\N	\N
+2255	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:04:16.683954+03	30	\N	\N	1	\N		5900	2017-09-03 23:04:16.6516+03	\N	\N
+2256	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:04:17.83837+03	30	\N	\N	1	\N		5900	2017-09-03 23:04:17.831503+03	\N	\N
+2257	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:04:19.02345+03	30	\N	\N	1	\N		5900	2017-09-03 23:04:18.924014+03	\N	\N
+2258	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:04:45.43466+03	30	\N	\N	1	\N		5900	2017-09-03 23:04:45.411794+03	\N	\N
+2259	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:04:46.691699+03	30	\N	\N	1	\N		5900	2017-09-03 23:04:46.684157+03	\N	\N
+2260	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:04:47.321141+03	30	\N	\N	1	\N		5900	2017-09-03 23:04:47.258622+03	\N	\N
+2261	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:05:13.826502+03	30	\N	\N	1	\N		5900	2017-09-03 23:05:13.802886+03	\N	\N
+2262	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:05:15.340487+03	30	\N	\N	1	\N		5900	2017-09-03 23:05:15.335286+03	\N	\N
+2263	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:05:16.627675+03	30	\N	\N	1	\N		5900	2017-09-03 23:05:16.560975+03	\N	\N
+2264	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:05:43.254396+03	30	\N	\N	1	\N		5900	2017-09-03 23:05:43.231503+03	\N	\N
+2265	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:05:44.27776+03	30	\N	\N	1	\N		5900	2017-09-03 23:05:44.269371+03	\N	\N
+2266	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:05:45.469242+03	30	\N	\N	1	\N		5900	2017-09-03 23:05:45.401267+03	\N	\N
+2267	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:06:16.487902+03	30	\N	\N	1	\N		5900	2017-09-03 23:06:16.462583+03	\N	\N
+2268	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:06:17.660155+03	30	\N	\N	1	\N		5900	2017-09-03 23:06:17.649441+03	\N	\N
+2269	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:06:18.315254+03	30	\N	\N	1	\N		5900	2017-09-03 23:06:18.235319+03	\N	\N
+2270	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:06:44.643763+03	30	\N	\N	1	\N		5900	2017-09-03 23:06:44.619142+03	\N	\N
+2271	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:06:45.235791+03	30	\N	\N	1	\N		5900	2017-09-03 23:06:45.22644+03	\N	\N
+2272	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:06:45.919335+03	30	\N	\N	1	\N		5900	2017-09-03 23:06:45.852247+03	\N	\N
+2273	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:07:16.643765+03	30	\N	\N	1	\N		5900	2017-09-03 23:07:16.622004+03	\N	\N
+2274	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:07:17.927557+03	30	\N	\N	1	\N		5900	2017-09-03 23:07:17.919902+03	\N	\N
+2275	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:07:18.626857+03	30	\N	\N	1	\N		5900	2017-09-03 23:07:18.563783+03	\N	\N
+2276	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:07:52.186159+03	30	\N	\N	1	\N		7866	2017-09-03 23:07:52.159125+03	\N	\N
+2277	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:07:53.157698+03	30	\N	\N	1	\N		7866	2017-09-03 23:07:53.149039+03	\N	\N
+2278	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:07:54.164739+03	30	\N	\N	1	\N		7866	2017-09-03 23:07:54.104534+03	\N	\N
+2279	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:08:24.932693+03	30	\N	\N	1	\N		7866	2017-09-03 23:08:24.909818+03	\N	\N
+2280	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:08:25.514213+03	30	\N	\N	1	\N		7866	2017-09-03 23:08:25.505141+03	\N	\N
+2281	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:08:26.295473+03	30	\N	\N	1	\N		7866	2017-09-03 23:08:26.229316+03	\N	\N
+2282	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:08:52.642182+03	30	\N	\N	1	\N		7866	2017-09-03 23:08:52.621655+03	\N	\N
+2283	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:08:53.727715+03	30	\N	\N	1	\N		7866	2017-09-03 23:08:53.716434+03	\N	\N
+2284	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:08:54.674261+03	30	\N	\N	1	\N		7866	2017-09-03 23:08:54.617338+03	\N	\N
+2285	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:09:20.666972+03	30	\N	\N	1	\N		7866	2017-09-03 23:09:20.639842+03	\N	\N
+2286	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:09:21.756991+03	30	\N	\N	1	\N		7866	2017-09-03 23:09:21.750485+03	\N	\N
+2287	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:09:22.559854+03	30	\N	\N	1	\N		7866	2017-09-03 23:09:22.49086+03	\N	\N
+2288	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:09:53.926917+03	30	\N	\N	1	\N		7866	2017-09-03 23:09:53.875666+03	\N	\N
+2289	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:10:01.048982+03	30	\N	\N	1	\N		7866	2017-09-03 23:09:55.236582+03	\N	\N
+2290	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:10:02.340193+03	30	\N	\N	1	\N		7866	2017-09-03 23:10:02.299344+03	\N	\N
+2291	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:10:23.734806+03	30	\N	\N	1	\N		7866	2017-09-03 23:10:23.714549+03	\N	\N
+2292	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:10:25.129837+03	30	\N	\N	1	\N		7866	2017-09-03 23:10:25.076646+03	\N	\N
+2293	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:10:26.59102+03	30	\N	\N	1	\N		7866	2017-09-03 23:10:26.531785+03	\N	\N
+2294	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:10:52.286393+03	30	\N	\N	1	\N		7866	2017-09-03 23:10:52.26177+03	\N	\N
+2295	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:10:53.059892+03	30	\N	\N	1	\N		7866	2017-09-03 23:10:53.050992+03	\N	\N
+2296	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:10:53.84857+03	30	\N	\N	1	\N		7866	2017-09-03 23:10:53.781818+03	\N	\N
+2297	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:11:29.649055+03	30	\N	\N	1	\N		8159	2017-09-03 23:11:29.625548+03	\N	\N
+2298	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:11:30.884489+03	30	\N	\N	1	\N		8159	2017-09-03 23:11:30.875525+03	\N	\N
+2299	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:11:31.850319+03	30	\N	\N	1	\N		8159	2017-09-03 23:11:31.770299+03	\N	\N
+2300	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:11:58.052943+03	30	\N	\N	1	\N		8159	2017-09-03 23:11:58.026289+03	\N	\N
+2301	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:11:58.750359+03	30	\N	\N	1	\N		8159	2017-09-03 23:11:58.739551+03	\N	\N
+2302	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:11:59.564642+03	30	\N	\N	1	\N		8159	2017-09-03 23:11:59.491535+03	\N	\N
+2303	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:12:31.054785+03	30	\N	\N	1	\N		8159	2017-09-03 23:12:31.001719+03	\N	\N
+2304	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:12:32.481942+03	30	\N	\N	1	\N		8159	2017-09-03 23:12:31.890601+03	\N	\N
+2305	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:12:33.782135+03	30	\N	\N	1	\N		8159	2017-09-03 23:12:33.731195+03	\N	\N
+2306	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:13:00.091969+03	30	\N	\N	1	\N		8159	2017-09-03 23:13:00.069717+03	\N	\N
+2307	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:13:00.758521+03	30	\N	\N	1	\N		8159	2017-09-03 23:13:00.730947+03	\N	\N
+2308	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:13:01.372312+03	30	\N	\N	1	\N		8159	2017-09-03 23:13:01.312427+03	\N	\N
+2309	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:13:27.869651+03	30	\N	\N	1	\N		8159	2017-09-03 23:13:27.84434+03	\N	\N
+2310	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:13:29.016695+03	30	\N	\N	1	\N		8159	2017-09-03 23:13:29.007983+03	\N	\N
+2311	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:13:29.797544+03	30	\N	\N	1	\N		8159	2017-09-03 23:13:29.707554+03	\N	\N
+2312	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:14:01.250126+03	30	\N	\N	1	\N		8159	2017-09-03 23:14:01.227393+03	\N	\N
+2313	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:14:02.751228+03	30	\N	\N	1	\N		8159	2017-09-03 23:14:02.743599+03	\N	\N
+2314	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:14:03.833055+03	30	\N	\N	1	\N		8159	2017-09-03 23:14:03.768872+03	\N	\N
+2315	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:14:29.734202+03	30	\N	\N	1	\N		8159	2017-09-03 23:14:29.711055+03	\N	\N
+2316	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:14:31.016666+03	30	\N	\N	1	\N		8159	2017-09-03 23:14:31.00814+03	\N	\N
+2317	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:14:31.928454+03	30	\N	\N	1	\N		8159	2017-09-03 23:14:31.869512+03	\N	\N
+2318	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:15:03.963464+03	30	\N	\N	1	\N		8414	2017-09-03 23:15:03.940352+03	\N	\N
+2319	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:15:04.725795+03	30	\N	\N	1	\N		8414	2017-09-03 23:15:04.715502+03	\N	\N
+2320	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:15:05.317702+03	30	\N	\N	1	\N		8414	2017-09-03 23:15:05.238002+03	\N	\N
+2321	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:15:31.614669+03	30	\N	\N	1	\N		8414	2017-09-03 23:15:31.588133+03	\N	\N
+2322	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:15:32.510433+03	30	\N	\N	1	\N		8414	2017-09-03 23:15:32.501011+03	\N	\N
+2323	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:15:33.685028+03	30	\N	\N	1	\N		8414	2017-09-03 23:15:33.622909+03	\N	\N
+2324	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:16:04.870795+03	30	\N	\N	1	\N		8414	2017-09-03 23:16:04.829418+03	\N	\N
+2325	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:16:06.975272+03	30	\N	\N	1	\N		8414	2017-09-03 23:16:05.930702+03	\N	\N
+2326	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:16:07.606239+03	30	\N	\N	1	\N		8414	2017-09-03 23:16:07.564354+03	\N	\N
+2327	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:16:34.163568+03	30	\N	\N	1	\N		8414	2017-09-03 23:16:34.141244+03	\N	\N
+2328	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:16:35.685456+03	30	\N	\N	1	\N		8414	2017-09-03 23:16:35.654062+03	\N	\N
+2329	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:16:36.280659+03	30	\N	\N	1	\N		8414	2017-09-03 23:16:36.214199+03	\N	\N
+2330	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:17:02.188164+03	30	\N	\N	1	\N		8414	2017-09-03 23:17:02.166393+03	\N	\N
+2331	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:17:03.665929+03	30	\N	\N	1	\N		8414	2017-09-03 23:17:03.656018+03	\N	\N
+2332	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:17:05.211792+03	30	\N	\N	1	\N		8414	2017-09-03 23:17:05.139828+03	\N	\N
+2333	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:18:18.894473+03	30	\N	\N	1	\N		8631	2017-09-03 23:18:18.874497+03	\N	\N
+2334	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:18:20.235018+03	30	\N	\N	1	\N		8631	2017-09-03 23:18:20.226657+03	\N	\N
+2335	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:18:21.43796+03	30	\N	\N	1	\N		8631	2017-09-03 23:18:21.37306+03	\N	\N
+2336	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:18:48.024143+03	30	\N	\N	1	\N		8631	2017-09-03 23:18:48.001379+03	\N	\N
+2337	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:18:48.629249+03	30	\N	\N	1	\N		8631	2017-09-03 23:18:48.622898+03	\N	\N
+2338	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:18:49.950198+03	30	\N	\N	1	\N		8631	2017-09-03 23:18:49.88363+03	\N	\N
+2339	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:19:20.827253+03	30	\N	\N	1	\N		8631	2017-09-03 23:19:20.779439+03	\N	\N
+2340	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:19:24.167846+03	30	\N	\N	1	\N		8631	2017-09-03 23:19:22.266951+03	\N	\N
+2341	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:19:25.428276+03	30	\N	\N	1	\N		8631	2017-09-03 23:19:25.373983+03	\N	\N
+2342	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:19:46.698269+03	30	\N	\N	1	\N		8631	2017-09-03 23:19:46.674209+03	\N	\N
+2343	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:19:47.759793+03	30	\N	\N	1	\N		8631	2017-09-03 23:19:47.734787+03	\N	\N
+2344	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:19:48.474861+03	30	\N	\N	1	\N		8631	2017-09-03 23:19:48.408767+03	\N	\N
+2345	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:20:19.908171+03	30	\N	\N	1	\N		8631	2017-09-03 23:20:19.887692+03	\N	\N
+2346	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:20:21.292261+03	30	\N	\N	1	\N		8631	2017-09-03 23:20:21.285064+03	\N	\N
+2347	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:20:22.69698+03	30	\N	\N	1	\N		8631	2017-09-03 23:20:22.628733+03	\N	\N
+2348	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:20:48.559596+03	30	\N	\N	1	\N		8631	2017-09-03 23:20:48.537366+03	\N	\N
+2349	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:20:50.004135+03	30	\N	\N	1	\N		8631	2017-09-03 23:20:49.996373+03	\N	\N
+2350	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:20:51.287641+03	30	\N	\N	1	\N		8631	2017-09-03 23:20:51.228803+03	\N	\N
+2351	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:21:17.243711+03	30	\N	\N	1	\N		8631	2017-09-03 23:21:17.216948+03	\N	\N
+2352	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:21:18.530374+03	30	\N	\N	1	\N		8631	2017-09-03 23:21:18.522226+03	\N	\N
+2353	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:21:20.105462+03	30	\N	\N	1	\N		8631	2017-09-03 23:21:20.037245+03	\N	\N
+2354	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:21:46.272598+03	30	\N	\N	1	\N		8631	2017-09-03 23:21:46.250981+03	\N	\N
+2355	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:21:47.182998+03	30	\N	\N	1	\N		8631	2017-09-03 23:21:47.178231+03	\N	\N
+2356	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:21:47.955098+03	30	\N	\N	1	\N		8631	2017-09-03 23:21:47.894316+03	\N	\N
+2357	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:22:19.33098+03	30	\N	\N	1	\N		8631	2017-09-03 23:22:19.294747+03	\N	\N
+2358	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:22:20.298332+03	30	\N	\N	1	\N		8631	2017-09-03 23:22:20.287357+03	\N	\N
+2359	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:22:21.015957+03	30	\N	\N	1	\N		8631	2017-09-03 23:22:20.950154+03	\N	\N
+2360	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:22:47.229776+03	30	\N	\N	1	\N		8631	2017-09-03 23:22:47.209235+03	\N	\N
+2361	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:22:47.977701+03	30	\N	\N	1	\N		8631	2017-09-03 23:22:47.971596+03	\N	\N
+2362	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:22:48.750931+03	30	\N	\N	1	\N		8631	2017-09-03 23:22:48.686328+03	\N	\N
+2363	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:23:09.565735+03	30	\N	\N	1	\N		8956	2017-09-03 23:23:09.542204+03	\N	\N
+2364	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:23:10.322458+03	30	\N	\N	1	\N		8956	2017-09-03 23:23:10.312653+03	\N	\N
+2365	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:23:11.774869+03	30	\N	\N	1	\N		8956	2017-09-03 23:23:11.686373+03	\N	\N
+2366	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:23:37.956874+03	30	\N	\N	1	\N		8956	2017-09-03 23:23:37.933179+03	\N	\N
+2367	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:23:39.17779+03	30	\N	\N	1	\N		8956	2017-09-03 23:23:39.168364+03	\N	\N
+2368	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:23:40.398561+03	30	\N	\N	1	\N		8956	2017-09-03 23:23:40.323252+03	\N	\N
+2369	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:24:11.686507+03	30	\N	\N	1	\N		8956	2017-09-03 23:24:11.643323+03	\N	\N
+2370	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:24:13.299528+03	30	\N	\N	1	\N		8956	2017-09-03 23:24:12.559537+03	\N	\N
+2371	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:24:14.738094+03	30	\N	\N	1	\N		8956	2017-09-03 23:24:14.68409+03	\N	\N
+2372	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:24:40.667281+03	30	\N	\N	1	\N		8956	2017-09-03 23:24:40.64728+03	\N	\N
+2373	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:24:41.204331+03	30	\N	\N	1	\N		8956	2017-09-03 23:24:41.183218+03	\N	\N
+2374	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:24:42.411125+03	30	\N	\N	1	\N		8956	2017-09-03 23:24:42.352699+03	\N	\N
+2375	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:25:08.093744+03	30	\N	\N	1	\N		8956	2017-09-03 23:25:08.06893+03	\N	\N
+2376	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:25:09.397972+03	30	\N	\N	1	\N		8956	2017-09-03 23:25:09.347566+03	\N	\N
+2377	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:25:10.198621+03	30	\N	\N	1	\N		8956	2017-09-03 23:25:10.15779+03	\N	\N
+2378	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:25:41.782495+03	30	\N	\N	1	\N		8956	2017-09-03 23:25:41.755847+03	\N	\N
+2379	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:25:42.935098+03	30	\N	\N	1	\N		8956	2017-09-03 23:25:42.92901+03	\N	\N
+2380	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:25:44.100365+03	30	\N	\N	1	\N		8956	2017-09-03 23:25:44.031137+03	\N	\N
+2381	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:26:10.196034+03	30	\N	\N	1	\N		8956	2017-09-03 23:26:10.168863+03	\N	\N
+2382	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:26:11.343548+03	30	\N	\N	1	\N		8956	2017-09-03 23:26:11.331956+03	\N	\N
+2383	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:26:12.550735+03	30	\N	\N	1	\N		8956	2017-09-03 23:26:12.474249+03	\N	\N
+2384	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:26:38.361709+03	30	\N	\N	1	\N		8956	2017-09-03 23:26:38.31804+03	\N	\N
+2385	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:26:46.483167+03	30	\N	\N	1	\N		8956	2017-09-03 23:26:39.866738+03	\N	\N
+2386	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:26:47.527125+03	30	\N	\N	1	\N		8956	2017-09-03 23:26:47.47452+03	\N	\N
+2387	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:27:08.685533+03	30	\N	\N	1	\N		8956	2017-09-03 23:27:08.658032+03	\N	\N
+2388	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:27:09.485649+03	30	\N	\N	1	\N		8956	2017-09-03 23:27:09.471002+03	\N	\N
+2389	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:27:10.870678+03	30	\N	\N	1	\N		8956	2017-09-03 23:27:10.797509+03	\N	\N
+2390	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:27:41.696618+03	30	\N	\N	1	\N		8956	2017-09-03 23:27:41.673588+03	\N	\N
+2391	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:27:42.935153+03	30	\N	\N	1	\N		8956	2017-09-03 23:27:42.904405+03	\N	\N
+2392	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:27:44.169699+03	30	\N	\N	1	\N		8956	2017-09-03 23:27:44.058227+03	\N	\N
+2393	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:28:10.713698+03	30	\N	\N	1	\N		8956	2017-09-03 23:28:10.688506+03	\N	\N
+2394	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:28:11.791694+03	30	\N	\N	1	\N		8956	2017-09-03 23:28:11.781012+03	\N	\N
+2395	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:28:13.123914+03	30	\N	\N	1	\N		8956	2017-09-03 23:28:13.058509+03	\N	\N
+2396	gisModule.tasks.blame_module_check_blame_status	[[], {}]	a4454e4d36a59c7aa142f622e19cc299bd3405b9	\N	0	2017-09-03 23:28:39.692057+03	30	\N	\N	1	\N		8956	2017-09-03 23:28:39.670584+03	\N	\N
+2397	gisModule.tasks.blame_module_check_proposal	[[], {}]	a842445229471e7e5a85ae1ac715c02c2f962556	\N	0	2017-09-03 23:28:41.053019+03	30	\N	\N	1	\N		8956	2017-09-03 23:28:41.044363+03	\N	\N
+2398	gisModule.tasks.statistic_module_basic_statistics	[[], {}]	cddf56d6e036957b03d6e9b0c8cb85e4c8d67848	\N	0	2017-09-03 23:28:41.953975+03	30	\N	\N	1	\N		8956	2017-09-03 23:28:41.868941+03	\N	\N
 \.
 
 
@@ -2732,14 +2105,14 @@ COPY background_task_completedtask (id, task_name, task_params, task_hash, verbo
 -- Name: background_task_completedtask_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('background_task_completedtask_id_seq', 2056, true);
+SELECT pg_catalog.setval('background_task_completedtask_id_seq', 2398, true);
 
 
 --
 -- Name: background_task_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('background_task_id_seq', 2510, true);
+SELECT pg_catalog.setval('background_task_id_seq', 2954, true);
 
 
 --
@@ -4849,6 +4222,7 @@ COPY django_admin_log (id, action_time, object_id, object_repr, action_flag, cha
 2090	2017-07-25 21:32:46.594841+03	48	gisModule.tasks.blame_module_check_blame_status - 2017-07-15 11:17:44.044706+00:00	3		35	1
 2091	2017-07-25 21:32:46.599595+03	47	gisModule.tasks.blame_module_check_blame_status - 2017-07-15 11:12:18.481968+00:00	3		35	1
 2092	2017-07-25 21:32:46.603996+03	46	gisModule.tasks.blame_module_check_blame_status - 2017-07-15 11:12:17.638140+00:00	3		35	1
+3365	2017-09-03 22:39:53.960879+03	52	child2	3		13	1
 2093	2017-07-25 21:32:46.607105+03	45	gisModule.tasks.blame_module_check_proposal - 2017-07-15 11:12:17.037106+00:00	3		35	1
 2094	2017-07-25 21:32:46.610991+03	44	gisModule.tasks.blame_module_check_proposal - 2017-07-15 11:12:16.001511+00:00	3		35	1
 2095	2017-07-25 21:32:46.614258+03	43	gisModule.tasks.blame_module_check_blame_status - 2017-07-15 11:12:14.999671+00:00	3		35	1
@@ -5117,6 +4491,1038 @@ COPY django_admin_log (id, action_time, object_id, object_repr, action_flag, cha
 2372	2017-07-26 17:38:03.820673+03	52	child2	1	[{"added": {}}]	13	1
 2373	2017-07-29 18:01:31.543769+03	532	ShoppingListItem object	2	[{"changed": {"fields": ["unit_purchase_price"]}}]	19	1
 2374	2017-07-29 18:01:40.118608+03	535	ShoppingListItem object	2	[{"changed": {"fields": ["unit_purchase_price"]}}]	19	1
+2375	2017-09-02 00:20:09.952008+03	535	ShoppingListItem object	3		19	1
+2376	2017-09-02 00:20:09.957186+03	534	ShoppingListItem object	3		19	1
+2377	2017-09-02 00:20:09.960368+03	533	ShoppingListItem object	3		19	1
+2378	2017-09-02 00:20:09.963726+03	532	ShoppingListItem object	3		19	1
+2379	2017-09-02 00:20:09.966924+03	531	ShoppingListItem object	3		19	1
+2380	2017-09-02 00:20:09.970584+03	530	ShoppingListItem object	3		19	1
+2381	2017-09-02 00:20:09.974095+03	529	ShoppingListItem object	3		19	1
+2382	2017-09-02 00:20:09.977374+03	528	ShoppingListItem object	3		19	1
+2383	2017-09-02 00:20:09.980895+03	521	ShoppingListItem object	3		19	1
+2384	2017-09-02 00:20:09.984731+03	520	ShoppingListItem object	3		19	1
+2385	2017-09-02 00:20:09.988409+03	519	ShoppingListItem object	3		19	1
+2386	2017-09-02 00:20:09.992263+03	518	ShoppingListItem object	3		19	1
+2387	2017-09-02 00:20:37.437609+03	66	My First Shopping List	3		18	1
+2388	2017-09-03 22:38:49.918924+03	2654	gisModule.tasks.statistic_module_basic_statistics	3		36	1
+2389	2017-09-03 22:38:49.933543+03	2653	gisModule.tasks.blame_module_check_proposal	3		36	1
+2390	2017-09-03 22:38:49.937134+03	2652	gisModule.tasks.blame_module_check_blame_status	3		36	1
+2391	2017-09-03 22:39:07.848104+03	2122	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:44:18.191226+00:00	3		35	1
+2392	2017-09-03 22:39:07.85371+03	2121	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:44:17.449964+00:00	3		35	1
+2393	2017-09-03 22:39:07.857377+03	2120	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:44:16.638613+00:00	3		35	1
+2394	2017-09-03 22:39:07.860556+03	2119	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:44:15.408752+00:00	3		35	1
+2395	2017-09-03 22:39:07.86357+03	2118	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:44:14.628195+00:00	3		35	1
+2396	2017-09-03 22:39:07.866707+03	2117	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:44:13.297454+00:00	3		35	1
+2397	2017-09-03 22:39:07.870021+03	2116	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:44:12.225286+00:00	3		35	1
+2398	2017-09-03 22:39:07.874064+03	2115	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:44:11.448551+00:00	3		35	1
+2399	2017-09-03 22:39:07.878063+03	2114	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:44:10.286299+00:00	3		35	1
+2400	2017-09-03 22:39:07.881707+03	2113	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:44:09.102209+00:00	3		35	1
+2401	2017-09-03 22:39:07.88542+03	2112	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:44:07.963380+00:00	3		35	1
+2402	2017-09-03 22:39:07.8892+03	2111	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:44:06.617898+00:00	3		35	1
+2403	2017-09-03 22:39:07.893116+03	2110	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:44:05.968909+00:00	3		35	1
+2404	2017-09-03 22:39:07.896354+03	2109	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:44:05.048904+00:00	3		35	1
+2405	2017-09-03 22:39:07.906622+03	2108	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:44:03.975525+00:00	3		35	1
+2406	2017-09-03 22:39:07.910404+03	2107	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:44:02.794368+00:00	3		35	1
+2407	2017-09-03 22:39:07.914191+03	2106	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:44:02.027487+00:00	3		35	1
+2408	2017-09-03 22:39:07.918409+03	2105	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:44:01.416155+00:00	3		35	1
+2409	2017-09-03 22:39:07.922542+03	2104	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:44:00.505293+00:00	3		35	1
+2410	2017-09-03 22:39:07.933647+03	2103	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:43:59.480062+00:00	3		35	1
+2411	2017-09-03 22:39:07.937504+03	2102	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:43:58.395616+00:00	3		35	1
+2412	2017-09-03 22:39:07.94156+03	2101	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:43:57.073451+00:00	3		35	1
+3366	2017-09-03 22:39:53.964739+03	51	child	3		13	1
+2413	2017-09-03 22:39:07.945731+03	2100	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:43:56.408812+00:00	3		35	1
+2414	2017-09-03 22:39:07.949305+03	2099	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:43:55.124692+00:00	3		35	1
+2415	2017-09-03 22:39:07.952959+03	2098	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:43:53.700851+00:00	3		35	1
+2416	2017-09-03 22:39:07.956851+03	2097	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:43:52.990370+00:00	3		35	1
+2417	2017-09-03 22:39:07.960792+03	2096	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:35:25.729788+00:00	3		35	1
+2418	2017-09-03 22:39:07.964123+03	2095	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:35:24.276631+00:00	3		35	1
+2419	2017-09-03 22:39:07.967446+03	2094	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:35:22.763076+00:00	3		35	1
+2420	2017-09-03 22:39:07.97075+03	2093	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:34:56.568326+00:00	3		35	1
+2421	2017-09-03 22:39:07.974246+03	2092	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:34:55.292910+00:00	3		35	1
+2422	2017-09-03 22:39:07.977472+03	2091	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:34:54.758043+00:00	3		35	1
+2423	2017-09-03 22:39:07.980606+03	2090	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:34:23.884744+00:00	3		35	1
+2424	2017-09-03 22:39:07.98354+03	2089	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:34:22.962204+00:00	3		35	1
+2425	2017-09-03 22:39:07.986587+03	2088	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:34:22.056831+00:00	3		35	1
+2426	2017-09-03 22:39:07.99049+03	2087	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:34:21.089332+00:00	3		35	1
+2427	2017-09-03 22:39:07.994664+03	2086	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:34:19.929862+00:00	3		35	1
+2428	2017-09-03 22:39:07.99849+03	2085	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:34:18.768689+00:00	3		35	1
+2429	2017-09-03 22:39:08.002362+03	2084	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:34:17.612433+00:00	3		35	1
+2430	2017-09-03 22:39:08.007144+03	2083	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:34:16.517555+00:00	3		35	1
+2431	2017-09-03 22:39:08.01107+03	2082	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:34:15.220054+00:00	3		35	1
+2432	2017-09-03 22:39:08.01447+03	2081	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:34:14.046353+00:00	3		35	1
+2433	2017-09-03 22:39:08.017913+03	2080	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:34:13.228498+00:00	3		35	1
+2434	2017-09-03 22:39:08.021527+03	2079	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:34:12.342178+00:00	3		35	1
+2435	2017-09-03 22:39:08.025262+03	2078	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:34:11.498045+00:00	3		35	1
+2436	2017-09-03 22:39:08.035881+03	2077	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:34:09.969067+00:00	3		35	1
+2437	2017-09-03 22:39:08.039967+03	2076	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:34:09.113313+00:00	3		35	1
+2438	2017-09-03 22:39:08.044558+03	2075	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:34:08.399924+00:00	3		35	1
+2439	2017-09-03 22:39:08.047798+03	2074	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:34:06.950121+00:00	3		35	1
+2440	2017-09-03 22:39:08.0509+03	2073	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:34:06.146916+00:00	3		35	1
+2441	2017-09-03 22:39:08.054314+03	2072	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:34:04.696590+00:00	3		35	1
+2442	2017-09-03 22:39:08.057828+03	2071	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:34:03.542283+00:00	3		35	1
+2443	2017-09-03 22:39:08.061458+03	2070	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:32:42.397744+00:00	3		35	1
+2444	2017-09-03 22:39:08.064937+03	2069	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:32:41.208596+00:00	3		35	1
+2445	2017-09-03 22:39:08.068473+03	2068	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:32:39.812070+00:00	3		35	1
+2446	2017-09-03 22:39:08.071753+03	2067	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:32:39.196290+00:00	3		35	1
+2447	2017-09-03 22:39:08.07562+03	2066	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 21:32:38.231050+00:00	3		35	1
+2448	2017-09-03 22:39:08.079435+03	2065	gisModule.tasks.blame_module_check_proposal - 2017-09-02 21:32:37.573535+00:00	3		35	1
+2449	2017-09-03 22:39:08.083201+03	2064	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 21:32:36.774401+00:00	3		35	1
+2450	2017-09-03 22:39:08.087028+03	2063	gisModule.tasks.statistic_module_basic_statistics - 2017-09-02 12:27:41.273163+00:00	3		35	1
+2451	2017-09-03 22:39:08.090736+03	2062	gisModule.tasks.blame_module_check_proposal - 2017-09-02 12:27:40.168455+00:00	3		35	1
+2452	2017-09-03 22:39:08.094626+03	2061	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 12:27:38.769379+00:00	3		35	1
+2453	2017-09-03 22:39:08.098897+03	2060	gisModule.tasks.blame_module_check_proposal - 2017-09-02 12:27:15.220914+00:00	3		35	1
+2454	2017-09-03 22:39:08.102251+03	2059	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 12:27:14.169242+00:00	3		35	1
+2455	2017-09-03 22:39:08.105776+03	2058	gisModule.tasks.blame_module_check_proposal - 2017-09-02 12:27:11.711474+00:00	3		35	1
+2456	2017-09-03 22:39:08.109981+03	2057	gisModule.tasks.blame_module_check_blame_status - 2017-09-02 12:27:10.375359+00:00	3		35	1
+2457	2017-09-03 22:39:08.121703+03	2056	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:50:48.740489+00:00	3		35	1
+2458	2017-09-03 22:39:08.125508+03	2055	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:50:48.050352+00:00	3		35	1
+2459	2017-09-03 22:39:08.129554+03	2054	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:50:47.049255+00:00	3		35	1
+2460	2017-09-03 22:39:08.132812+03	2053	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:50:15.709974+00:00	3		35	1
+2461	2017-09-03 22:39:08.136063+03	2052	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:50:14.913333+00:00	3		35	1
+2462	2017-09-03 22:39:08.140118+03	2051	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:50:13.643476+00:00	3		35	1
+2463	2017-09-03 22:39:08.143997+03	2050	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:49:47.119994+00:00	3		35	1
+2464	2017-09-03 22:39:08.147404+03	2049	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:49:46.537232+00:00	3		35	1
+2465	2017-09-03 22:39:08.150579+03	2048	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:49:45.613765+00:00	3		35	1
+2466	2017-09-03 22:39:08.153913+03	2047	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:49:14.583109+00:00	3		35	1
+2467	2017-09-03 22:39:08.157207+03	2046	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:49:13.589506+00:00	3		35	1
+2468	2017-09-03 22:39:08.160279+03	2045	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:49:12.485772+00:00	3		35	1
+2469	2017-09-03 22:39:08.163293+03	2044	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:48:46.405407+00:00	3		35	1
+2470	2017-09-03 22:39:08.166438+03	2043	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:48:45.668884+00:00	3		35	1
+2471	2017-09-03 22:39:08.169588+03	2042	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:48:45.067556+00:00	3		35	1
+2472	2017-09-03 22:39:08.173538+03	2041	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:48:19.186226+00:00	3		35	1
+2473	2017-09-03 22:39:08.178029+03	2040	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:48:17.953460+00:00	3		35	1
+2474	2017-09-03 22:39:08.181671+03	2039	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:48:16.821597+00:00	3		35	1
+2475	2017-09-03 22:39:08.184814+03	2038	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:47:46.133188+00:00	3		35	1
+2476	2017-09-03 22:39:08.188019+03	2037	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:47:45.011651+00:00	3		35	1
+2477	2017-09-03 22:39:08.191141+03	2036	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:47:44.309061+00:00	3		35	1
+2478	2017-09-03 22:39:08.195048+03	2035	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:47:18.113062+00:00	3		35	1
+2479	2017-09-03 22:39:08.198697+03	2034	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:47:17.222981+00:00	3		35	1
+2480	2017-09-03 22:39:08.202434+03	2033	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:47:16.664920+00:00	3		35	1
+2481	2017-09-03 22:39:08.205947+03	2032	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:46:45.103239+00:00	3		35	1
+2482	2017-09-03 22:39:08.209376+03	2031	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:46:44.207238+00:00	3		35	1
+2483	2017-09-03 22:39:08.212473+03	2030	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:46:43.314116+00:00	3		35	1
+2484	2017-09-03 22:39:08.215428+03	2029	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:46:17.336987+00:00	3		35	1
+2485	2017-09-03 22:39:08.218646+03	2028	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:46:15.782948+00:00	3		35	1
+2486	2017-09-03 22:39:08.221707+03	2027	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:46:14.885190+00:00	3		35	1
+2487	2017-09-03 22:39:08.224868+03	2026	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:45:48.595547+00:00	3		35	1
+2488	2017-09-03 22:39:08.228325+03	2025	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:45:47.605386+00:00	3		35	1
+2489	2017-09-03 22:39:08.231242+03	2024	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:45:46.449529+00:00	3		35	1
+2490	2017-09-03 22:39:08.234481+03	2023	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:45:15.003997+00:00	3		35	1
+2491	2017-09-03 22:39:08.237501+03	2022	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:45:13.967281+00:00	3		35	1
+2492	2017-09-03 22:39:08.240872+03	2021	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:45:13.256444+00:00	3		35	1
+2493	2017-09-03 22:39:08.24394+03	2020	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:44:46.879311+00:00	3		35	1
+2494	2017-09-03 22:39:08.24696+03	2019	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:44:46.225942+00:00	3		35	1
+2495	2017-09-03 22:39:08.25022+03	2018	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:44:44.859614+00:00	3		35	1
+2496	2017-09-03 22:39:08.253414+03	2017	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:44:14.074864+00:00	3		35	1
+2497	2017-09-03 22:39:08.256712+03	2016	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:44:13.397638+00:00	3		35	1
+2498	2017-09-03 22:39:08.260446+03	2015	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:44:12.714531+00:00	3		35	1
+2499	2017-09-03 22:39:08.263959+03	2014	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:43:46.121379+00:00	3		35	1
+2500	2017-09-03 22:39:08.267866+03	2013	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:43:45.086815+00:00	3		35	1
+2501	2017-09-03 22:39:08.271603+03	2012	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:43:43.889947+00:00	3		35	1
+2502	2017-09-03 22:39:08.275449+03	2011	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:43:17.843838+00:00	3		35	1
+2503	2017-09-03 22:39:08.279034+03	2010	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:43:17.076121+00:00	3		35	1
+2504	2017-09-03 22:39:08.282359+03	2009	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:43:15.611738+00:00	3		35	1
+2505	2017-09-03 22:39:08.2853+03	2008	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:42:49.511462+00:00	3		35	1
+2506	2017-09-03 22:39:08.288327+03	2007	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:42:48.040230+00:00	3		35	1
+2507	2017-09-03 22:39:08.29152+03	2006	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:42:46.692592+00:00	3		35	1
+2508	2017-09-03 22:39:08.295288+03	2005	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:42:15.094584+00:00	3		35	1
+2509	2017-09-03 22:39:08.29836+03	2004	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:42:14.366709+00:00	3		35	1
+2510	2017-09-03 22:39:08.30133+03	2003	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:42:13.549770+00:00	3		35	1
+2511	2017-09-03 22:39:08.310778+03	2002	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:41:47.370186+00:00	3		35	1
+2512	2017-09-03 22:39:08.31413+03	2001	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:41:46.672075+00:00	3		35	1
+2513	2017-09-03 22:39:08.317497+03	2000	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:41:45.357475+00:00	3		35	1
+2514	2017-09-03 22:39:08.321558+03	1999	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:41:14.543831+00:00	3		35	1
+2515	2017-09-03 22:39:08.325552+03	1998	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:41:13.709125+00:00	3		35	1
+2516	2017-09-03 22:39:08.329798+03	1997	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:41:13.130433+00:00	3		35	1
+2517	2017-09-03 22:39:08.333047+03	1996	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:40:47.162171+00:00	3		35	1
+2518	2017-09-03 22:39:08.336095+03	1995	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:40:45.805361+00:00	3		35	1
+2519	2017-09-03 22:39:08.339283+03	1994	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:40:45.087296+00:00	3		35	1
+2520	2017-09-03 22:39:08.343161+03	1993	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:40:18.900153+00:00	3		35	1
+2521	2017-09-03 22:39:08.346176+03	1992	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:40:17.735092+00:00	3		35	1
+2522	2017-09-03 22:39:08.349224+03	1991	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:40:16.257443+00:00	3		35	1
+2523	2017-09-03 22:39:08.352402+03	1990	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:39:45.485698+00:00	3		35	1
+2524	2017-09-03 22:39:08.355502+03	1989	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:39:44.370500+00:00	3		35	1
+2525	2017-09-03 22:39:08.359073+03	1988	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:39:43.181915+00:00	3		35	1
+2526	2017-09-03 22:39:08.362576+03	1987	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:39:17.390648+00:00	3		35	1
+2527	2017-09-03 22:39:08.36972+03	1986	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:39:16.314818+00:00	3		35	1
+2528	2017-09-03 22:39:08.375669+03	1985	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:39:14.816344+00:00	3		35	1
+2529	2017-09-03 22:39:08.3789+03	1984	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:38:48.698322+00:00	3		35	1
+2530	2017-09-03 22:39:08.381889+03	1983	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:38:47.650685+00:00	3		35	1
+2531	2017-09-03 22:39:08.384924+03	1982	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:38:46.671128+00:00	3		35	1
+2532	2017-09-03 22:39:08.388155+03	1981	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:38:15.803259+00:00	3		35	1
+2533	2017-09-03 22:39:08.391981+03	1980	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:38:15.031322+00:00	3		35	1
+2534	2017-09-03 22:39:08.395526+03	1979	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:38:13.808222+00:00	3		35	1
+2535	2017-09-03 22:39:08.398953+03	1978	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:37:48.015000+00:00	3		35	1
+2536	2017-09-03 22:39:08.402321+03	1977	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:37:46.613261+00:00	3		35	1
+2537	2017-09-03 22:39:08.406402+03	1976	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:37:45.400955+00:00	3		35	1
+2538	2017-09-03 22:39:08.40993+03	1975	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:37:14.727881+00:00	3		35	1
+2539	2017-09-03 22:39:08.413108+03	1974	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:37:13.977367+00:00	3		35	1
+2540	2017-09-03 22:39:08.416205+03	1973	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:37:12.670964+00:00	3		35	1
+2541	2017-09-03 22:39:08.419339+03	1972	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:36:46.929560+00:00	3		35	1
+2542	2017-09-03 22:39:08.422437+03	1971	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:36:46.064546+00:00	3		35	1
+2543	2017-09-03 22:39:08.425471+03	1970	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:36:44.948538+00:00	3		35	1
+2544	2017-09-03 22:39:08.428403+03	1969	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:36:18.866521+00:00	3		35	1
+2545	2017-09-03 22:39:08.431288+03	1968	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:36:18.246173+00:00	3		35	1
+2546	2017-09-03 22:39:08.434032+03	1967	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:36:16.823928+00:00	3		35	1
+2547	2017-09-03 22:39:08.43686+03	1966	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:35:45.401440+00:00	3		35	1
+2548	2017-09-03 22:39:08.440192+03	1965	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:35:44.191225+00:00	3		35	1
+2549	2017-09-03 22:39:08.443396+03	1964	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:35:42.857195+00:00	3		35	1
+2550	2017-09-03 22:39:08.44657+03	1963	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:35:16.521259+00:00	3		35	1
+2551	2017-09-03 22:39:08.449989+03	1962	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:35:15.005363+00:00	3		35	1
+2552	2017-09-03 22:39:08.454589+03	1961	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:35:13.548462+00:00	3		35	1
+2553	2017-09-03 22:39:08.45848+03	1960	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:34:47.208296+00:00	3		35	1
+2554	2017-09-03 22:39:08.462954+03	1959	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:34:46.641700+00:00	3		35	1
+2555	2017-09-03 22:39:08.466374+03	1958	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:34:46.098118+00:00	3		35	1
+2556	2017-09-03 22:39:08.469469+03	1957	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:34:14.627941+00:00	3		35	1
+2557	2017-09-03 22:39:08.473342+03	1956	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:34:13.695753+00:00	3		35	1
+2558	2017-09-03 22:39:08.477256+03	1955	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:34:12.876086+00:00	3		35	1
+2559	2017-09-03 22:39:08.480559+03	1954	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:33:46.354959+00:00	3		35	1
+2560	2017-09-03 22:39:08.483789+03	1953	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:33:45.216355+00:00	3		35	1
+2561	2017-09-03 22:39:08.486952+03	1952	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:33:44.059086+00:00	3		35	1
+2562	2017-09-03 22:39:08.490196+03	1951	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:33:17.626504+00:00	3		35	1
+2563	2017-09-03 22:39:08.493316+03	1950	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:33:16.745152+00:00	3		35	1
+2564	2017-09-03 22:39:08.496383+03	1949	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:33:15.534741+00:00	3		35	1
+2565	2017-09-03 22:39:08.500796+03	1948	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:32:44.626052+00:00	3		35	1
+2566	2017-09-03 22:39:08.505331+03	1947	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:32:43.471086+00:00	3		35	1
+2567	2017-09-03 22:39:08.509131+03	1946	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:32:42.504796+00:00	3		35	1
+2568	2017-09-03 22:39:08.512289+03	1945	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:32:15.874345+00:00	3		35	1
+2569	2017-09-03 22:39:08.515442+03	1944	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:32:14.804033+00:00	3		35	1
+2570	2017-09-03 22:39:08.518576+03	1943	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:32:14.172693+00:00	3		35	1
+2571	2017-09-03 22:39:08.522031+03	1942	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:31:48.026400+00:00	3		35	1
+2572	2017-09-03 22:39:08.525472+03	1941	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:31:47.050080+00:00	3		35	1
+2573	2017-09-03 22:39:08.528689+03	1940	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:31:45.887753+00:00	3		35	1
+2574	2017-09-03 22:39:08.531692+03	1939	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:31:14.548062+00:00	3		35	1
+2575	2017-09-03 22:39:08.534966+03	1938	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:31:13.378449+00:00	3		35	1
+2576	2017-09-03 22:39:08.538506+03	1937	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:31:12.363425+00:00	3		35	1
+2577	2017-09-03 22:39:08.54228+03	1936	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:30:46.689427+00:00	3		35	1
+2578	2017-09-03 22:39:08.545873+03	1935	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:30:45.923455+00:00	3		35	1
+2579	2017-09-03 22:39:08.549066+03	1934	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:30:44.727485+00:00	3		35	1
+2580	2017-09-03 22:39:08.55221+03	1933	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:30:14.050488+00:00	3		35	1
+2581	2017-09-03 22:39:08.556061+03	1932	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:30:12.863088+00:00	3		35	1
+2582	2017-09-03 22:39:08.559379+03	1931	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:30:12.186187+00:00	3		35	1
+2583	2017-09-03 22:39:08.562283+03	1930	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:29:46.390052+00:00	3		35	1
+2584	2017-09-03 22:39:08.565095+03	1929	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:29:45.820726+00:00	3		35	1
+2585	2017-09-03 22:39:08.568108+03	1928	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:29:44.695812+00:00	3		35	1
+2586	2017-09-03 22:39:08.571353+03	1927	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:29:18.282555+00:00	3		35	1
+2587	2017-09-03 22:39:08.584759+03	1926	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:29:17.120046+00:00	3		35	1
+2588	2017-09-03 22:39:08.588434+03	1925	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:29:16.582538+00:00	3		35	1
+2589	2017-09-03 22:39:08.592557+03	1924	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:28:45.025330+00:00	3		35	1
+2590	2017-09-03 22:39:08.59591+03	1923	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:28:44.463407+00:00	3		35	1
+2591	2017-09-03 22:39:08.599223+03	1922	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:28:43.414122+00:00	3		35	1
+2592	2017-09-03 22:39:08.603229+03	1921	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:28:17.106926+00:00	3		35	1
+2593	2017-09-03 22:39:08.608148+03	1920	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:28:16.278134+00:00	3		35	1
+2594	2017-09-03 22:39:08.612164+03	1919	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:28:15.485629+00:00	3		35	1
+2595	2017-09-03 22:39:08.616054+03	1918	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:27:43.924082+00:00	3		35	1
+2596	2017-09-03 22:39:08.620017+03	1917	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:27:43.201238+00:00	3		35	1
+2597	2017-09-03 22:39:08.626416+03	1916	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:27:42.088870+00:00	3		35	1
+2598	2017-09-03 22:39:08.630239+03	1915	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:27:15.467963+00:00	3		35	1
+2599	2017-09-03 22:39:08.633266+03	1914	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:27:14.545875+00:00	3		35	1
+2600	2017-09-03 22:39:08.636191+03	1913	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:27:13.020544+00:00	3		35	1
+2601	2017-09-03 22:39:08.646981+03	1912	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:26:46.805852+00:00	3		35	1
+2602	2017-09-03 22:39:08.650184+03	1911	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:26:45.939350+00:00	3		35	1
+2603	2017-09-03 22:39:08.653163+03	1910	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:26:45.079118+00:00	3		35	1
+2604	2017-09-03 22:39:08.657255+03	1909	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:26:18.923818+00:00	3		35	1
+2605	2017-09-03 22:39:08.662444+03	1908	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:26:17.783021+00:00	3		35	1
+2606	2017-09-03 22:39:08.66581+03	1907	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:26:16.614405+00:00	3		35	1
+2607	2017-09-03 22:39:08.668918+03	1906	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:25:45.602474+00:00	3		35	1
+2608	2017-09-03 22:39:08.67223+03	1905	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:25:44.633034+00:00	3		35	1
+2609	2017-09-03 22:39:08.676746+03	1904	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:25:43.689032+00:00	3		35	1
+2610	2017-09-03 22:39:08.679923+03	1903	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:25:17.707009+00:00	3		35	1
+2611	2017-09-03 22:39:08.682794+03	1902	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:25:16.767773+00:00	3		35	1
+2612	2017-09-03 22:39:08.686339+03	1901	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:25:15.354887+00:00	3		35	1
+2613	2017-09-03 22:39:08.690193+03	1900	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:24:44.526163+00:00	3		35	1
+2614	2017-09-03 22:39:08.694591+03	1899	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:24:43.926008+00:00	3		35	1
+2615	2017-09-03 22:39:08.697694+03	1898	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:24:42.452864+00:00	3		35	1
+2616	2017-09-03 22:39:08.700956+03	1897	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:24:15.996493+00:00	3		35	1
+2617	2017-09-03 22:39:08.704426+03	1896	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:24:14.443494+00:00	3		35	1
+2618	2017-09-03 22:39:08.709119+03	1895	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:24:12.938135+00:00	3		35	1
+2619	2017-09-03 22:39:08.722007+03	1894	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:23:47.226377+00:00	3		35	1
+2620	2017-09-03 22:39:08.726019+03	1893	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:23:46.428721+00:00	3		35	1
+2621	2017-09-03 22:39:08.730441+03	1892	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:23:45.014037+00:00	3		35	1
+2622	2017-09-03 22:39:08.733637+03	1891	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:23:14.363821+00:00	3		35	1
+2623	2017-09-03 22:39:08.736759+03	1890	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:23:13.660213+00:00	3		35	1
+2624	2017-09-03 22:39:08.741025+03	1889	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:23:12.642527+00:00	3		35	1
+2625	2017-09-03 22:39:08.744807+03	1888	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:22:46.621910+00:00	3		35	1
+2626	2017-09-03 22:39:08.747944+03	1887	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:22:45.733112+00:00	3		35	1
+2627	2017-09-03 22:39:08.751127+03	1886	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:22:44.255178+00:00	3		35	1
+2628	2017-09-03 22:39:08.754546+03	1885	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:22:17.943510+00:00	3		35	1
+2629	2017-09-03 22:39:08.758696+03	1884	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:22:17.330370+00:00	3		35	1
+2630	2017-09-03 22:39:08.763384+03	1883	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:22:16.066381+00:00	3		35	1
+2631	2017-09-03 22:39:08.766584+03	1882	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:21:45.205343+00:00	3		35	1
+2632	2017-09-03 22:39:08.778348+03	1881	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:21:44.526762+00:00	3		35	1
+2633	2017-09-03 22:39:08.781884+03	1880	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:21:43.092124+00:00	3		35	1
+2634	2017-09-03 22:39:08.785142+03	1879	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:21:16.698372+00:00	3		35	1
+2635	2017-09-03 22:39:08.788609+03	1878	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:21:15.611212+00:00	3		35	1
+2636	2017-09-03 22:39:08.792326+03	1877	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:21:14.465858+00:00	3		35	1
+2637	2017-09-03 22:39:08.795702+03	1876	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:20:47.952701+00:00	3		35	1
+2638	2017-09-03 22:39:08.798932+03	1875	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:20:47.011353+00:00	3		35	1
+2639	2017-09-03 22:39:08.802759+03	1874	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:20:43.308184+00:00	3		35	1
+2640	2017-09-03 22:39:08.806887+03	1873	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:20:16.961451+00:00	3		35	1
+2641	2017-09-03 22:39:08.810741+03	1872	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:20:15.778127+00:00	3		35	1
+2642	2017-09-03 22:39:08.813702+03	1871	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:20:14.902856+00:00	3		35	1
+2643	2017-09-03 22:39:08.816903+03	1870	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:19:48.391725+00:00	3		35	1
+2644	2017-09-03 22:39:08.819834+03	1869	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:19:47.073466+00:00	3		35	1
+2645	2017-09-03 22:39:08.824237+03	1868	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:19:46.072044+00:00	3		35	1
+2646	2017-09-03 22:39:08.827946+03	1867	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:19:14.820923+00:00	3		35	1
+2647	2017-09-03 22:39:08.8309+03	1866	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:19:13.781194+00:00	3		35	1
+2648	2017-09-03 22:39:08.834278+03	1865	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:19:13.226970+00:00	3		35	1
+2649	2017-09-03 22:39:08.839722+03	1864	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:18:46.733489+00:00	3		35	1
+2650	2017-09-03 22:39:08.851995+03	1863	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:18:45.251366+00:00	3		35	1
+2651	2017-09-03 22:39:08.855614+03	1862	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:18:44.660499+00:00	3		35	1
+2652	2017-09-03 22:39:08.859126+03	1861	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:18:18.667746+00:00	3		35	1
+2653	2017-09-03 22:39:08.863305+03	1860	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:18:17.743468+00:00	3		35	1
+2654	2017-09-03 22:39:08.874779+03	1859	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:18:16.887594+00:00	3		35	1
+2655	2017-09-03 22:39:08.878614+03	1858	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:17:45.329338+00:00	3		35	1
+2656	2017-09-03 22:39:08.889354+03	1857	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:17:43.772941+00:00	3		35	1
+2657	2017-09-03 22:39:08.893942+03	1856	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:17:42.688329+00:00	3		35	1
+2658	2017-09-03 22:39:08.904844+03	1855	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:17:16.090116+00:00	3		35	1
+2659	2017-09-03 22:39:08.909294+03	1854	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:17:14.561858+00:00	3		35	1
+2660	2017-09-03 22:39:08.913672+03	1853	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:17:13.964718+00:00	3		35	1
+2661	2017-09-03 22:39:08.917164+03	1852	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:16:47.397914+00:00	3		35	1
+2662	2017-09-03 22:39:08.921076+03	1851	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:16:46.523486+00:00	3		35	1
+2663	2017-09-03 22:39:08.924258+03	1850	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:16:45.623811+00:00	3		35	1
+2664	2017-09-03 22:39:08.927378+03	1849	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:16:14.834241+00:00	3		35	1
+2665	2017-09-03 22:39:08.930368+03	1848	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:16:14.055548+00:00	3		35	1
+2666	2017-09-03 22:39:08.941448+03	1847	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:16:13.506566+00:00	3		35	1
+2667	2017-09-03 22:39:08.945968+03	1846	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:15:47.694314+00:00	3		35	1
+2668	2017-09-03 22:39:08.949712+03	1845	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:15:46.619297+00:00	3		35	1
+2669	2017-09-03 22:39:08.954438+03	1844	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:15:45.371904+00:00	3		35	1
+2670	2017-09-03 22:39:08.958107+03	1843	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:15:14.130736+00:00	3		35	1
+2671	2017-09-03 22:39:08.970129+03	1842	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:15:12.967088+00:00	3		35	1
+2672	2017-09-03 22:39:08.973167+03	1841	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:15:12.124310+00:00	3		35	1
+2673	2017-09-03 22:39:08.976817+03	1840	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:14:45.586785+00:00	3		35	1
+2674	2017-09-03 22:39:08.980594+03	1839	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:14:44.045138+00:00	3		35	1
+2675	2017-09-03 22:39:08.984903+03	1838	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:14:42.758051+00:00	3		35	1
+2676	2017-09-03 22:39:08.995717+03	1837	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:14:16.418373+00:00	3		35	1
+2677	2017-09-03 22:39:08.999522+03	1836	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:14:14.941549+00:00	3		35	1
+2678	2017-09-03 22:39:09.003113+03	1835	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:14:13.758379+00:00	3		35	1
+2679	2017-09-03 22:39:09.006911+03	1834	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:13:42.105963+00:00	3		35	1
+2680	2017-09-03 22:39:09.010497+03	1833	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:13:40.694519+00:00	3		35	1
+2681	2017-09-03 22:39:09.01407+03	1832	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:13:39.886049+00:00	3		35	1
+2682	2017-09-03 22:39:09.017652+03	1831	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:13:13.392611+00:00	3		35	1
+2683	2017-09-03 22:39:09.021323+03	1830	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:13:12.747278+00:00	3		35	1
+2684	2017-09-03 22:39:09.025671+03	1829	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:13:11.510611+00:00	3		35	1
+2685	2017-09-03 22:39:09.033392+03	1828	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:12:45.394520+00:00	3		35	1
+2686	2017-09-03 22:39:09.03645+03	1827	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:12:44.306469+00:00	3		35	1
+2687	2017-09-03 22:39:09.039914+03	1826	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:12:43.729408+00:00	3		35	1
+2688	2017-09-03 22:39:09.043477+03	1825	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:12:12.964709+00:00	3		35	1
+2689	2017-09-03 22:39:09.046718+03	1824	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:12:12.387638+00:00	3		35	1
+2690	2017-09-03 22:39:09.049659+03	1823	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:12:11.849299+00:00	3		35	1
+2691	2017-09-03 22:39:09.052695+03	1822	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:11:45.997839+00:00	3		35	1
+2692	2017-09-03 22:39:09.056198+03	1821	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:11:44.595660+00:00	3		35	1
+2693	2017-09-03 22:39:09.059564+03	1820	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:11:43.652405+00:00	3		35	1
+2694	2017-09-03 22:39:09.062368+03	1819	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:11:12.464420+00:00	3		35	1
+2695	2017-09-03 22:39:09.065262+03	1818	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:11:11.793625+00:00	3		35	1
+2696	2017-09-03 22:39:09.068217+03	1817	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:11:11.055329+00:00	3		35	1
+2697	2017-09-03 22:39:09.07114+03	1816	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:10:44.988982+00:00	3		35	1
+2698	2017-09-03 22:39:09.074193+03	1815	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:10:43.925150+00:00	3		35	1
+2699	2017-09-03 22:39:09.077486+03	1814	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:10:42.897600+00:00	3		35	1
+2700	2017-09-03 22:39:09.080531+03	1813	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:10:16.427640+00:00	3		35	1
+2701	2017-09-03 22:39:09.083471+03	1812	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:10:15.156192+00:00	3		35	1
+2702	2017-09-03 22:39:09.086411+03	1811	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:10:14.375208+00:00	3		35	1
+2703	2017-09-03 22:39:09.089674+03	1810	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:09:43.208321+00:00	3		35	1
+2704	2017-09-03 22:39:09.09276+03	1809	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:09:42.568285+00:00	3		35	1
+2705	2017-09-03 22:39:09.0957+03	1808	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:09:41.696414+00:00	3		35	1
+2706	2017-09-03 22:39:09.098584+03	1807	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:09:15.765246+00:00	3		35	1
+2707	2017-09-03 22:39:09.101434+03	1806	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:09:15.011052+00:00	3		35	1
+2708	2017-09-03 22:39:09.104389+03	1805	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:09:13.929208+00:00	3		35	1
+2709	2017-09-03 22:39:09.107666+03	1804	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:08:42.958187+00:00	3		35	1
+2710	2017-09-03 22:39:09.110957+03	1803	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:08:41.873855+00:00	3		35	1
+2711	2017-09-03 22:39:09.113916+03	1802	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:08:41.165349+00:00	3		35	1
+2712	2017-09-03 22:39:09.116858+03	1801	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:08:14.869575+00:00	3		35	1
+2713	2017-09-03 22:39:09.119828+03	1800	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:08:13.967792+00:00	3		35	1
+2714	2017-09-03 22:39:09.123607+03	1799	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:08:13.319141+00:00	3		35	1
+2715	2017-09-03 22:39:09.127519+03	1798	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:07:42.106221+00:00	3		35	1
+2716	2017-09-03 22:39:09.130673+03	1797	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:07:41.564264+00:00	3		35	1
+2717	2017-09-03 22:39:09.134167+03	1796	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:07:40.983029+00:00	3		35	1
+2718	2017-09-03 22:39:09.145032+03	1795	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:07:14.616813+00:00	3		35	1
+2719	2017-09-03 22:39:09.148591+03	1794	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:07:13.820957+00:00	3		35	1
+2720	2017-09-03 22:39:09.151731+03	1793	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:07:12.694867+00:00	3		35	1
+2721	2017-09-03 22:39:09.154951+03	1792	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:07:01.154604+00:00	3		35	1
+2722	2017-09-03 22:39:09.158131+03	1791	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:06:59.950911+00:00	3		35	1
+2723	2017-09-03 22:39:09.161013+03	1790	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:06:59.035868+00:00	3		35	1
+2724	2017-09-03 22:39:09.164214+03	1789	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:06:33.207825+00:00	3		35	1
+2725	2017-09-03 22:39:09.167638+03	1788	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:06:31.735537+00:00	3		35	1
+2726	2017-09-03 22:39:09.171427+03	1787	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:06:30.661344+00:00	3		35	1
+2727	2017-09-03 22:39:09.175553+03	1786	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:05:59.824431+00:00	3		35	1
+2728	2017-09-03 22:39:09.179214+03	1785	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:05:58.880572+00:00	3		35	1
+2729	2017-09-03 22:39:09.183197+03	1784	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:05:57.862804+00:00	3		35	1
+2730	2017-09-03 22:39:09.186963+03	1783	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:05:56.943794+00:00	3		35	1
+2731	2017-09-03 22:39:09.190747+03	1782	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:05:55.822064+00:00	3		35	1
+2732	2017-09-03 22:39:09.194659+03	1781	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:05:54.966885+00:00	3		35	1
+2733	2017-09-03 22:39:09.198112+03	1780	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:05:54.248229+00:00	3		35	1
+2734	2017-09-03 22:39:09.201068+03	1779	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:05:52.719118+00:00	3		35	1
+2735	2017-09-03 22:39:09.204284+03	1778	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:05:52.091419+00:00	3		35	1
+2736	2017-09-03 22:39:09.207423+03	1777	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:05:50.881607+00:00	3		35	1
+2737	2017-09-03 22:39:09.211033+03	1776	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:05:50.024177+00:00	3		35	1
+2738	2017-09-03 22:39:09.21421+03	1775	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:05:49.199906+00:00	3		35	1
+2739	2017-09-03 22:39:09.217306+03	1774	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 14:05:47.754845+00:00	3		35	1
+2740	2017-09-03 22:39:09.220453+03	1773	gisModule.tasks.blame_module_check_proposal - 2017-07-26 14:05:46.966136+00:00	3		35	1
+2741	2017-09-03 22:39:09.223699+03	1772	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 14:05:46.226442+00:00	3		35	1
+2742	2017-09-03 22:39:09.227685+03	1771	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 12:03:23.159770+00:00	3		35	1
+2743	2017-09-03 22:39:09.231274+03	1770	gisModule.tasks.blame_module_check_proposal - 2017-07-26 12:03:22.605860+00:00	3		35	1
+2744	2017-09-03 22:39:09.2348+03	1769	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 12:03:21.108696+00:00	3		35	1
+2745	2017-09-03 22:39:09.245451+03	1768	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 12:02:54.696209+00:00	3		35	1
+2746	2017-09-03 22:39:09.248716+03	1767	gisModule.tasks.blame_module_check_proposal - 2017-07-26 12:02:54.103926+00:00	3		35	1
+2747	2017-09-03 22:39:09.251791+03	1766	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 12:02:53.415025+00:00	3		35	1
+2748	2017-09-03 22:39:09.254902+03	1765	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 12:02:27.412185+00:00	3		35	1
+2749	2017-09-03 22:39:09.25882+03	1764	gisModule.tasks.blame_module_check_proposal - 2017-07-26 12:02:25.924444+00:00	3		35	1
+2750	2017-09-03 22:39:09.269414+03	1763	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 12:02:25.174191+00:00	3		35	1
+2751	2017-09-03 22:39:09.273819+03	1762	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 12:02:19.326292+00:00	3		35	1
+2752	2017-09-03 22:39:09.278369+03	1761	gisModule.tasks.blame_module_check_proposal - 2017-07-26 12:02:18.169819+00:00	3		35	1
+2753	2017-09-03 22:39:09.282094+03	1760	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 12:02:16.727466+00:00	3		35	1
+2754	2017-09-03 22:39:09.28523+03	1759	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 12:02:16.167159+00:00	3		35	1
+2755	2017-09-03 22:39:09.288771+03	1758	gisModule.tasks.blame_module_check_proposal - 2017-07-26 12:02:15.356091+00:00	3		35	1
+2756	2017-09-03 22:39:09.291993+03	1757	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 12:02:14.506797+00:00	3		35	1
+2757	2017-09-03 22:39:09.295172+03	1756	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 12:02:13.460487+00:00	3		35	1
+2758	2017-09-03 22:39:09.298627+03	1755	gisModule.tasks.blame_module_check_proposal - 2017-07-26 12:02:11.941333+00:00	3		35	1
+2759	2017-09-03 22:39:09.302283+03	1754	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 12:02:11.344803+00:00	3		35	1
+2760	2017-09-03 22:39:09.306262+03	1753	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 12:02:10.213641+00:00	3		35	1
+2761	2017-09-03 22:39:09.309814+03	1752	gisModule.tasks.blame_module_check_proposal - 2017-07-26 12:02:09.199729+00:00	3		35	1
+2762	2017-09-03 22:39:09.313151+03	1751	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 12:02:08.331668+00:00	3		35	1
+2763	2017-09-03 22:39:09.316774+03	1750	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:59:05.446990+00:00	3		35	1
+2764	2017-09-03 22:39:09.320355+03	1749	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:59:04.022564+00:00	3		35	1
+2765	2017-09-03 22:39:09.324121+03	1748	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:59:03.354449+00:00	3		35	1
+2766	2017-09-03 22:39:09.327327+03	1747	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:58:32.509736+00:00	3		35	1
+2767	2017-09-03 22:39:09.330498+03	1746	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:58:31.834383+00:00	3		35	1
+2768	2017-09-03 22:39:09.333425+03	1745	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:58:30.998812+00:00	3		35	1
+2769	2017-09-03 22:39:09.336275+03	1744	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:58:04.426381+00:00	3		35	1
+2770	2017-09-03 22:39:09.339769+03	1743	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:58:02.993060+00:00	3		35	1
+2771	2017-09-03 22:39:09.343214+03	1742	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:58:02.386172+00:00	3		35	1
+2772	2017-09-03 22:39:09.346341+03	1741	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:57:36.552974+00:00	3		35	1
+2773	2017-09-03 22:39:09.349921+03	1740	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:57:35.989847+00:00	3		35	1
+2774	2017-09-03 22:39:09.353004+03	1739	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:57:34.117960+00:00	3		35	1
+2775	2017-09-03 22:39:09.356632+03	1738	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:57:02.613614+00:00	3		35	1
+2776	2017-09-03 22:39:09.360338+03	1737	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:57:01.222927+00:00	3		35	1
+2777	2017-09-03 22:39:09.363425+03	1736	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:57:00.160539+00:00	3		35	1
+2778	2017-09-03 22:39:09.366646+03	1735	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:56:34.065375+00:00	3		35	1
+2779	2017-09-03 22:39:09.370109+03	1734	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:56:32.886008+00:00	3		35	1
+2780	2017-09-03 22:39:09.373683+03	1733	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:56:32.090060+00:00	3		35	1
+2781	2017-09-03 22:39:09.377685+03	1732	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:56:05.727423+00:00	3		35	1
+2782	2017-09-03 22:39:09.381641+03	1731	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:56:04.710207+00:00	3		35	1
+2783	2017-09-03 22:39:09.385174+03	1730	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:56:03.198940+00:00	3		35	1
+2784	2017-09-03 22:39:09.388758+03	1729	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:55:31.922982+00:00	3		35	1
+2785	2017-09-03 22:39:09.393287+03	1728	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:55:30.542305+00:00	3		35	1
+2786	2017-09-03 22:39:09.397249+03	1727	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:55:29.824885+00:00	3		35	1
+2787	2017-09-03 22:39:09.400747+03	1726	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:55:03.723308+00:00	3		35	1
+2788	2017-09-03 22:39:09.404082+03	1725	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:55:03.117843+00:00	3		35	1
+2789	2017-09-03 22:39:09.407155+03	1724	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:55:02.132422+00:00	3		35	1
+2790	2017-09-03 22:39:09.410885+03	1723	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:54:35.761541+00:00	3		35	1
+2791	2017-09-03 22:39:09.414116+03	1722	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:54:34.534513+00:00	3		35	1
+2792	2017-09-03 22:39:09.417057+03	1721	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:54:32.528213+00:00	3		35	1
+2793	2017-09-03 22:39:09.420635+03	1720	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:54:01.824811+00:00	3		35	1
+2794	2017-09-03 22:39:09.423676+03	1719	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:54:01.083356+00:00	3		35	1
+2795	2017-09-03 22:39:09.427255+03	1718	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:54:00.422823+00:00	3		35	1
+2796	2017-09-03 22:39:09.430388+03	1717	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:53:34.724898+00:00	3		35	1
+2797	2017-09-03 22:39:09.433506+03	1716	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:53:33.241678+00:00	3		35	1
+2798	2017-09-03 22:39:09.436655+03	1715	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:53:32.611710+00:00	3		35	1
+2799	2017-09-03 22:39:09.440431+03	1714	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:52:57.439938+00:00	3		35	1
+2800	2017-09-03 22:39:09.443646+03	1713	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:52:56.738689+00:00	3		35	1
+2801	2017-09-03 22:39:09.454508+03	1712	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:52:25.319543+00:00	3		35	1
+2802	2017-09-03 22:39:09.458171+03	1711	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:52:24.310359+00:00	3		35	1
+2803	2017-09-03 22:39:09.461213+03	1710	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:51:57.705829+00:00	3		35	1
+2804	2017-09-03 22:39:09.464186+03	1709	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:51:56.394980+00:00	3		35	1
+2805	2017-09-03 22:39:09.474308+03	1708	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:51:28.833568+00:00	3		35	1
+2806	2017-09-03 22:39:09.47745+03	1707	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:51:28.235183+00:00	3		35	1
+2807	2017-09-03 22:39:09.480599+03	1706	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:50:57.208395+00:00	3		35	1
+2808	2017-09-03 22:39:09.483483+03	1705	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:50:56.254906+00:00	3		35	1
+2809	2017-09-03 22:39:09.486553+03	1704	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:50:25.092793+00:00	3		35	1
+2810	2017-09-03 22:39:09.490036+03	1703	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:50:23.968376+00:00	3		35	1
+2811	2017-09-03 22:39:09.493516+03	1702	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:49:56.618220+00:00	3		35	1
+2812	2017-09-03 22:39:09.496648+03	1701	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:49:55.696550+00:00	3		35	1
+2813	2017-09-03 22:39:09.499694+03	1700	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:49:27.554538+00:00	3		35	1
+2814	2017-09-03 22:39:09.502754+03	1699	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:49:26.871687+00:00	3		35	1
+2815	2017-09-03 22:39:09.506191+03	1698	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:49:07.978737+00:00	3		35	1
+2816	2017-09-03 22:39:09.509308+03	1697	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:49:07.172458+00:00	3		35	1
+2817	2017-09-03 22:39:09.512134+03	1696	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:48:36.395962+00:00	3		35	1
+2818	2017-09-03 22:39:09.515029+03	1695	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:48:35.063097+00:00	3		35	1
+2819	2017-09-03 22:39:09.517995+03	1694	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:48:09.286963+00:00	3		35	1
+2820	2017-09-03 22:39:09.521091+03	1693	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:48:08.003784+00:00	3		35	1
+2821	2017-09-03 22:39:09.52439+03	1692	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:47:40.337484+00:00	3		35	1
+2822	2017-09-03 22:39:09.527439+03	1691	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:47:39.122151+00:00	3		35	1
+2823	2017-09-03 22:39:09.530544+03	1690	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:47:06.426240+00:00	3		35	1
+2824	2017-09-03 22:39:09.534165+03	1689	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:47:05.401683+00:00	3		35	1
+2825	2017-09-03 22:39:09.537476+03	1688	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:46:52.382526+00:00	3		35	1
+2826	2017-09-03 22:39:09.540489+03	1687	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:46:51.672710+00:00	3		35	1
+2827	2017-09-03 22:39:09.543897+03	1686	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:46:35.720516+00:00	3		35	1
+2828	2017-09-03 22:39:09.54699+03	1685	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:46:34.789094+00:00	3		35	1
+2829	2017-09-03 22:39:09.550024+03	1684	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:46:03.601494+00:00	3		35	1
+2830	2017-09-03 22:39:09.552884+03	1683	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:46:02.660020+00:00	3		35	1
+2831	2017-09-03 22:39:09.555843+03	1682	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:45:36.704638+00:00	3		35	1
+2832	2017-09-03 22:39:09.558722+03	1681	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:45:35.458353+00:00	3		35	1
+2833	2017-09-03 22:39:09.561894+03	1680	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:45:04.311924+00:00	3		35	1
+2834	2017-09-03 22:39:09.565088+03	1679	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:45:03.495570+00:00	3		35	1
+2835	2017-09-03 22:39:09.568366+03	1678	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:44:32.566859+00:00	3		35	1
+2836	2017-09-03 22:39:09.571519+03	1677	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:44:31.861484+00:00	3		35	1
+2837	2017-09-03 22:39:09.574827+03	1676	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:44:06.062227+00:00	3		35	1
+2838	2017-09-03 22:39:09.578261+03	1675	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:44:04.759921+00:00	3		35	1
+2839	2017-09-03 22:39:09.581044+03	1674	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:43:33.405876+00:00	3		35	1
+2840	2017-09-03 22:39:09.584007+03	1673	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:43:31.973040+00:00	3		35	1
+2841	2017-09-03 22:39:09.586934+03	1672	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:43:06.237705+00:00	3		35	1
+2842	2017-09-03 22:39:09.590082+03	1671	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:43:05.279074+00:00	3		35	1
+2843	2017-09-03 22:39:09.593075+03	1670	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:42:33.472086+00:00	3		35	1
+2844	2017-09-03 22:39:09.595993+03	1669	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:42:32.617758+00:00	3		35	1
+2845	2017-09-03 22:39:09.598964+03	1668	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:42:06.790988+00:00	3		35	1
+2846	2017-09-03 22:39:09.601822+03	1667	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:42:05.549560+00:00	3		35	1
+2847	2017-09-03 22:39:09.604673+03	1666	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:41:34.039383+00:00	3		35	1
+2848	2017-09-03 22:39:09.608083+03	1665	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:41:33.481022+00:00	3		35	1
+2849	2017-09-03 22:39:09.611278+03	1664	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:41:06.303369+00:00	3		35	1
+2850	2017-09-03 22:39:09.614331+03	1663	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:41:05.432883+00:00	3		35	1
+2851	2017-09-03 22:39:09.617399+03	1662	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:40:36.776762+00:00	3		35	1
+2852	2017-09-03 22:39:09.620734+03	1661	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:40:36.063752+00:00	3		35	1
+2853	2017-09-03 22:39:09.624064+03	1660	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:40:15.166429+00:00	3		35	1
+2854	2017-09-03 22:39:09.627639+03	1659	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:40:14.200392+00:00	3		35	1
+2855	2017-09-03 22:39:09.63075+03	1658	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:39:42.699495+00:00	3		35	1
+2856	2017-09-03 22:39:09.633791+03	1657	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:39:41.521080+00:00	3		35	1
+2857	2017-09-03 22:39:09.637282+03	1656	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:39:15.466251+00:00	3		35	1
+2858	2017-09-03 22:39:09.640322+03	1655	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:39:14.823760+00:00	3		35	1
+2859	2017-09-03 22:39:09.643987+03	1654	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:38:43.854373+00:00	3		35	1
+2860	2017-09-03 22:39:09.647269+03	1653	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:38:42.692664+00:00	3		35	1
+3367	2017-09-03 22:39:53.968112+03	50	test	3		13	1
+2861	2017-09-03 22:39:09.650476+03	1652	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:38:16.237553+00:00	3		35	1
+2862	2017-09-03 22:39:09.654053+03	1651	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:38:15.024882+00:00	3		35	1
+2863	2017-09-03 22:39:09.657493+03	1650	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:37:43.749530+00:00	3		35	1
+2864	2017-09-03 22:39:09.660631+03	1649	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:37:42.539142+00:00	3		35	1
+2865	2017-09-03 22:39:09.663498+03	1648	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:37:16.032360+00:00	3		35	1
+2866	2017-09-03 22:39:09.66643+03	1647	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:37:15.029492+00:00	3		35	1
+2867	2017-09-03 22:39:09.669653+03	1646	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:36:43.582859+00:00	3		35	1
+2868	2017-09-03 22:39:09.673544+03	1645	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:36:42.734698+00:00	3		35	1
+2869	2017-09-03 22:39:09.677476+03	1644	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:36:16.326078+00:00	3		35	1
+2870	2017-09-03 22:39:09.68108+03	1643	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:36:15.571434+00:00	3		35	1
+2871	2017-09-03 22:39:09.684341+03	1642	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:35:43.140572+00:00	3		35	1
+2872	2017-09-03 22:39:09.687537+03	1641	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:35:42.041289+00:00	3		35	1
+2873	2017-09-03 22:39:09.691202+03	1640	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:35:15.655724+00:00	3		35	1
+2874	2017-09-03 22:39:09.694454+03	1639	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:35:14.881187+00:00	3		35	1
+2875	2017-09-03 22:39:09.697583+03	1638	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:34:43.483008+00:00	3		35	1
+2876	2017-09-03 22:39:09.700708+03	1637	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:34:42.369096+00:00	3		35	1
+2877	2017-09-03 22:39:09.703993+03	1636	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:34:14.395554+00:00	3		35	1
+2878	2017-09-03 22:39:09.707331+03	1635	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:34:13.475902+00:00	3		35	1
+2879	2017-09-03 22:39:09.710706+03	1634	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:33:45.478957+00:00	3		35	1
+2880	2017-09-03 22:39:09.713794+03	1633	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:33:44.673483+00:00	3		35	1
+2881	2017-09-03 22:39:09.717434+03	1632	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:33:13.507283+00:00	3		35	1
+2882	2017-09-03 22:39:09.720804+03	1631	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:33:12.957099+00:00	3		35	1
+2883	2017-09-03 22:39:09.72417+03	1630	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:33:11.479753+00:00	3		35	1
+2884	2017-09-03 22:39:09.727111+03	1629	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:32:45.700983+00:00	3		35	1
+2885	2017-09-03 22:39:09.730125+03	1628	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:32:44.570084+00:00	3		35	1
+2886	2017-09-03 22:39:09.733192+03	1627	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:32:43.411485+00:00	3		35	1
+2887	2017-09-03 22:39:09.736261+03	1626	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:32:17.308904+00:00	3		35	1
+2888	2017-09-03 22:39:09.739297+03	1625	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:32:16.616341+00:00	3		35	1
+2889	2017-09-03 22:39:09.742114+03	1624	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:32:15.402374+00:00	3		35	1
+2890	2017-09-03 22:39:09.744889+03	1623	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:31:44.405012+00:00	3		35	1
+2891	2017-09-03 22:39:09.747813+03	1622	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:31:42.904347+00:00	3		35	1
+2892	2017-09-03 22:39:09.750906+03	1621	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:31:42.233693+00:00	3		35	1
+2893	2017-09-03 22:39:09.753958+03	1620	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:31:16.541057+00:00	3		35	1
+2894	2017-09-03 22:39:09.757576+03	1619	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:31:15.767354+00:00	3		35	1
+2895	2017-09-03 22:39:09.760773+03	1618	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:31:14.435081+00:00	3		35	1
+2896	2017-09-03 22:39:09.763797+03	1617	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:30:48.641485+00:00	3		35	1
+2897	2017-09-03 22:39:09.766831+03	1616	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:30:47.420351+00:00	3		35	1
+2898	2017-09-03 22:39:09.7703+03	1615	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:30:46.049895+00:00	3		35	1
+2899	2017-09-03 22:39:09.773728+03	1614	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:30:14.520534+00:00	3		35	1
+2900	2017-09-03 22:39:09.784745+03	1613	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:30:13.400021+00:00	3		35	1
+2901	2017-09-03 22:39:09.789147+03	1612	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:30:12.341998+00:00	3		35	1
+2902	2017-09-03 22:39:09.793636+03	1611	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:29:46.246984+00:00	3		35	1
+2903	2017-09-03 22:39:09.797727+03	1610	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:29:45.531765+00:00	3		35	1
+2904	2017-09-03 22:39:09.801324+03	1609	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:29:44.295826+00:00	3		35	1
+2905	2017-09-03 22:39:09.804585+03	1608	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:29:17.845019+00:00	3		35	1
+2906	2017-09-03 22:39:09.808315+03	1607	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:29:17.034057+00:00	3		35	1
+2907	2017-09-03 22:39:09.811325+03	1606	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:29:16.105883+00:00	3		35	1
+2908	2017-09-03 22:39:09.814277+03	1605	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:28:45.417379+00:00	3		35	1
+2909	2017-09-03 22:39:09.817315+03	1604	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:28:44.384252+00:00	3		35	1
+2910	2017-09-03 22:39:09.820801+03	1603	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:28:43.560603+00:00	3		35	1
+2911	2017-09-03 22:39:09.824218+03	1602	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:28:16.941683+00:00	3		35	1
+2912	2017-09-03 22:39:09.827645+03	1601	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:28:15.825773+00:00	3		35	1
+2913	2017-09-03 22:39:09.83088+03	1600	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:28:14.845853+00:00	3		35	1
+2914	2017-09-03 22:39:09.833975+03	1599	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:27:43.389713+00:00	3		35	1
+2915	2017-09-03 22:39:09.837056+03	1598	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:27:42.198660+00:00	3		35	1
+2916	2017-09-03 22:39:09.840726+03	1597	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:27:41.639092+00:00	3		35	1
+2917	2017-09-03 22:39:09.844103+03	1596	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:27:15.526577+00:00	3		35	1
+2918	2017-09-03 22:39:09.847161+03	1595	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:27:14.062292+00:00	3		35	1
+2919	2017-09-03 22:39:09.850171+03	1594	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:27:13.471611+00:00	3		35	1
+2920	2017-09-03 22:39:09.853661+03	1593	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:26:47.486785+00:00	3		35	1
+2921	2017-09-03 22:39:09.856989+03	1592	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:26:46.099192+00:00	3		35	1
+2922	2017-09-03 22:39:09.860567+03	1591	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:26:44.925399+00:00	3		35	1
+2923	2017-09-03 22:39:09.864055+03	1590	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:26:18.705519+00:00	3		35	1
+2924	2017-09-03 22:39:09.86713+03	1589	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:26:17.382071+00:00	3		35	1
+2925	2017-09-03 22:39:09.871086+03	1588	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:26:16.267621+00:00	3		35	1
+2926	2017-09-03 22:39:09.874377+03	1587	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:25:45.027962+00:00	3		35	1
+2927	2017-09-03 22:39:09.877776+03	1586	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:25:44.299796+00:00	3		35	1
+2928	2017-09-03 22:39:09.880689+03	1585	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:25:43.248918+00:00	3		35	1
+2929	2017-09-03 22:39:09.883663+03	1584	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:25:16.930293+00:00	3		35	1
+2930	2017-09-03 22:39:09.886654+03	1583	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:25:15.585316+00:00	3		35	1
+2931	2017-09-03 22:39:09.889734+03	1582	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:25:14.244171+00:00	3		35	1
+2932	2017-09-03 22:39:09.893021+03	1581	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:24:48.463556+00:00	3		35	1
+2933	2017-09-03 22:39:09.896022+03	1580	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:24:47.426724+00:00	3		35	1
+2934	2017-09-03 22:39:09.899227+03	1579	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:24:46.199580+00:00	3		35	1
+2935	2017-09-03 22:39:09.9031+03	1578	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:24:15.317847+00:00	3		35	1
+2936	2017-09-03 22:39:09.907049+03	1577	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:24:13.901703+00:00	3		35	1
+2937	2017-09-03 22:39:09.911095+03	1576	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:24:13.091217+00:00	3		35	1
+2938	2017-09-03 22:39:09.914635+03	1575	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:23:47.165060+00:00	3		35	1
+2939	2017-09-03 22:39:09.918114+03	1574	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:23:46.524025+00:00	3		35	1
+2940	2017-09-03 22:39:09.92147+03	1573	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:23:45.002700+00:00	3		35	1
+2941	2017-09-03 22:39:09.92513+03	1572	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:23:13.636081+00:00	3		35	1
+2942	2017-09-03 22:39:09.928916+03	1571	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:23:12.735212+00:00	3		35	1
+2943	2017-09-03 22:39:09.933281+03	1570	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:23:12.132022+00:00	3		35	1
+2944	2017-09-03 22:39:09.937266+03	1569	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:22:46.242871+00:00	3		35	1
+2945	2017-09-03 22:39:09.940837+03	1568	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:22:45.633045+00:00	3		35	1
+2946	2017-09-03 22:39:09.944819+03	1567	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:22:44.936624+00:00	3		35	1
+2947	2017-09-03 22:39:09.9481+03	1566	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:22:14.021454+00:00	3		35	1
+2948	2017-09-03 22:39:09.959701+03	1565	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:22:12.604137+00:00	3		35	1
+2949	2017-09-03 22:39:09.962716+03	1564	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:22:11.630481+00:00	3		35	1
+2950	2017-09-03 22:39:09.965684+03	1563	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:21:45.437667+00:00	3		35	1
+2951	2017-09-03 22:39:09.968592+03	1562	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:21:44.409913+00:00	3		35	1
+2952	2017-09-03 22:39:09.971723+03	1561	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:21:43.797722+00:00	3		35	1
+2953	2017-09-03 22:39:09.975183+03	1560	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:21:17.326791+00:00	3		35	1
+2954	2017-09-03 22:39:09.978102+03	1559	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:21:16.726300+00:00	3		35	1
+2955	2017-09-03 22:39:09.981083+03	1558	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:21:16.187575+00:00	3		35	1
+2956	2017-09-03 22:39:09.984125+03	1557	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:20:45.424750+00:00	3		35	1
+2957	2017-09-03 22:39:09.987448+03	1556	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:20:44.404779+00:00	3		35	1
+2958	2017-09-03 22:39:09.991049+03	1555	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:20:43.018666+00:00	3		35	1
+2959	2017-09-03 22:39:09.995037+03	1554	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:20:16.587869+00:00	3		35	1
+2960	2017-09-03 22:39:09.997987+03	1553	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:20:15.395870+00:00	3		35	1
+2961	2017-09-03 22:39:10.000859+03	1552	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:20:14.350451+00:00	3		35	1
+2962	2017-09-03 22:39:10.011074+03	1551	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:19:48.014664+00:00	3		35	1
+2963	2017-09-03 22:39:10.014316+03	1550	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:19:46.990948+00:00	3		35	1
+2964	2017-09-03 22:39:10.017542+03	1549	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:19:46.175944+00:00	3		35	1
+2965	2017-09-03 22:39:10.020745+03	1548	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:19:14.858453+00:00	3		35	1
+2966	2017-09-03 22:39:10.024074+03	1547	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:19:13.644348+00:00	3		35	1
+2967	2017-09-03 22:39:10.027182+03	1546	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:19:12.198999+00:00	3		35	1
+2968	2017-09-03 22:39:10.030203+03	1545	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:18:45.627631+00:00	3		35	1
+2969	2017-09-03 22:39:10.033251+03	1544	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:18:44.437076+00:00	3		35	1
+2970	2017-09-03 22:39:10.036334+03	1543	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:18:43.695477+00:00	3		35	1
+2971	2017-09-03 22:39:10.040124+03	1542	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:18:17.594884+00:00	3		35	1
+2972	2017-09-03 22:39:10.043662+03	1541	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:18:16.083405+00:00	3		35	1
+2973	2017-09-03 22:39:10.047012+03	1540	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:18:15.195089+00:00	3		35	1
+2974	2017-09-03 22:39:10.058935+03	1539	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:17:44.425725+00:00	3		35	1
+2975	2017-09-03 22:39:10.06236+03	1538	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:17:42.902507+00:00	3		35	1
+2976	2017-09-03 22:39:10.065501+03	1537	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:17:41.729375+00:00	3		35	1
+2977	2017-09-03 22:39:10.076812+03	1536	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:17:15.133565+00:00	3		35	1
+2978	2017-09-03 22:39:10.080724+03	1535	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:17:14.255058+00:00	3		35	1
+2979	2017-09-03 22:39:10.084986+03	1534	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:17:13.699515+00:00	3		35	1
+2980	2017-09-03 22:39:10.088105+03	1533	gisModule.tasks.statistic_module_basic_statistics - 2017-07-26 08:17:02.656971+00:00	3		35	1
+2981	2017-09-03 22:39:10.091472+03	1532	gisModule.tasks.blame_module_check_proposal - 2017-07-26 08:17:01.877921+00:00	3		35	1
+2982	2017-09-03 22:39:10.094809+03	1531	gisModule.tasks.blame_module_check_blame_status - 2017-07-26 08:17:01.323707+00:00	3		35	1
+2983	2017-09-03 22:39:10.097829+03	1530	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:37:46.397437+00:00	3		35	1
+2984	2017-09-03 22:39:10.100985+03	1529	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:37:45.547353+00:00	3		35	1
+2985	2017-09-03 22:39:10.104138+03	1528	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:37:44.401426+00:00	3		35	1
+2986	2017-09-03 22:39:10.10756+03	1527	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:37:13.530422+00:00	3		35	1
+2987	2017-09-03 22:39:10.111088+03	1526	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:37:12.821963+00:00	3		35	1
+2988	2017-09-03 22:39:10.114464+03	1525	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:37:12.067443+00:00	3		35	1
+2989	2017-09-03 22:39:10.117705+03	1524	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:36:46.097252+00:00	3		35	1
+2990	2017-09-03 22:39:10.121011+03	1523	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:36:45.427191+00:00	3		35	1
+2991	2017-09-03 22:39:10.124878+03	1522	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:36:44.476220+00:00	3		35	1
+2992	2017-09-03 22:39:10.128085+03	1521	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:36:17.959894+00:00	3		35	1
+2993	2017-09-03 22:39:10.131064+03	1520	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:36:16.739880+00:00	3		35	1
+2994	2017-09-03 22:39:10.134015+03	1519	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:36:15.715282+00:00	3		35	1
+2995	2017-09-03 22:39:10.14555+03	1518	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:35:44.990701+00:00	3		35	1
+2996	2017-09-03 22:39:10.148784+03	1517	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:35:44.028270+00:00	3		35	1
+2997	2017-09-03 22:39:10.15174+03	1516	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:35:41.946756+00:00	3		35	1
+2998	2017-09-03 22:39:10.154891+03	1515	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:35:15.982420+00:00	3		35	1
+2999	2017-09-03 22:39:10.158394+03	1514	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:35:15.185886+00:00	3		35	1
+3000	2017-09-03 22:39:10.161618+03	1513	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:35:14.315521+00:00	3		35	1
+3001	2017-09-03 22:39:10.164832+03	1512	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:34:47.765153+00:00	3		35	1
+3002	2017-09-03 22:39:10.168255+03	1511	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:34:46.858711+00:00	3		35	1
+3003	2017-09-03 22:39:10.172062+03	1510	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:34:45.818512+00:00	3		35	1
+3004	2017-09-03 22:39:10.175797+03	1509	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:34:19.285264+00:00	3		35	1
+3005	2017-09-03 22:39:10.179141+03	1508	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:34:17.972421+00:00	3		35	1
+3006	2017-09-03 22:39:10.182486+03	1507	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:34:16.576392+00:00	3		35	1
+3007	2017-09-03 22:39:10.192084+03	1506	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:33:45.872964+00:00	3		35	1
+3008	2017-09-03 22:39:10.195553+03	1505	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:33:44.650001+00:00	3		35	1
+3009	2017-09-03 22:39:10.199107+03	1504	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:33:44.030733+00:00	3		35	1
+3010	2017-09-03 22:39:10.202535+03	1503	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:33:17.452509+00:00	3		35	1
+3011	2017-09-03 22:39:10.206439+03	1502	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:33:16.497959+00:00	3		35	1
+3012	2017-09-03 22:39:10.209479+03	1501	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:33:15.642364+00:00	3		35	1
+3013	2017-09-03 22:39:10.221206+03	1500	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:33:01.256474+00:00	3		35	1
+3014	2017-09-03 22:39:10.224692+03	1499	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:33:00.538316+00:00	3		35	1
+3015	2017-09-03 22:39:10.228234+03	1498	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:32:59.797763+00:00	3		35	1
+3016	2017-09-03 22:39:10.231944+03	1497	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:32:59.049897+00:00	3		35	1
+3017	2017-09-03 22:39:10.243594+03	1496	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:32:58.378333+00:00	3		35	1
+3018	2017-09-03 22:39:10.247412+03	1495	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:32:57.537614+00:00	3		35	1
+3019	2017-09-03 22:39:10.250821+03	1494	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:31:28.566504+00:00	3		35	1
+3020	2017-09-03 22:39:10.254034+03	1493	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:31:27.856199+00:00	3		35	1
+3021	2017-09-03 22:39:10.25711+03	1492	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:31:26.482445+00:00	3		35	1
+3022	2017-09-03 22:39:10.260107+03	1491	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:30:59.853478+00:00	3		35	1
+3023	2017-09-03 22:39:10.263102+03	1490	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:30:58.672869+00:00	3		35	1
+3024	2017-09-03 22:39:10.266146+03	1489	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:30:57.373673+00:00	3		35	1
+3025	2017-09-03 22:39:10.269117+03	1488	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:30:26.302012+00:00	3		35	1
+3026	2017-09-03 22:39:10.280275+03	1487	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:30:25.410835+00:00	3		35	1
+3027	2017-09-03 22:39:10.292338+03	1486	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:30:24.492310+00:00	3		35	1
+3028	2017-09-03 22:39:10.296599+03	1485	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:29:58.371574+00:00	3		35	1
+3029	2017-09-03 22:39:10.300924+03	1484	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:29:57.380944+00:00	3		35	1
+3030	2017-09-03 22:39:10.305+03	1483	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:29:56.765268+00:00	3		35	1
+3031	2017-09-03 22:39:10.318326+03	1482	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:29:30.924769+00:00	3		35	1
+3032	2017-09-03 22:39:10.323015+03	1481	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:29:29.921204+00:00	3		35	1
+3033	2017-09-03 22:39:10.327908+03	1480	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:29:28.936715+00:00	3		35	1
+3034	2017-09-03 22:39:10.331548+03	1479	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:28:57.716035+00:00	3		35	1
+3035	2017-09-03 22:39:10.335155+03	1478	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:28:57.032386+00:00	3		35	1
+3036	2017-09-03 22:39:10.339052+03	1477	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:28:55.599447+00:00	3		35	1
+3037	2017-09-03 22:39:10.343636+03	1476	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:28:34.088715+00:00	3		35	1
+3038	2017-09-03 22:39:10.347793+03	1475	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:28:32.759291+00:00	3		35	1
+3039	2017-09-03 22:39:10.351135+03	1474	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:28:25.821527+00:00	3		35	1
+3040	2017-09-03 22:39:10.354489+03	1473	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:27:59.163440+00:00	3		35	1
+3041	2017-09-03 22:39:10.358097+03	1472	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:27:57.876603+00:00	3		35	1
+3042	2017-09-03 22:39:10.362197+03	1471	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:27:56.901021+00:00	3		35	1
+3043	2017-09-03 22:39:10.365257+03	1470	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:27:30.900393+00:00	3		35	1
+3044	2017-09-03 22:39:10.368247+03	1469	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:27:29.379232+00:00	3		35	1
+3045	2017-09-03 22:39:10.371341+03	1468	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:27:28.056532+00:00	3		35	1
+3046	2017-09-03 22:39:10.374927+03	1467	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:26:57.245609+00:00	3		35	1
+3047	2017-09-03 22:39:10.378615+03	1466	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:26:56.473968+00:00	3		35	1
+3048	2017-09-03 22:39:10.381972+03	1465	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:26:55.142263+00:00	3		35	1
+3049	2017-09-03 22:39:10.385758+03	1464	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:26:28.808462+00:00	3		35	1
+3050	2017-09-03 22:39:10.390084+03	1463	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:26:27.290323+00:00	3		35	1
+3051	2017-09-03 22:39:10.394129+03	1462	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:26:26.430865+00:00	3		35	1
+3052	2017-09-03 22:39:10.404943+03	1461	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:25:59.944898+00:00	3		35	1
+3053	2017-09-03 22:39:10.409402+03	1460	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:25:58.986614+00:00	3		35	1
+3054	2017-09-03 22:39:10.413654+03	1459	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:25:57.777056+00:00	3		35	1
+3055	2017-09-03 22:39:10.417595+03	1458	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:25:26.945002+00:00	3		35	1
+3056	2017-09-03 22:39:10.421671+03	1457	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:25:26.233889+00:00	3		35	1
+3057	2017-09-03 22:39:10.433191+03	1456	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:25:25.308418+00:00	3		35	1
+3058	2017-09-03 22:39:10.4374+03	1455	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:24:59.481008+00:00	3		35	1
+3059	2017-09-03 22:39:10.44222+03	1454	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:24:58.313132+00:00	3		35	1
+3060	2017-09-03 22:39:10.446592+03	1453	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:24:57.396178+00:00	3		35	1
+3061	2017-09-03 22:39:10.450847+03	1452	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:24:31.351853+00:00	3		35	1
+3062	2017-09-03 22:39:10.455009+03	1451	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:24:30.587401+00:00	3		35	1
+3063	2017-09-03 22:39:10.45829+03	1450	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:24:29.170060+00:00	3		35	1
+3064	2017-09-03 22:39:10.461576+03	1449	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:23:58.186484+00:00	3		35	1
+3065	2017-09-03 22:39:10.464549+03	1448	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:23:56.772915+00:00	3		35	1
+3066	2017-09-03 22:39:10.46749+03	1447	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:23:56.094791+00:00	3		35	1
+3067	2017-09-03 22:39:10.470443+03	1446	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:23:30.186572+00:00	3		35	1
+3068	2017-09-03 22:39:10.473468+03	1445	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:23:28.728228+00:00	3		35	1
+3069	2017-09-03 22:39:10.476604+03	1444	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:23:26.637926+00:00	3		35	1
+3070	2017-09-03 22:39:10.47942+03	1443	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:23:00.760221+00:00	3		35	1
+3071	2017-09-03 22:39:10.482939+03	1442	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:22:59.261695+00:00	3		35	1
+3072	2017-09-03 22:39:10.486119+03	1441	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:22:58.012036+00:00	3		35	1
+3073	2017-09-03 22:39:10.489798+03	1440	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:22:26.346491+00:00	3		35	1
+3074	2017-09-03 22:39:10.493377+03	1439	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:22:25.141890+00:00	3		35	1
+3075	2017-09-03 22:39:10.496695+03	1438	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:22:24.356290+00:00	3		35	1
+3076	2017-09-03 22:39:10.499763+03	1437	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:21:58.018879+00:00	3		35	1
+3077	2017-09-03 22:39:10.502964+03	1436	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:21:57.091712+00:00	3		35	1
+3078	2017-09-03 22:39:10.50653+03	1435	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:21:56.463255+00:00	3		35	1
+3079	2017-09-03 22:39:10.51029+03	1434	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:21:29.859210+00:00	3		35	1
+3080	2017-09-03 22:39:10.51521+03	1433	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:21:28.845893+00:00	3		35	1
+3081	2017-09-03 22:39:10.518959+03	1432	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:21:27.701558+00:00	3		35	1
+3082	2017-09-03 22:39:10.522656+03	1431	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:20:56.195311+00:00	3		35	1
+3083	2017-09-03 22:39:10.52584+03	1430	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:20:55.144641+00:00	3		35	1
+3084	2017-09-03 22:39:10.528749+03	1429	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:20:54.598871+00:00	3		35	1
+3085	2017-09-03 22:39:10.533634+03	1428	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:20:28.303604+00:00	3		35	1
+3086	2017-09-03 22:39:10.539162+03	1427	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:20:27.263851+00:00	3		35	1
+3087	2017-09-03 22:39:10.542323+03	1426	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:20:26.256200+00:00	3		35	1
+3088	2017-09-03 22:39:10.545229+03	1425	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:20:20.590612+00:00	3		35	1
+3089	2017-09-03 22:39:10.548083+03	1424	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:20:19.337881+00:00	3		35	1
+3090	2017-09-03 22:39:10.550997+03	1423	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:20:17.950072+00:00	3		35	1
+3091	2017-09-03 22:39:10.554066+03	1422	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:19:34.635684+00:00	3		35	1
+3092	2017-09-03 22:39:10.557724+03	1421	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:19:33.240786+00:00	3		35	1
+3093	2017-09-03 22:39:10.56089+03	1420	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:19:32.369876+00:00	3		35	1
+3094	2017-09-03 22:39:10.563892+03	1419	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:15:09.666530+00:00	3		35	1
+3095	2017-09-03 22:39:10.56699+03	1418	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:15:08.795744+00:00	3		35	1
+3096	2017-09-03 22:39:10.570461+03	1417	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:14:37.475402+00:00	3		35	1
+3097	2017-09-03 22:39:10.573897+03	1416	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:14:36.434460+00:00	3		35	1
+3098	2017-09-03 22:39:10.577385+03	1415	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:14:09.725458+00:00	3		35	1
+3099	2017-09-03 22:39:10.580779+03	1414	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:14:08.848936+00:00	3		35	1
+3100	2017-09-03 22:39:10.583921+03	1413	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:13:37.967451+00:00	3		35	1
+3101	2017-09-03 22:39:10.587136+03	1412	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:13:36.697143+00:00	3		35	1
+3102	2017-09-03 22:39:10.590363+03	1411	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:13:06.032327+00:00	3		35	1
+3103	2017-09-03 22:39:10.593773+03	1410	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:13:05.015766+00:00	3		35	1
+3104	2017-09-03 22:39:10.597122+03	1409	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:12:38.004589+00:00	3		35	1
+3105	2017-09-03 22:39:10.600283+03	1408	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:12:37.090696+00:00	3		35	1
+3106	2017-09-03 22:39:10.603706+03	1407	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:12:09.068219+00:00	3		35	1
+3107	2017-09-03 22:39:10.607122+03	1406	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:12:07.059341+00:00	3		35	1
+3108	2017-09-03 22:39:10.610544+03	1405	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:11:41.397123+00:00	3		35	1
+3109	2017-09-03 22:39:10.613967+03	1404	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:11:39.868478+00:00	3		35	1
+3110	2017-09-03 22:39:10.617251+03	1403	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:11:39.199811+00:00	3		35	1
+3111	2017-09-03 22:39:10.620588+03	1402	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:11:07.879137+00:00	3		35	1
+3112	2017-09-03 22:39:10.624264+03	1401	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:11:06.475431+00:00	3		35	1
+3113	2017-09-03 22:39:10.628413+03	1400	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:11:04.946454+00:00	3		35	1
+3114	2017-09-03 22:39:10.632109+03	1399	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:10:38.375291+00:00	3		35	1
+3115	2017-09-03 22:39:10.635743+03	1398	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:10:36.847819+00:00	3		35	1
+3116	2017-09-03 22:39:10.639697+03	1397	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:10:35.636664+00:00	3		35	1
+3117	2017-09-03 22:39:10.644145+03	1396	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:10:09.101271+00:00	3		35	1
+3118	2017-09-03 22:39:10.647683+03	1395	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:10:07.726924+00:00	3		35	1
+3119	2017-09-03 22:39:10.650875+03	1394	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:10:06.715450+00:00	3		35	1
+3120	2017-09-03 22:39:10.65421+03	1393	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:09:35.870517+00:00	3		35	1
+3121	2017-09-03 22:39:10.657332+03	1392	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:09:35.244724+00:00	3		35	1
+3122	2017-09-03 22:39:10.660701+03	1391	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:09:34.692502+00:00	3		35	1
+3123	2017-09-03 22:39:10.663792+03	1390	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:09:08.188729+00:00	3		35	1
+3124	2017-09-03 22:39:10.66726+03	1389	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:09:07.214912+00:00	3		35	1
+3125	2017-09-03 22:39:10.670427+03	1388	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:09:05.911172+00:00	3		35	1
+3126	2017-09-03 22:39:10.673382+03	1387	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:08:40.076430+00:00	3		35	1
+3127	2017-09-03 22:39:10.677064+03	1386	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:08:39.019024+00:00	3		35	1
+3128	2017-09-03 22:39:10.680404+03	1385	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:08:37.825823+00:00	3		35	1
+3129	2017-09-03 22:39:10.683866+03	1384	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:08:11.374304+00:00	3		35	1
+3130	2017-09-03 22:39:10.686931+03	1383	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:08:10.129501+00:00	3		35	1
+3131	2017-09-03 22:39:10.690132+03	1382	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:08:08.762684+00:00	3		35	1
+3132	2017-09-03 22:39:10.693096+03	1381	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:07:37.502457+00:00	3		35	1
+3133	2017-09-03 22:39:10.696257+03	1380	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:07:36.176039+00:00	3		35	1
+3134	2017-09-03 22:39:10.699211+03	1379	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:07:35.434851+00:00	3		35	1
+3135	2017-09-03 22:39:10.702179+03	1378	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:07:09.390381+00:00	3		35	1
+3136	2017-09-03 22:39:10.70518+03	1377	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:07:08.244541+00:00	3		35	1
+3137	2017-09-03 22:39:10.70856+03	1376	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:07:07.710145+00:00	3		35	1
+3138	2017-09-03 22:39:10.711613+03	1375	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:06:41.170143+00:00	3		35	1
+3139	2017-09-03 22:39:10.714608+03	1374	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:06:40.406480+00:00	3		35	1
+3368	2017-09-03 22:40:16.485902+03	551	ShoppingListItem object	3		19	1
+3140	2017-09-03 22:39:10.717623+03	1373	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:06:38.994803+00:00	3		35	1
+3141	2017-09-03 22:39:10.720885+03	1372	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:06:08.097035+00:00	3		35	1
+3142	2017-09-03 22:39:10.724769+03	1371	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:06:07.354120+00:00	3		35	1
+3143	2017-09-03 22:39:10.729174+03	1370	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:06:06.168237+00:00	3		35	1
+3144	2017-09-03 22:39:10.732352+03	1369	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:05:39.876066+00:00	3		35	1
+3145	2017-09-03 22:39:10.735378+03	1368	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:05:38.929105+00:00	3		35	1
+3146	2017-09-03 22:39:10.739216+03	1367	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:05:38.132468+00:00	3		35	1
+3147	2017-09-03 22:39:10.742999+03	1366	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:05:12.025909+00:00	3		35	1
+3148	2017-09-03 22:39:10.747296+03	1365	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:05:10.517779+00:00	3		35	1
+3149	2017-09-03 22:39:10.751048+03	1364	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:05:09.277459+00:00	3		35	1
+3150	2017-09-03 22:39:10.75512+03	1363	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:04:38.003212+00:00	3		35	1
+3151	2017-09-03 22:39:10.759651+03	1362	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:04:36.805320+00:00	3		35	1
+3152	2017-09-03 22:39:10.763154+03	1361	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:04:35.859399+00:00	3		35	1
+3153	2017-09-03 22:39:10.773919+03	1360	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:04:09.940803+00:00	3		35	1
+3154	2017-09-03 22:39:10.77898+03	1359	gisModule.tasks.blame_module_check_proposal - 2017-07-25 20:04:09.394686+00:00	3		35	1
+3155	2017-09-03 22:39:10.783301+03	1358	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:04:08.433267+00:00	3		35	1
+3156	2017-09-03 22:39:10.787715+03	1357	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 20:00:09.928586+00:00	3		35	1
+3157	2017-09-03 22:39:10.791019+03	1356	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 20:00:09.126739+00:00	3		35	1
+3158	2017-09-03 22:39:10.793997+03	1355	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:59:38.005954+00:00	3		35	1
+3159	2017-09-03 22:39:10.797068+03	1354	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:59:36.621975+00:00	3		35	1
+3160	2017-09-03 22:39:10.800115+03	1353	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:59:09.405905+00:00	3		35	1
+3161	2017-09-03 22:39:10.811311+03	1352	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:59:08.822671+00:00	3		35	1
+3162	2017-09-03 22:39:10.815255+03	1351	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:58:41.876886+00:00	3		35	1
+3163	2017-09-03 22:39:10.819483+03	1350	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:58:40.084957+00:00	3		35	1
+3164	2017-09-03 22:39:10.824227+03	1349	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:58:09.396998+00:00	3		35	1
+3165	2017-09-03 22:39:10.828337+03	1348	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:58:08.585505+00:00	3		35	1
+3166	2017-09-03 22:39:10.831722+03	1347	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:58:07.384018+00:00	3		35	1
+3167	2017-09-03 22:39:10.83528+03	1346	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:57:41.225476+00:00	3		35	1
+3168	2017-09-03 22:39:10.83852+03	1345	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:57:40.546593+00:00	3		35	1
+3169	2017-09-03 22:39:10.841656+03	1344	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:57:39.430489+00:00	3		35	1
+3170	2017-09-03 22:39:10.844889+03	1343	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:57:08.732099+00:00	3		35	1
+3171	2017-09-03 22:39:10.84858+03	1342	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:57:07.622070+00:00	3		35	1
+3172	2017-09-03 22:39:10.851972+03	1341	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:57:06.215861+00:00	3		35	1
+3173	2017-09-03 22:39:10.855689+03	1340	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:56:40.118270+00:00	3		35	1
+3174	2017-09-03 22:39:10.859503+03	1339	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:56:38.879239+00:00	3		35	1
+3175	2017-09-03 22:39:10.86275+03	1338	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:56:38.072743+00:00	3		35	1
+3176	2017-09-03 22:39:10.866048+03	1337	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:56:11.502692+00:00	3		35	1
+3177	2017-09-03 22:39:10.86944+03	1336	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:56:10.612672+00:00	3		35	1
+3178	2017-09-03 22:39:10.872964+03	1335	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:56:09.542003+00:00	3		35	1
+3179	2017-09-03 22:39:10.876225+03	1334	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:55:38.443731+00:00	3		35	1
+3180	2017-09-03 22:39:10.879837+03	1333	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:55:37.479074+00:00	3		35	1
+3181	2017-09-03 22:39:10.883367+03	1332	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:55:36.218420+00:00	3		35	1
+3182	2017-09-03 22:39:10.887274+03	1331	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:55:09.859126+00:00	3		35	1
+3183	2017-09-03 22:39:10.891271+03	1330	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:55:09.112643+00:00	3		35	1
+3184	2017-09-03 22:39:10.895139+03	1329	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:55:08.547125+00:00	3		35	1
+3185	2017-09-03 22:39:10.899152+03	1328	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:54:42.424396+00:00	3		35	1
+3186	2017-09-03 22:39:10.902885+03	1327	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:54:40.937412+00:00	3		35	1
+3187	2017-09-03 22:39:10.906748+03	1326	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:54:39.441988+00:00	3		35	1
+3188	2017-09-03 22:39:10.911096+03	1325	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:54:07.794774+00:00	3		35	1
+3189	2017-09-03 22:39:10.914393+03	1324	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:54:06.345006+00:00	3		35	1
+3190	2017-09-03 22:39:10.91758+03	1323	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:54:05.505734+00:00	3		35	1
+3191	2017-09-03 22:39:10.920939+03	1322	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:53:39.689833+00:00	3		35	1
+3192	2017-09-03 22:39:10.924406+03	1321	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:53:39.036436+00:00	3		35	1
+3193	2017-09-03 22:39:10.927366+03	1320	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:53:38.085084+00:00	3		35	1
+3194	2017-09-03 22:39:10.930472+03	1319	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:53:06.823806+00:00	3		35	1
+3195	2017-09-03 22:39:10.933525+03	1318	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:53:06.212450+00:00	3		35	1
+3196	2017-09-03 22:39:10.936698+03	1317	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:53:05.276856+00:00	3		35	1
+3197	2017-09-03 22:39:10.940246+03	1316	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:52:39.634518+00:00	3		35	1
+3198	2017-09-03 22:39:10.943535+03	1315	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:52:38.953148+00:00	3		35	1
+3199	2017-09-03 22:39:10.946507+03	1314	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:52:38.038321+00:00	3		35	1
+3200	2017-09-03 22:39:10.949453+03	1313	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:52:07.268506+00:00	3		35	1
+3201	2017-09-03 22:39:10.952448+03	1312	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:52:06.474992+00:00	3		35	1
+3202	2017-09-03 22:39:10.956452+03	1311	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:52:05.381453+00:00	3		35	1
+3203	2017-09-03 22:39:10.960543+03	1310	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:51:39.276494+00:00	3		35	1
+3204	2017-09-03 22:39:10.963986+03	1309	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:51:37.784355+00:00	3		35	1
+3205	2017-09-03 22:39:10.966912+03	1308	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:51:36.823622+00:00	3		35	1
+3206	2017-09-03 22:39:10.970475+03	1307	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:51:10.620388+00:00	3		35	1
+3207	2017-09-03 22:39:10.973648+03	1306	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:51:09.092591+00:00	3		35	1
+3208	2017-09-03 22:39:10.983591+03	1305	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:51:08.038620+00:00	3		35	1
+3209	2017-09-03 22:39:10.986834+03	1304	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:50:41.387674+00:00	3		35	1
+3210	2017-09-03 22:39:10.99101+03	1303	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:50:40.690404+00:00	3		35	1
+3211	2017-09-03 22:39:10.99463+03	1302	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:50:39.248978+00:00	3		35	1
+3212	2017-09-03 22:39:10.997946+03	1301	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:50:08.516713+00:00	3		35	1
+3213	2017-09-03 22:39:11.001634+03	1300	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:50:07.392348+00:00	3		35	1
+3214	2017-09-03 22:39:11.00531+03	1299	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:50:06.636173+00:00	3		35	1
+3215	2017-09-03 22:39:11.009462+03	1298	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:49:40.594605+00:00	3		35	1
+3216	2017-09-03 22:39:11.012498+03	1297	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:49:39.991585+00:00	3		35	1
+3217	2017-09-03 22:39:11.015392+03	1296	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:49:38.905179+00:00	3		35	1
+3218	2017-09-03 22:39:11.01833+03	1295	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:49:07.333577+00:00	3		35	1
+3219	2017-09-03 22:39:11.021357+03	1294	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:49:06.336555+00:00	3		35	1
+3220	2017-09-03 22:39:11.024697+03	1293	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:49:05.597195+00:00	3		35	1
+3221	2017-09-03 22:39:11.028027+03	1292	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:48:39.603152+00:00	3		35	1
+3222	2017-09-03 22:39:11.031467+03	1291	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:48:38.884345+00:00	3		35	1
+3223	2017-09-03 22:39:11.034648+03	1290	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:48:37.900360+00:00	3		35	1
+3224	2017-09-03 22:39:11.037909+03	1289	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:48:12.166133+00:00	3		35	1
+3225	2017-09-03 22:39:11.041524+03	1288	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:48:10.704227+00:00	3		35	1
+3226	2017-09-03 22:39:11.045231+03	1287	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:48:10.089692+00:00	3		35	1
+3227	2017-09-03 22:39:11.048683+03	1286	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:47:39.085778+00:00	3		35	1
+3228	2017-09-03 22:39:11.052124+03	1285	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:47:37.765485+00:00	3		35	1
+3229	2017-09-03 22:39:11.055764+03	1284	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:47:37.105038+00:00	3		35	1
+3230	2017-09-03 22:39:11.059228+03	1283	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:47:11.064552+00:00	3		35	1
+3231	2017-09-03 22:39:11.06256+03	1282	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:47:09.525668+00:00	3		35	1
+3232	2017-09-03 22:39:11.065665+03	1281	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:47:08.769519+00:00	3		35	1
+3233	2017-09-03 22:39:11.068711+03	1280	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:46:37.670782+00:00	3		35	1
+3234	2017-09-03 22:39:11.071917+03	1279	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:46:36.530886+00:00	3		35	1
+3235	2017-09-03 22:39:11.0753+03	1278	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:46:35.485611+00:00	3		35	1
+3236	2017-09-03 22:39:11.078289+03	1277	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:46:09.070922+00:00	3		35	1
+3237	2017-09-03 22:39:11.081367+03	1276	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:46:08.005692+00:00	3		35	1
+3238	2017-09-03 22:39:11.084577+03	1275	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:46:06.878706+00:00	3		35	1
+3239	2017-09-03 22:39:11.088202+03	1274	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:45:40.472941+00:00	3		35	1
+3240	2017-09-03 22:39:11.09478+03	1273	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:45:38.981988+00:00	3		35	1
+3241	2017-09-03 22:39:11.098021+03	1272	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:45:37.564461+00:00	3		35	1
+3242	2017-09-03 22:39:11.101074+03	1271	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:45:11.229151+00:00	3		35	1
+3243	2017-09-03 22:39:11.104186+03	1270	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:45:10.684159+00:00	3		35	1
+3244	2017-09-03 22:39:11.107467+03	1269	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:45:09.887067+00:00	3		35	1
+3245	2017-09-03 22:39:11.111241+03	1268	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:44:39.038424+00:00	3		35	1
+3246	2017-09-03 22:39:11.114464+03	1267	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:44:38.350855+00:00	3		35	1
+3247	2017-09-03 22:39:11.117627+03	1266	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:44:37.704290+00:00	3		35	1
+3248	2017-09-03 22:39:11.120878+03	1265	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:44:11.874037+00:00	3		35	1
+3249	2017-09-03 22:39:11.124369+03	1264	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:44:10.644394+00:00	3		35	1
+3250	2017-09-03 22:39:11.127563+03	1263	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:44:09.507048+00:00	3		35	1
+3251	2017-09-03 22:39:11.130697+03	1262	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:43:38.577350+00:00	3		35	1
+3252	2017-09-03 22:39:11.133996+03	1261	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:43:37.908361+00:00	3		35	1
+3253	2017-09-03 22:39:11.144236+03	1260	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:43:36.457979+00:00	3		35	1
+3254	2017-09-03 22:39:11.14788+03	1259	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:43:10.719106+00:00	3		35	1
+3255	2017-09-03 22:39:11.151469+03	1258	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:43:09.227311+00:00	3		35	1
+3256	2017-09-03 22:39:11.156148+03	1257	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:43:07.837007+00:00	3		35	1
+3257	2017-09-03 22:39:11.159873+03	1256	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:42:41.565640+00:00	3		35	1
+3258	2017-09-03 22:39:11.16272+03	1255	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:42:40.392988+00:00	3		35	1
+3259	2017-09-03 22:39:11.166572+03	1254	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:42:39.252843+00:00	3		35	1
+3260	2017-09-03 22:39:11.169925+03	1253	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:42:08.142786+00:00	3		35	1
+3261	2017-09-03 22:39:11.173104+03	1252	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:42:07.055357+00:00	3		35	1
+3262	2017-09-03 22:39:11.176202+03	1251	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:42:06.104144+00:00	3		35	1
+3263	2017-09-03 22:39:11.179189+03	1250	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:41:40.010661+00:00	3		35	1
+3264	2017-09-03 22:39:11.182158+03	1249	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:41:38.762787+00:00	3		35	1
+3265	2017-09-03 22:39:11.185312+03	1248	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:41:37.999749+00:00	3		35	1
+3266	2017-09-03 22:39:11.188478+03	1247	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:41:06.631121+00:00	3		35	1
+3267	2017-09-03 22:39:11.192567+03	1246	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:41:06.091849+00:00	3		35	1
+3268	2017-09-03 22:39:11.196207+03	1245	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:41:05.446958+00:00	3		35	1
+3269	2017-09-03 22:39:11.199202+03	1244	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:40:39.138419+00:00	3		35	1
+3270	2017-09-03 22:39:11.202287+03	1243	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:40:38.047259+00:00	3		35	1
+3271	2017-09-03 22:39:11.20594+03	1242	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:40:36.722975+00:00	3		35	1
+3272	2017-09-03 22:39:11.209373+03	1241	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:40:10.223827+00:00	3		35	1
+3273	2017-09-03 22:39:11.213322+03	1240	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:40:09.555198+00:00	3		35	1
+3274	2017-09-03 22:39:11.224379+03	1239	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:40:08.370172+00:00	3		35	1
+3275	2017-09-03 22:39:11.228336+03	1238	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:39:37.354610+00:00	3		35	1
+3276	2017-09-03 22:39:11.231683+03	1237	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:39:36.196180+00:00	3		35	1
+3277	2017-09-03 22:39:11.234764+03	1236	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:39:35.528844+00:00	3		35	1
+3278	2017-09-03 22:39:11.237693+03	1235	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:39:09.376966+00:00	3		35	1
+3279	2017-09-03 22:39:11.241072+03	1234	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:39:08.768682+00:00	3		35	1
+3280	2017-09-03 22:39:11.244392+03	1233	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:39:08.097755+00:00	3		35	1
+3281	2017-09-03 22:39:11.247586+03	1232	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:38:42.007647+00:00	3		35	1
+3282	2017-09-03 22:39:11.250988+03	1231	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:38:40.516988+00:00	3		35	1
+3283	2017-09-03 22:39:11.254483+03	1230	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:38:39.733096+00:00	3		35	1
+3284	2017-09-03 22:39:11.257997+03	1229	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:38:08.946330+00:00	3		35	1
+3285	2017-09-03 22:39:11.26818+03	1228	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:38:08.267445+00:00	3		35	1
+3286	2017-09-03 22:39:11.271466+03	1227	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:38:06.770312+00:00	3		35	1
+3287	2017-09-03 22:39:11.275636+03	1226	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:37:40.551880+00:00	3		35	1
+3288	2017-09-03 22:39:11.279198+03	1225	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:37:39.499910+00:00	3		35	1
+3289	2017-09-03 22:39:11.282608+03	1224	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:37:38.777592+00:00	3		35	1
+3290	2017-09-03 22:39:11.285838+03	1223	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:37:07.965804+00:00	3		35	1
+3291	2017-09-03 22:39:11.289584+03	1222	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:37:07.339381+00:00	3		35	1
+3292	2017-09-03 22:39:11.293107+03	1221	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:37:05.861222+00:00	3		35	1
+3293	2017-09-03 22:39:11.296166+03	1220	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:36:40.112365+00:00	3		35	1
+3294	2017-09-03 22:39:11.299103+03	1219	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:36:38.715171+00:00	3		35	1
+3295	2017-09-03 22:39:11.302143+03	1218	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:36:37.227576+00:00	3		35	1
+3296	2017-09-03 22:39:11.305411+03	1217	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:36:11.252713+00:00	3		35	1
+3297	2017-09-03 22:39:11.308504+03	1216	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:36:09.993004+00:00	3		35	1
+3298	2017-09-03 22:39:11.311506+03	1215	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:36:08.638817+00:00	3		35	1
+3299	2017-09-03 22:39:11.314645+03	1214	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:35:37.961036+00:00	3		35	1
+3300	2017-09-03 22:39:11.317962+03	1213	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:35:36.681816+00:00	3		35	1
+3301	2017-09-03 22:39:11.322207+03	1212	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:35:35.851541+00:00	3		35	1
+3302	2017-09-03 22:39:11.326207+03	1211	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:35:09.688635+00:00	3		35	1
+3303	2017-09-03 22:39:11.329432+03	1210	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:35:08.666614+00:00	3		35	1
+3304	2017-09-03 22:39:11.332603+03	1209	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:35:07.395744+00:00	3		35	1
+3305	2017-09-03 22:39:11.343918+03	1208	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:34:40.763909+00:00	3		35	1
+3306	2017-09-03 22:39:11.347253+03	1207	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:34:39.329328+00:00	3		35	1
+3307	2017-09-03 22:39:11.350483+03	1206	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:34:38.202141+00:00	3		35	1
+3308	2017-09-03 22:39:11.353583+03	1205	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:34:12.479045+00:00	3		35	1
+3309	2017-09-03 22:39:11.356792+03	1204	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:34:11.175222+00:00	3		35	1
+3310	2017-09-03 22:39:11.35995+03	1203	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:34:09.654180+00:00	3		35	1
+3311	2017-09-03 22:39:11.363058+03	1202	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:33:38.555872+00:00	3		35	1
+3312	2017-09-03 22:39:11.36645+03	1201	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:33:37.699379+00:00	3		35	1
+3313	2017-09-03 22:39:11.370138+03	1200	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:33:36.438025+00:00	3		35	1
+3314	2017-09-03 22:39:11.374092+03	1199	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:33:09.911441+00:00	3		35	1
+3315	2017-09-03 22:39:11.377672+03	1198	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:33:08.873122+00:00	3		35	1
+3316	2017-09-03 22:39:11.38111+03	1197	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:33:07.731348+00:00	3		35	1
+3317	2017-09-03 22:39:11.384105+03	1196	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:32:41.333753+00:00	3		35	1
+3318	2017-09-03 22:39:11.394228+03	1195	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:32:40.575645+00:00	3		35	1
+3319	2017-09-03 22:39:11.398737+03	1194	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:32:39.272320+00:00	3		35	1
+3320	2017-09-03 22:39:11.40258+03	1193	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:32:12.660978+00:00	3		35	1
+3321	2017-09-03 22:39:11.406179+03	1192	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:32:11.133640+00:00	3		35	1
+3322	2017-09-03 22:39:11.409803+03	1191	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:32:10.006085+00:00	3		35	1
+3323	2017-09-03 22:39:11.412886+03	1190	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:31:38.836154+00:00	3		35	1
+3324	2017-09-03 22:39:11.415797+03	1189	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:31:38.047059+00:00	3		35	1
+3325	2017-09-03 22:39:11.41886+03	1188	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:31:36.619560+00:00	3		35	1
+3326	2017-09-03 22:39:11.422059+03	1187	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:31:10.956058+00:00	3		35	1
+3327	2017-09-03 22:39:11.425308+03	1186	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:31:09.583583+00:00	3		35	1
+3328	2017-09-03 22:39:11.428464+03	1185	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:31:08.566008+00:00	3		35	1
+3329	2017-09-03 22:39:11.431694+03	1184	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:30:42.465715+00:00	3		35	1
+3330	2017-09-03 22:39:11.434872+03	1183	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:30:41.597582+00:00	3		35	1
+3331	2017-09-03 22:39:11.438129+03	1182	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:30:40.138072+00:00	3		35	1
+3332	2017-09-03 22:39:11.441728+03	1181	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:30:08.906042+00:00	3		35	1
+3333	2017-09-03 22:39:11.445032+03	1180	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:30:07.807853+00:00	3		35	1
+3334	2017-09-03 22:39:11.448135+03	1179	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:30:06.818577+00:00	3		35	1
+3335	2017-09-03 22:39:11.45127+03	1178	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:29:40.364737+00:00	3		35	1
+3336	2017-09-03 22:39:11.454371+03	1177	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:29:39.790684+00:00	3		35	1
+3337	2017-09-03 22:39:11.458346+03	1176	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:29:39.152824+00:00	3		35	1
+3338	2017-09-03 22:39:11.462148+03	1175	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:29:12.838152+00:00	3		35	1
+3339	2017-09-03 22:39:11.465544+03	1174	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:29:11.336595+00:00	3		35	1
+3340	2017-09-03 22:39:11.477563+03	1173	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:29:09.805838+00:00	3		35	1
+3341	2017-09-03 22:39:11.481721+03	1172	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:28:38.986222+00:00	3		35	1
+3342	2017-09-03 22:39:11.485363+03	1171	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:28:38.094210+00:00	3		35	1
+3343	2017-09-03 22:39:11.488984+03	1170	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:28:37.300393+00:00	3		35	1
+3344	2017-09-03 22:39:11.492009+03	1169	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:28:10.893757+00:00	3		35	1
+3345	2017-09-03 22:39:11.494848+03	1168	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:28:09.705373+00:00	3		35	1
+3346	2017-09-03 22:39:11.497661+03	1167	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:28:08.713064+00:00	3		35	1
+3347	2017-09-03 22:39:11.500619+03	1166	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:27:37.825153+00:00	3		35	1
+3348	2017-09-03 22:39:11.50367+03	1165	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:27:36.420420+00:00	3		35	1
+3349	2017-09-03 22:39:11.506952+03	1164	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:27:35.518813+00:00	3		35	1
+3350	2017-09-03 22:39:11.510463+03	1163	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:27:09.359193+00:00	3		35	1
+3351	2017-09-03 22:39:11.513581+03	1162	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:27:08.779190+00:00	3		35	1
+3352	2017-09-03 22:39:11.516798+03	1161	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:27:08.242292+00:00	3		35	1
+3353	2017-09-03 22:39:11.520378+03	1160	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:26:37.089625+00:00	3		35	1
+3354	2017-09-03 22:39:11.523598+03	1159	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:26:36.239288+00:00	3		35	1
+3355	2017-09-03 22:39:11.526946+03	1158	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:26:35.371147+00:00	3		35	1
+3356	2017-09-03 22:39:11.52997+03	1157	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:26:08.919287+00:00	3		35	1
+3357	2017-09-03 22:39:11.532963+03	1156	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:26:07.833639+00:00	3		35	1
+3358	2017-09-03 22:39:11.543238+03	1155	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:26:06.363394+00:00	3		35	1
+3359	2017-09-03 22:39:11.5554+03	1154	gisModule.tasks.statistic_module_basic_statistics - 2017-07-25 19:25:40.290972+00:00	3		35	1
+3360	2017-09-03 22:39:11.55976+03	1153	gisModule.tasks.blame_module_check_proposal - 2017-07-25 19:25:39.348254+00:00	3		35	1
+3361	2017-09-03 22:39:11.563693+03	1152	gisModule.tasks.blame_module_check_blame_status - 2017-07-25 19:25:38.035565+00:00	3		35	1
+3362	2017-09-03 22:39:20.686824+03	50	dyanikoglu -> Kızılay AVM | Coca-Cola  1L	3		34	1
+3363	2017-09-03 22:39:31.116103+03	29	FalsePriceProposal object	3		37	1
+3364	2017-09-03 22:39:42.863524+03	119	test	3		32	1
+3369	2017-09-03 22:40:16.491854+03	550	ShoppingListItem object	3		19	1
+3370	2017-09-03 22:40:16.495835+03	549	ShoppingListItem object	3		19	1
+3371	2017-09-03 22:40:16.499228+03	548	ShoppingListItem object	3		19	1
+3372	2017-09-03 22:40:16.502397+03	547	ShoppingListItem object	3		19	1
+3373	2017-09-03 22:40:16.505676+03	546	ShoppingListItem object	3		19	1
+3374	2017-09-03 22:40:16.509081+03	545	ShoppingListItem object	3		19	1
+3375	2017-09-03 22:40:16.512541+03	544	ShoppingListItem object	3		19	1
+3376	2017-09-03 22:40:16.51607+03	543	ShoppingListItem object	3		19	1
+3377	2017-09-03 22:40:16.519068+03	542	ShoppingListItem object	3		19	1
+3378	2017-09-03 22:40:38.381591+03	76	My First Shopping List	3		18	1
+3379	2017-09-03 22:40:38.385293+03	75	Test	3		18	1
+3380	2017-09-03 22:40:38.388487+03	73	My First Shopping List	3		18	1
+3381	2017-09-03 22:40:38.392233+03	72	My First Shopping List	3		18	1
+3382	2017-09-03 22:41:02.991968+03	22	dyanikoglu	3		17	1
+3383	2017-09-03 22:41:10.570782+03	77	My First Shopping List	3		18	1
+3384	2017-09-03 22:41:20.18549+03	23	UserPreferences object	3		29	1
+3385	2017-09-03 22:41:31.085419+03	5	UserStatistics object	3		39	1
+3386	2017-09-03 22:41:31.088732+03	4	UserStatistics object	3		39	1
+3387	2017-09-03 22:58:16.986536+03	242	Kızılay AVM | Coca-Cola  1L	2	[{"changed": {"fields": ["blame_point", "proposal_ongoing", "removed_from_store"]}}]	15	1
+3388	2017-09-03 23:09:27.579249+03	207	Ankamall AVM | Coca-Cola  1L	2	[{"changed": {"fields": ["blame_point"]}}]	15	1
+3389	2017-09-03 23:12:24.564046+03	221	Arcadium AVM | Coca-Cola  1L	2	[{"changed": {"fields": ["blame_point"]}}]	15	1
+3390	2017-09-03 23:15:38.442164+03	200	Atlantis AVM | Coca-Cola  1L	2	[{"changed": {"fields": ["blame_point"]}}]	15	1
+3391	2017-09-03 23:19:04.675668+03	235	Cepa AVM | Coca-Cola  1L	2	[{"changed": {"fields": ["blame_point"]}}]	15	1
+3392	2017-09-03 23:23:48.577555+03	228	Armada AVM | Coca-Cola  1L	2	[{"changed": {"fields": ["blame_point"]}}]	15	1
+3393	2017-09-03 23:26:16.789277+03	249	Panora AVM | Coca-Cola  1L	2	[{"changed": {"fields": ["blame_point"]}}]	15	1
+3394	2017-09-04 13:50:23.861617+03	25	test_2	3		17	1
+3395	2017-09-04 13:50:23.867519+03	24	test_1	3		17	1
+3396	2017-09-04 13:50:30.09338+03	36	FalsePriceProposal object	3		37	1
+3397	2017-09-04 13:50:30.097782+03	35	FalsePriceProposal object	3		37	1
+3398	2017-09-04 13:50:30.102048+03	34	FalsePriceProposal object	3		37	1
+3399	2017-09-04 13:50:30.10587+03	33	FalsePriceProposal object	3		37	1
+3400	2017-09-04 13:50:30.109254+03	32	FalsePriceProposal object	3		37	1
+3401	2017-09-04 13:50:30.112502+03	31	FalsePriceProposal object	3		37	1
+3402	2017-09-04 13:50:30.115607+03	30	FalsePriceProposal object	3		37	1
+3403	2017-09-04 13:50:46.485733+03	81	My First Shopping List	3		18	1
+3404	2017-09-04 13:50:46.48893+03	80	My First Shopping List	3		18	1
+3405	2017-09-04 13:50:54.131915+03	25	UserPreferences object	3		29	1
+3406	2017-09-04 13:51:01.631224+03	7	UserStatistics object	3		39	1
+3407	2017-09-04 13:51:01.636929+03	6	UserStatistics object	3		39	1
 \.
 
 
@@ -5124,7 +5530,7 @@ COPY django_admin_log (id, action_time, object_id, object_repr, action_flag, cha
 -- Name: django_admin_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('django_admin_log_id_seq', 2374, true);
+SELECT pg_catalog.setval('django_admin_log_id_seq', 3407, true);
 
 
 --
@@ -5312,6 +5718,8 @@ COPY django_migrations (id, app, name, applied) FROM stdin;
 133	gisModule	0104_shoppinglistitem_purchase_date	2017-07-27 22:58:38.069285+03
 134	gisModule	0105_auto_20170727_2002	2017-07-27 23:02:12.290736+03
 135	gisModule	0106_auto_20170727_2017	2017-07-27 23:17:12.614566+03
+136	gisModule	0107_shoppinglistitem_purchased_from	2017-09-02 00:16:15.05688+03
+137	gisModule	0108_userstatistics_favorite_retailer	2017-09-02 15:23:53.025632+03
 \.
 
 
@@ -5319,7 +5727,7 @@ COPY django_migrations (id, app, name, applied) FROM stdin;
 -- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('django_migrations_id_seq', 135, true);
+SELECT pg_catalog.setval('django_migrations_id_seq', 137, true);
 
 
 --
@@ -5329,6 +5737,9 @@ SELECT pg_catalog.setval('django_migrations_id_seq', 135, true);
 COPY django_session (session_key, session_data, expire_date) FROM stdin;
 smgt52y21xrgltcvxizra7urb21ophxk	YTUxMTdjOWI0N2U1ZTBmZDFmZmUxODdkNmFiZTM1MDZkMjY0NmVhYjp7InVzZXJfbG9naW5fc2Vzc2lvbiI6eyJzdGF0dXMiOiJsb2dnZWRfaW4iLCJpZCI6MjIsInVzZXJuYW1lIjoiZHlhbmlrb2dsdSIsImZpcnN0X25hbWUiOiJEb1x1MDExZmEgQ2FuIiwibGFzdF9uYW1lIjoiWWFuXHUwMTMxa29cdTAxMWZsdSJ9LCJfYXV0aF91c2VyX2lkIjoiMSIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiMDUyNjdlN2Y4NTRmMjVkNmIxZGI3YjcwY2E3OTI0OTczNGMxOWM3YiJ9	2017-08-09 17:06:12.767895+03
 8kb583v6vtenemz89ws4zjxs1gasy1rk	YTUxMTdjOWI0N2U1ZTBmZDFmZmUxODdkNmFiZTM1MDZkMjY0NmVhYjp7InVzZXJfbG9naW5fc2Vzc2lvbiI6eyJzdGF0dXMiOiJsb2dnZWRfaW4iLCJpZCI6MjIsInVzZXJuYW1lIjoiZHlhbmlrb2dsdSIsImZpcnN0X25hbWUiOiJEb1x1MDExZmEgQ2FuIiwibGFzdF9uYW1lIjoiWWFuXHUwMTMxa29cdTAxMWZsdSJ9LCJfYXV0aF91c2VyX2lkIjoiMSIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiMDUyNjdlN2Y4NTRmMjVkNmIxZGI3YjcwY2E3OTI0OTczNGMxOWM3YiJ9	2017-08-12 18:02:34.976117+03
+xzutypgcz5ee6z2p862g870bb29pvj4w	ZDMwMjg0NzdhMzQyODVkNWRmNzBkMTRiMTg1YThhOTExM2Q4ODg3YTp7InVzZXJfbG9naW5fc2Vzc2lvbiI6eyJzdGF0dXMiOiJsb2dnZWRfaW4iLCJpZCI6MjUsInVzZXJuYW1lIjoidGVzdF8yIiwiZmlyc3RfbmFtZSI6IlNlY29uZCIsImxhc3RfbmFtZSI6IlRlc3QifSwiX2F1dGhfdXNlcl9pZCI6IjEiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaGFzaCI6IjA1MjY3ZTdmODU0ZjI1ZDZiMWRiN2I3MGNhNzkyNDk3MzRjMTljN2IifQ==	2017-09-17 22:43:35.442442+03
+i5apd06jq39vr7gbrfrt0wxfbai4dtlx	MDJjZmU0NGRhOTkzMzE1ZTA2NjE0MzI0OWM0ZWQ3MmNmN2E2ZjAyZDp7InVzZXJfbG9naW5fc2Vzc2lvbiI6eyJzdGF0dXMiOiJsb2dnZWRfaW4iLCJpZCI6MjIsInVzZXJuYW1lIjoiZHlhbmlrb2dsdSIsImZpcnN0X25hbWUiOiJEb1x1MDExZmEgQ2FuIiwibGFzdF9uYW1lIjoiWWFuXHUwMTMxa29cdTAxMWZsdSJ9fQ==	2017-09-02 23:33:06.404829+03
+2dph0qz5wnvidnsimr39fqiwtqlgywss	MmRlNGUzMzFlZWQzYWE3YmFmY2U3MmRkMjQwZmQ1MzA4ODQ5ZjMxODp7InVzZXJfbG9naW5fc2Vzc2lvbiI6eyJzdGF0dXMiOiJsb2dnZWRfaW4iLCJpZCI6MjQsInVzZXJuYW1lIjoidGVzdF8xIiwiZmlyc3RfbmFtZSI6IkZpcnN0IiwibGFzdF9uYW1lIjoiVGVzdCJ9LCJfYXV0aF91c2VyX2lkIjoiMSIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiMDUyNjdlN2Y4NTRmMjVkNmIxZGI3YjcwY2E3OTI0OTczNGMxOWM3YiJ9	2017-09-17 22:43:16.990499+03
 \.
 
 
@@ -5359,8 +5770,6 @@ SELECT pg_catalog.setval('"gisModule_baseproduct_productID_seq"', 26, true);
 --
 
 COPY "gisModule_blame" (id, created_at, user_id, retailer_product_id, updated_at) FROM stdin;
-50	2017-07-26 17:17:58.083995+03	22	242	2017-07-26 17:17:58.084024+03
-51	2017-07-26 17:20:36.703386+03	23	242	2017-07-26 17:20:36.703405+03
 \.
 
 
@@ -5368,7 +5777,7 @@ COPY "gisModule_blame" (id, created_at, user_id, retailer_product_id, updated_at
 -- Name: gisModule_blame_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('"gisModule_blame_id_seq"', 51, true);
+SELECT pg_catalog.setval('"gisModule_blame_id_seq"', 65, true);
 
 
 --
@@ -6454,7 +6863,6 @@ SELECT pg_catalog.setval('"gisModule_district_districtID_seq"', 1, false);
 --
 
 COPY "gisModule_falsepriceproposal" (id, status_code, created_at, updated_at, retailer_id, retailer_product_id, answer_count, send_count) FROM stdin;
-29	3	2017-07-26 17:20:43.303609+03	2017-07-26 17:25:16.75851+03	14	242	2	2
 \.
 
 
@@ -6462,7 +6870,7 @@ COPY "gisModule_falsepriceproposal" (id, status_code, created_at, updated_at, re
 -- Name: gisModule_falsepriceproposal_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('"gisModule_falsepriceproposal_id_seq"', 29, true);
+SELECT pg_catalog.setval('"gisModule_falsepriceproposal_id_seq"', 36, true);
 
 
 --
@@ -6477,7 +6885,7 @@ COPY "gisModule_friend" (id, date, status, user_receiver_id, user_sender_id) FRO
 -- Name: gisModule_friend_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('"gisModule_friend_id_seq"', 76, true);
+SELECT pg_catalog.setval('"gisModule_friend_id_seq"', 77, true);
 
 
 --
@@ -6485,7 +6893,6 @@ SELECT pg_catalog.setval('"gisModule_friend_id_seq"', 76, true);
 --
 
 COPY "gisModule_group" (id, name, date) FROM stdin;
-119	test	2017-07-26 17:37:19.08293+03
 \.
 
 
@@ -6526,9 +6933,6 @@ COPY "gisModule_productgroup" (id, name, parent_id) FROM stdin;
 39	Beverages	37
 38	Food	37
 37	Food & Beverages	\N
-50	test	\N
-51	child	50
-52	child2	51
 47	Electronic	\N
 \.
 
@@ -6545,8 +6949,6 @@ SELECT pg_catalog.setval('"gisModule_productgroup_productGroupID_seq"', 52, true
 --
 
 COPY "gisModule_proposalsent" (id, created_at, updated_at, response, false_price_proposal_id, user_id) FROM stdin;
-50	2017-07-26 17:20:44.611053+03	2017-07-26 17:23:18.395918+03	t	29	23
-51	2017-07-26 17:20:46.919044+03	2017-07-26 17:24:36.780505+03	t	29	22
 \.
 
 
@@ -6554,7 +6956,7 @@ COPY "gisModule_proposalsent" (id, created_at, updated_at, response, false_price
 -- Name: gisModule_proposalsent_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('"gisModule_proposalsent_id_seq"', 51, true);
+SELECT pg_catalog.setval('"gisModule_proposalsent_id_seq"', 65, true);
 
 
 --
@@ -6568,10 +6970,10 @@ Kentpark AVM	11	Mustafa Kemal Mahallesi, Eskişehir Yolu 7. Km No:164, 06800 Ça
 Gordion AVM	12	Koru Mahallesi, Ankaralılar Cd. No:2, 06810 Çankaya/Ankara, Turkey	6	63	0101000020E610000012B00C60805840405EE7F05A53F34340	06810	2	2017-05-18 09:18:31.678298+03	2017-05-18 09:18:31.74768+03	500
 Panora AVM	13	No:182, Oran Mahallesi, Kudüs Cd., 06450 Çankaya/Ankara, Turkey	6	63	0101000020E6100000639CBF09856A404052D32EA699EC4340	06450	2	2017-05-18 09:18:31.678298+03	2017-05-18 09:18:31.74768+03	500
 Cepa AVM	15	Mustafa Kemal Mahallesi, CEPA AVM, 06510 Çankaya/Ankara, Turkey	6	63	0101000020E610000034DAAA24B2634040444C89247AF44340	06510	2	2017-05-18 09:18:31.678298+03	2017-05-18 09:18:31.74768+03	500
-Armada AVM	16	No:, Eskişehir Yolu (Dumlupınar Blv.) No:6, 06520, Turkey	\N	\N	0101000020E6100000AE9D2809896740401013C3C4D5F44340	06520	2	2017-05-18 09:18:31.678298+03	2017-05-18 09:18:31.74768+03	500
 Nata Vega	29	Akşemsettin Mahallesi, Nata Vega Outlet, 06480 Mamak/Ankara, Turkey	6	76	0101000020E61000001D21037976774040F148BC3C9DF14340	06480	2	2017-05-18 09:18:31.678298+03	2017-05-18 09:18:31.74768+03	500
 Arcadium AVM	30	Çayyolu Mahallesi, 2432. Cd (8. Cd.) No:192, 06810 Yenimahalle/Ankara, Turkey	6	73	0101000020E61000004983DBDAC2574040CFF9298E03F14340	06810	2	2017-05-18 09:18:31.678298+03	2017-05-18 09:18:31.74768+03	500
-Kızılay AVM	14	Kızılay Mahallesi, Gazi Mustafa Kemal Blv., 06420 Çankaya/Ankara, Turkey	6	63	0101000020E61000008E7340B73C6D4040E810DD58F5F54340	06420	2	2017-05-18 09:18:31.678298+03	2017-07-26 17:25:16.762114+03	450
+Kızılay AVM	14	Kızılay Mahallesi, Gazi Mustafa Kemal Blv., 06420 Çankaya/Ankara, Turkey	6	63	0101000020E61000008E7340B73C6D4040E810DD58F5F54340	06420	2	2017-05-18 09:18:31.678298+03	2017-07-26 17:25:16.762114+03	500
+Armada AVM	16	No:, Eskişehir Yolu (Dumlupınar Blv.) No:6, 06520, Turkey	\N	\N	0101000020E6100000AE9D2809896740401013C3C4D5F44340	06520	2	2017-05-18 09:18:31.678298+03	2017-09-03 23:25:09.394078+03	500
 \.
 
 
@@ -6601,7 +7003,6 @@ COPY "gisModule_retailerproduct" (id, "unitPrice", "baseProduct_id", retailer_id
 204	9	25	10	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 205	22	19	9	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 206	23	20	9	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
-207	20	21	9	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 208	18	22	9	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 209	20	23	9	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 210	6	24	9	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
@@ -6626,7 +7027,6 @@ COPY "gisModule_retailerproduct" (id, "unitPrice", "baseProduct_id", retailer_id
 232	24	25	16	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 233	13	19	15	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 234	10	20	15	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
-235	23	21	15	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 236	25	22	15	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 237	1	23	15	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 239	4	25	15	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
@@ -6638,25 +7038,27 @@ COPY "gisModule_retailerproduct" (id, "unitPrice", "baseProduct_id", retailer_id
 246	7	25	14	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 247	7	19	13	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 248	4	20	13	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
-249	7	21	13	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 250	13	22	13	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 251	21	23	13	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 252	8	24	13	2017-05-18 09:18:31.806294+03	2017-05-18 09:18:31.882811+03	0	f	f
 184	5	19	12	2017-05-18 09:18:31.806294+03	2017-07-14 16:29:50.212055+03	0	f	f
 186	23	21	12	2017-05-18 09:18:31.806294+03	2017-07-14 16:51:50.995355+03	0	f	f
 220	2	20	30	2017-05-18 09:18:31.806294+03	2017-07-14 16:53:44.304363+03	0	f	f
-200	21	21	10	2017-05-18 09:18:31.806294+03	2017-07-26 11:55:03.115164+03	0	f	f
 189	1	24	12	2017-05-18 09:18:31.806294+03	2017-07-25 20:52:35.069241+03	0	f	f
 193	19	21	11	2017-05-18 09:18:31.806294+03	2017-07-21 09:28:29.081137+03	0	f	f
+249	7	21	13	2017-05-18 09:18:31.806294+03	2017-09-03 23:27:42.931729+03	0	f	f
+200	21	21	10	2017-05-18 09:18:31.806294+03	2017-09-03 23:16:35.681271+03	0	f	f
 191	12	19	11	2017-05-18 09:18:31.806294+03	2017-07-25 20:52:40.985595+03	0	f	f
 192	20	20	11	2017-05-18 09:18:31.806294+03	2017-07-25 20:52:46.112836+03	0	f	f
-228	8	21	16	2017-05-18 09:18:31.806294+03	2017-07-26 11:56:32.882426+03	0	f	f
+228	8	21	16	2017-05-18 09:18:31.806294+03	2017-09-03 23:25:09.396043+03	0	f	f
+242	6	21	14	2017-05-18 09:18:31.806294+03	2017-09-03 23:01:46.699411+03	0	f	f
 253	12	25	13	2017-05-18 09:18:31.806294+03	2017-07-25 20:51:25.917803+03	0	f	f
+235	23	21	15	2017-05-18 09:18:31.806294+03	2017-09-03 23:19:47.756999+03	0	f	f
 238	8	24	15	2017-05-18 09:18:31.806294+03	2017-07-25 20:51:51.584624+03	0	f	f
 185	20	20	12	2017-05-18 09:18:31.806294+03	2017-07-25 20:52:23.36169+03	0	f	f
 187	19	22	12	2017-05-18 09:18:31.806294+03	2017-07-25 20:52:29.890655+03	0	f	f
-221	17	21	30	2017-05-18 09:18:31.806294+03	2017-07-26 11:58:02.99031+03	0	f	f
-242	6	21	14	2017-05-18 09:18:31.806294+03	2017-07-26 17:25:16.764451+03	100	t	t
+207	20	21	9	2017-05-18 09:18:31.806294+03	2017-09-03 23:10:25.124617+03	0	f	f
+221	17	21	30	2017-05-18 09:18:31.806294+03	2017-09-03 23:13:00.754859+03	0	f	f
 \.
 
 
@@ -6706,9 +7108,6 @@ SELECT pg_catalog.setval('"gisModule_role_id_seq"', 2, true);
 --
 
 COPY "gisModule_shoppinglist" (id, created_at, completed, name, updated_at, completed_by_id, total_distance_cost, total_money_cost, total_time_cost) FROM stdin;
-66	2017-07-26 17:54:40.872333+03	f	My First Shopping List	2017-07-26 17:54:40.872366+03	\N	\N	\N	\N
-67	2017-07-26 18:00:21.928112+03	t	My First Shopping List	2017-07-27 23:23:14.668429+03	22	65.9913000000000238	44	4.39661111111111058
-68	2017-07-27 23:23:15.629202+03	f	My First Shopping List	2017-07-27 23:23:15.629231+03	\N	\N	\N	\N
 \.
 
 
@@ -6716,26 +7115,14 @@ COPY "gisModule_shoppinglist" (id, created_at, completed, name, updated_at, comp
 -- Name: gisModule_shoppinglist_listID_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('"gisModule_shoppinglist_listID_seq"', 68, true);
+SELECT pg_catalog.setval('"gisModule_shoppinglist_listID_seq"', 81, true);
 
 
 --
 -- Data for Name: gisModule_shoppinglistitem; Type: TABLE DATA; Schema: public; Owner: dyanikoglu
 --
 
-COPY "gisModule_shoppinglistitem" (id, product_id, quantity, list_id, added_by_id, edited_by_id, is_purchased, unit_purchase_price, purchased_by_id, purchase_date) FROM stdin;
-520	22	1	\N	22	22	f	\N	\N	\N
-521	23	1	\N	22	22	f	\N	\N	\N
-518	19	2	\N	22	22	f	\N	\N	\N
-519	20	3	\N	22	22	f	\N	\N	\N
-528	21	1	66	23	23	f	\N	\N	\N
-529	21	1	67	22	22	t	7	22	2017-07-27 23:23:14.627267+03
-530	19	1	67	22	22	t	5	22	2017-07-27 23:23:14.635608+03
-534	24	1	67	22	22	t	6	22	2017-07-27 23:23:14.647763+03
-531	20	3	67	22	22	t	2	22	2017-07-27 23:23:14.65899+03
-533	25	4	67	22	22	t	4	22	2017-07-27 23:23:14.665317+03
-532	22	1	67	22	22	t	3.22999999999999998	22	2017-07-27 23:23:14+03
-535	23	1	67	22	22	t	0.340000000000000024	22	2017-07-27 23:23:14+03
+COPY "gisModule_shoppinglistitem" (id, product_id, quantity, list_id, added_by_id, edited_by_id, is_purchased, unit_purchase_price, purchased_by_id, purchase_date, purchased_from_id) FROM stdin;
 \.
 
 
@@ -6743,7 +7130,7 @@ COPY "gisModule_shoppinglistitem" (id, product_id, quantity, list_id, added_by_i
 -- Name: gisModule_shoppinglistitems_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('"gisModule_shoppinglistitems_id_seq"', 535, true);
+SELECT pg_catalog.setval('"gisModule_shoppinglistitems_id_seq"', 557, true);
 
 
 --
@@ -6751,8 +7138,6 @@ SELECT pg_catalog.setval('"gisModule_shoppinglistitems_id_seq"', 535, true);
 --
 
 COPY "gisModule_shoppinglistmember" (id, list_id, user_id, role_id) FROM stdin;
-80	67	22	1
-81	68	22	1
 \.
 
 
@@ -6761,8 +7146,6 @@ COPY "gisModule_shoppinglistmember" (id, list_id, user_id, role_id) FROM stdin;
 --
 
 COPY "gisModule_user" (id, username, password, first_name, last_name, active_list_id, preferences_id, email, reputation, statistics_id) FROM stdin;
-23	test	$pbkdf2-sha256$12000$QYjR.t977x1DiPG.l1JKqZWSslYKwdibU4qREiJESKk$ht473/WCBWkf9BcC3nQZNU4a00tUZiiouq8BzTV33f8	test	account	66	23	test@test.com	0	5
-22	dyanikoglu	$pbkdf2-sha256$12000$FUJojXHO2dub0zrnXEuplRJCqDVGSIkR4nwvZSzFGAM$anf2lFQhhC43Wr05Z.Kc.XApMPjihGt4ApKmUCCHSLE	Doğa Can	Yanıkoğlu	68	22	dyanikoglu	0	4
 \.
 
 
@@ -6770,7 +7153,7 @@ COPY "gisModule_user" (id, username, password, first_name, last_name, active_lis
 -- Name: gisModule_user_userID_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('"gisModule_user_userID_seq"', 23, true);
+SELECT pg_catalog.setval('"gisModule_user_userID_seq"', 25, true);
 
 
 --
@@ -6778,8 +7161,6 @@ SELECT pg_catalog.setval('"gisModule_user_userID_seq"', 23, true);
 --
 
 COPY "gisModule_userpreferences" (id, money_factor, dist_factor, time_factor, search_radius, route_end_point_id, route_start_point_id, get_notif_only_for_active_list, algorithm) FROM stdin;
-23	t	t	t	100	\N	\N	t	0
-22	t	t	t	100	47	46	t	0
 \.
 
 
@@ -6787,7 +7168,7 @@ COPY "gisModule_userpreferences" (id, money_factor, dist_factor, time_factor, se
 -- Name: gisModule_userpreferences_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('"gisModule_userpreferences_id_seq"', 23, true);
+SELECT pg_catalog.setval('"gisModule_userpreferences_id_seq"', 25, true);
 
 
 --
@@ -6795,8 +7176,6 @@ SELECT pg_catalog.setval('"gisModule_userpreferences_id_seq"', 23, true);
 --
 
 COPY "gisModule_usersavedaddress" (name, id, address, geolocation, zip_code, last_edit_time, city_id, district_id, user_id) FROM stdin;
-Home	46	Kale Mh., Şan Sk No:10, 06000 Altındağ/Ankara, Turkey	0101000020E6100000982E69311D6E4040E308089C5BF84340	06000	2017-07-26 17:08:31.939301+03	6	58	22
-School	47	Söğütözü Mahallesi, Söğütözü Cd. No:43, 06560 Çankaya/Ankara, Turkey	0101000020E6100000336486D73F664040677EEB79EDF54340	06560	2017-07-26 17:08:48.999569+03	6	63	22
 \.
 
 
@@ -6804,23 +7183,21 @@ School	47	Söğütözü Mahallesi, Söğütözü Cd. No:43, 06560 Çankaya/Ankar
 -- Name: gisModule_usersavedaddress_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('"gisModule_usersavedaddress_id_seq"', 47, true);
+SELECT pg_catalog.setval('"gisModule_usersavedaddress_id_seq"', 50, true);
 
 
 --
 -- Name: gisModule_usershoppinglist_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('"gisModule_usershoppinglist_id_seq"', 81, true);
+SELECT pg_catalog.setval('"gisModule_usershoppinglist_id_seq"', 95, true);
 
 
 --
 -- Data for Name: gisModule_userstatistics; Type: TABLE DATA; Schema: public; Owner: dyanikoglu
 --
 
-COPY "gisModule_userstatistics" (id, "moneySpent", "itemsBought", "shoppingListsComplete", "favoriteCategory", "favoriteProduct", blame_count, reputation) FROM stdin;
-4	0	6	1	Milk	Pınar Süt 1L	1	205
-5	0	0	0	\N	\N	1	205
+COPY "gisModule_userstatistics" (id, "moneySpent", "itemsBought", "shoppingListsComplete", "favoriteCategory", "favoriteProduct", blame_count, reputation, favorite_retailer) FROM stdin;
 \.
 
 
@@ -6828,7 +7205,7 @@ COPY "gisModule_userstatistics" (id, "moneySpent", "itemsBought", "shoppingLists
 -- Name: gisModule_userstatistics_id_seq; Type: SEQUENCE SET; Schema: public; Owner: dyanikoglu
 --
 
-SELECT pg_catalog.setval('"gisModule_userstatistics_id_seq"', 5, true);
+SELECT pg_catalog.setval('"gisModule_userstatistics_id_seq"', 7, true);
 
 
 --
@@ -7662,6 +8039,13 @@ CREATE INDEX "gisModule_shoppinglistitem_purchased_by_id_169ce658" ON "gisModule
 
 
 --
+-- Name: gisModule_shoppinglistitem_purchased_from_id_228476f6; Type: INDEX; Schema: public; Owner: dyanikoglu
+--
+
+CREATE INDEX "gisModule_shoppinglistitem_purchased_from_id_228476f6" ON "gisModule_shoppinglistitem" USING btree (purchased_from_id);
+
+
+--
 -- Name: gisModule_user_activeList_id_295659b1; Type: INDEX; Schema: public; Owner: dyanikoglu
 --
 
@@ -8034,6 +8418,14 @@ ALTER TABLE ONLY "gisModule_shoppinglistitem"
 
 
 --
+-- Name: gisModule_shoppinglistitem gisModule_shoppingli_purchased_from_id_228476f6_fk_gisModule; Type: FK CONSTRAINT; Schema: public; Owner: dyanikoglu
+--
+
+ALTER TABLE ONLY "gisModule_shoppinglistitem"
+    ADD CONSTRAINT "gisModule_shoppingli_purchased_from_id_228476f6_fk_gisModule" FOREIGN KEY (purchased_from_id) REFERENCES "gisModule_retailer"(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
 -- Name: gisModule_user gisModule_user_active_list_id_0d34e0fd_fk_gisModule; Type: FK CONSTRAINT; Schema: public; Owner: dyanikoglu
 --
 
@@ -8109,8 +8501,8 @@ SET default_transaction_read_only = off;
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.3
--- Dumped by pg_dump version 9.6.3
+-- Dumped from database version 9.6.4
+-- Dumped by pg_dump version 9.6.4
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -8306,8 +8698,8 @@ SET default_transaction_read_only = off;
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.3
--- Dumped by pg_dump version 9.6.3
+-- Dumped from database version 9.6.4
+-- Dumped by pg_dump version 9.6.4
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -8365,8 +8757,8 @@ SET default_transaction_read_only = off;
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.3
--- Dumped by pg_dump version 9.6.3
+-- Dumped from database version 9.6.4
+-- Dumped by pg_dump version 9.6.4
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -8403,8 +8795,8 @@ SET default_transaction_read_only = off;
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.3
--- Dumped by pg_dump version 9.6.3
+-- Dumped from database version 9.6.4
+-- Dumped by pg_dump version 9.6.4
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
